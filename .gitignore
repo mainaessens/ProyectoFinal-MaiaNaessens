@@ -1,0 +1,24 @@
+# Secretos y credenciales
+.env
+.env.*
+!.claude/.env.example
+*.key
+*.pem
+credentials.json
+token.json
+
+# Dependencias
+node_modules/
+__pycache__/
+.venv/
+
+# Assets de clientes (pueden pesar mucho y son privados por cliente)
+clientes/*/assets/fotos/*
+clientes/*/assets/videos/*
+!clientes/*/assets/fotos/.gitkeep
+!clientes/*/assets/videos/.gitkeep
+
+# Logs y temporales
+*.log
+.DS_Store
+Thumbs.db
