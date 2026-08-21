@@ -1,4 +1,4 @@
-# Agencia — Agente de Automatización (Claude Code)
+# Agente de inteligencia artificial para el análisis de cuentas profesionales en redes sociales y la generación asistida de planes de contenido
 
 Sistema de automatización de marketing para agencia, construido íntegramente sobre Claude Code
 (sin desarrollar ninguna app propia). Ver el plan completo en
