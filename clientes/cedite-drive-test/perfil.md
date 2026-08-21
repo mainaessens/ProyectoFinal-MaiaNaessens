@@ -61,6 +61,11 @@
 
 ---
 
+## Organización (Fase 3)
+
+- **Proyecto/clave de Jira:** `SAM1` — *(proyecto de ejemplo usado solo para la validación técnica de PFMGN-31/34, no es el backlog real de contenido de CEDITE)*
+- **ID de Google Calendar:** `proyectofinalmaianaessens@gmail.com`
+
 ## Assets encontrados en Drive
 
 - Subcarpeta `fotos/` — existe, vacía (0 archivos).

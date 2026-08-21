@@ -56,6 +56,11 @@
 - **ID cuenta:**
 - **Límite de gasto mensual acordado:**
 
+## Organización (Fase 3)
+
+- **Proyecto/clave de Jira:** (ej: `SAM1`) — donde viven las tareas de contenido de este cliente
+- **ID de Google Calendar:** (ej: `nombre@gmail.com`) — calendario donde se agendan sus publicaciones
+
 ---
 
 ## Ejemplo — Café Lunar (cliente ficticio, referencia)

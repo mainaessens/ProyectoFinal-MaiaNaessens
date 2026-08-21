@@ -1,0 +1,11 @@
+{
+  "cliente": "cedite-drive-test",
+  "fecha_creacion": "2026-08-21",
+  "estado": "aprobado",
+  "aprobado": true,
+  "red": "instagram",
+  "hook_texto": "3 cosas que aprendes en tu primera semana de clases practicas",
+  "caption": "Texto de prueba para validar el hook validar-publicacion.ps1 (PFMGN-18).",
+  "fecha_programada": "2026-08-22T10:00:00-03:00",
+  "nota": "Plan de PRUEBA, no corresponde a una publicacion real."
+}

@@ -1,0 +1,16 @@
+{
+  "cliente": "cedite-drive-test",
+  "fecha_creacion": "2026-08-21",
+  "aprobado": true,
+  "red": ["instagram", "facebook"],
+  "hook_texto": "3 errores que cometes al buscar tu primer trabajo tecnico, y como evitarlos",
+  "caption": {
+    "instagram": "3 errores que cometes al buscar tu primer trabajo tecnico, y como evitarlos. Guardá este post. #tipsrapidos #formaciontecnica #primerempleo #vospodes #aprendehaciendo #tecnicos",
+    "facebook": "3 errores comunes al buscar tu primer trabajo tecnico (y como evitarlos). Te los contamos en este post - decinos en los comentarios si te paso alguno."
+  },
+  "fecha_programada": "2026-08-26T20:00:00-03:00",
+  "estado": "listo_para_publicar_cuando_exista_conector",
+  "checklist_marca": "OK tras correccion - version anterior mencionaba empleo garantizado y fue descartada",
+  "pilar": "tips rapidos del area",
+  "nota": "Dry-run PFMGN-22, sin publicacion real. Demuestra ciclo 'pide cambios -> nueva version'."
+}
