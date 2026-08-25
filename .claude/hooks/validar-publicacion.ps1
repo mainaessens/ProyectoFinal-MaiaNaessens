@@ -8,10 +8,12 @@
     tool_name y tool_input. Este script:
       1. Lee ese JSON de stdin.
       2. Si el tool_name no es de publicacion/gasto, permite la llamada sin mas (exit 0).
-      3. Si lo es, busca en clientes/*/historial/*.plan.json un plan que coincida (por cliente
-         y contenido) y tenga "aprobado": true.
-      4. Si no encuentra un plan aprobado, BLOQUEA la llamada (exit code 2) y explica por que.
-      5. Si lo encuentra, permite la llamada (exit 0).
+      3. Si lo es, EXIGE que tool_input incluya "cliente" - sin eso, bloquea (no se puede
+         verificar aprobacion para un cliente no identificado).
+      4. Busca en clientes/<cliente>/historial/*.plan.json (SOLO la carpeta de ESE cliente,
+         nunca de otros) un plan con "aprobado": true.
+      5. Si no encuentra un plan aprobado para ese cliente puntual, BLOQUEA (exit code 2).
+      6. Si lo encuentra, permite la llamada (exit 0).
 
     Registrado en settings.json bajo hooks.PreToolUse con matcher sobre las tools de
     publicacion/gasto (ver .claude/settings.json).
@@ -42,8 +44,19 @@ if ($toolName -notmatch $publicacionPattern -and $toolName -notmatch $gastoPatte
     exit 0
 }
 
+$cliente = $data.tool_input.cliente
+
+if ([string]::IsNullOrWhiteSpace($cliente)) {
+    $mensaje = "BLOQUEADO por validar-publicacion.ps1: la herramienta '$toolName' intenta " +
+        "publicar/gastar pero tool_input no incluye 'cliente' - no se puede verificar " +
+        "aprobacion para un cliente no identificado."
+    [Console]::Error.WriteLine($mensaje)
+    exit 2
+}
+
 $agenciaRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$planesEncontrados = Get-ChildItem -Path (Join-Path $agenciaRoot "clientes") -Recurse -Filter "*.plan.json" -ErrorAction SilentlyContinue
+$historialCliente = Join-Path $agenciaRoot "clientes\$cliente\historial"
+$planesEncontrados = Get-ChildItem -Path $historialCliente -Filter "*.plan.json" -ErrorAction SilentlyContinue
 
 $planAprobado = $null
 foreach ($archivo in $planesEncontrados) {
@@ -60,9 +73,9 @@ foreach ($archivo in $planesEncontrados) {
 
 if (-not $planAprobado) {
     $mensaje = "BLOQUEADO por validar-publicacion.ps1: la herramienta '$toolName' intenta " +
-        "publicar/gastar, pero no se encontro ningun archivo .plan.json con `"aprobado`": true " +
-        "en clientes/*/historial/. Presenta la propuesta al usuario y espera su OK explicito " +
-        "antes de reintentar."
+        "publicar/gastar para el cliente '$cliente', pero no se encontro ningun archivo " +
+        "`"aprobado`": true en clientes/$cliente/historial/. Presenta la propuesta al usuario " +
+        "y espera su OK explicito antes de reintentar."
     [Console]::Error.WriteLine($mensaje)
     exit 2
 }
