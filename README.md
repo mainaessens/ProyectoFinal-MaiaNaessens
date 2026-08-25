@@ -16,12 +16,56 @@ presentar antes la propuesta y recibir un OK explícito. Ver la regla completa e
 
 ```
 agencia/
-├── .claude/          # configuración: reglas, conectores MCP, subagentes, skills, hooks
-├── clientes/         # memoria local por cuenta de cliente
-│   └── plantilla/    # copiar esta carpeta para dar de alta un cliente nuevo
-├── tests/            # suite de tests automatizados (Pester) — ver tests/README.md
-└── docs/             # documentación de arquitectura por fase
+├── .claude/                        # configuración del agente — ver detalle abajo
+├── clientes/                       # memoria local por cuenta de cliente
+│   └── plantilla/                  # copiar esta carpeta para dar de alta un cliente nuevo
+├── tests/                          # suite de tests automatizados (Pester) — ver tests/README.md
+└── docs/                           # documentación de arquitectura por fase
 ```
+
+### `.claude/` — la carpeta más importante del proyecto
+
+Define **todo** el comportamiento del agente: reglas, conectores, subagentes, procedimientos y
+controles de seguridad. Es lo que hace que el sistema funcione igual para cualquier cliente sin
+tocar código.
+
+```
+.claude/
+├── CLAUDE.md                       # reglas globales: regla de oro human-in-the-loop,
+│                                    #   convenciones de idioma/nomenclatura, ciclo de estados
+├── settings.json                   # permisos y registro de hooks (PreToolUse/PostToolUse)
+├── .mcp.json                       # conectores MCP declarados (Drive, Calendar, Jira, Canva,
+│                                    #   Late/Postiz pendiente) — solo referencias a env vars
+├── .env.example                    # variables de entorno necesarias, sin valores reales
+│
+├── agents/                         # SUBAGENTES — especialistas invocados por los skills
+│   ├── estratega.md                #   campaña mensual, tendencias (WebSearch), calendario editorial
+│   ├── disenador.md                #   piezas gráficas: prioridad foto real → Canva → Glif (Fase 6)
+│   ├── community-manager.md        #   adapta captions por red (IG/FB), arma el PLAN de publicación
+│   └── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
+│
+├── skills/                         # SKILLS — procedimientos invocables como /comando
+│   ├── nuevo-cliente/SKILL.md      #   alta de cliente + lectura automática de brief/manual (Drive)
+│   ├── plan-del-dia/SKILL.md       #   vista unificada Calendar + Jira, prioridades del día
+│   ├── crear-post/SKILL.md         #   hook + caption + diseño + horario → PLAN aprobado
+│   ├── campania-mensual/SKILL.md   #   tendencias + historial → calendario editorial del mes
+│   ├── reporte-semanal/SKILL.md    #   informe semanal de actividad (sin inventar métricas)
+│   └── cierre-mensual/SKILL.md     #   consolida el mes → actualiza aprendizajes.md de la cuenta
+│
+├── hooks/                          # RED DE SEGURIDAD técnica (no negociable)
+│   ├── validar-publicacion.ps1     #   PreToolUse: bloquea publicar/gastar sin plan aprobado
+│   │                                #   del cliente exacto de la operación (probado con Pester)
+│   └── registrar-actividad.ps1     #   PostToolUse: registra toda acción relevante en el log
+│                                    #   de auditoría del cliente correspondiente
+│
+└── scripts/                        # utilitarios de soporte (PowerShell)
+    ├── descargar-assets.ps1        #   sincroniza fotos/videos del cliente desde Drive
+    └── checklist-marca.ps1         #   valida un texto contra las restricciones del perfil
+```
+
+`.claude/` define el **cómo** (procedimientos y controles, igual para todas las cuentas).
+`clientes/` define el **quién** (datos y memoria de cada cuenta). Añadir un cliente nuevo nunca
+requiere modificar nada dentro de `.claude/`.
 
 ## Cómo empezar
 
