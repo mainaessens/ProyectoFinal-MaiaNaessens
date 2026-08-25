@@ -28,7 +28,10 @@
 
 - **Paleta de colores:** azul (#1B4F72) y naranja (#E67E22) — *(extraído del manual de marca)*
 - **Tipografías:** Montserrat — *(extraído del manual de marca)*
-- **Plantillas maestras de Canva:** pendiente (Fase 5)
+- **Plantillas maestras de Canva:**
+  - Post: `DAHTQqkVIaI` — https://www.canva.com/d/ZNndSNw08aK8L_D
+  - Carrusel: `DAHTQtHOb8U` — https://www.canva.com/d/SiycG5YCRJbuK-k
+  - Historia/reel cover: `DAHTQrQo3-U` — https://www.canva.com/d/SGFek9sXSII95pD
 - **Estilo IA:** pendiente (Fase 6)
 
 ## Pilares de contenido

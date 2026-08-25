@@ -1,6 +1,6 @@
 ---
 name: crear-post
-description: Pipeline completo para armar un post — hook + caption adaptado por red + pieza gráfica (Canva) + propuesta de programación — y generar un PLAN de publicación tras aprobación humana. En esta versión nunca publica de verdad ni llama a ningún conector real de redes sociales; genera un archivo .plan.json en estado "pendiente_aprobacion" / "aprobado" que quedará listo para publicarse cuando se registren los conectores Late/Postiz (PFMGN-16) y Canva (PFMGN-42), ambos pendientes de coordinación externa.
+description: Pipeline completo para armar un post — hook + caption adaptado por red + pieza gráfica real (Canva, conectado) + propuesta de programación — y generar un PLAN de publicación tras aprobación humana. Nunca publica de verdad ni llama al conector de redes sociales; genera un archivo .plan.json en estado "pendiente_aprobacion" / "aprobado" que quedará listo para publicarse cuando se registre el conector Late/Postiz (PFMGN-16, pendiente de coordinación externa). Si Canva no estuviera disponible en algún momento, el paso de diseño cae a modo plan (diseno_pendiente: true) en vez de bloquear el resto del pipeline.
 tools: Read, Write, AskUserQuestion
 ---
 
@@ -33,11 +33,12 @@ exista el conector real (Late/Postiz).
    activa del cliente (Instagram / Facebook, según `perfil.md`).
 
 4. **Producir la pieza gráfica** (subagente `disenador`, Fase 5): siguiendo la prioridad de
-   material (foto real del cliente → plantilla Canva sin foto → imagen IA, Fase 6). **Mientras
-   el conector de Canva no esté registrado (PFMGN-42, pendiente de que se conecte la cuenta)**,
-   este paso queda en modo plan: en vez de generar la pieza real, se anota en el `.plan.json`
-   qué plantilla y qué material se usarían (`diseno_pendiente: true`), para que quede
-   documentado y no se pierda ese paso del pipeline. No bloquea el resto del flujo.
+   material (foto real del cliente → plantilla Canva sin foto → imagen IA, Fase 6). Con el
+   conector de Canva conectado, genera la pieza real usando las plantillas maestras del cliente
+   (nunca los brand kits de otros clientes de la cuenta). **Si en algún momento el conector no
+   estuviera disponible**, este paso cae a modo plan: en vez de generar la pieza real, se anota
+   en el `.plan.json` qué plantilla y qué material se usarían (`diseno_pendiente: true`), sin
+   bloquear el resto del flujo.
 
 5. **Sugerir horario** usando la lógica de `agents/horario-optimo.md` (Calendar + histórico si
    existe), si el cliente tiene `google_calendar_id` configurado en su perfil.

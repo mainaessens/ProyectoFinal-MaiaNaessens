@@ -18,7 +18,7 @@
     "canva": {
       "transport": "http",
       "url": "https://mcp.canva.com/mcp",
-      "note": "Fase 5 — pendiente. Diseño. Auth: OAuth. ⚠ verificar endpoint/transporte en Canva Developers."
+      "note": "Fase 5 — conectado y verificado (PFMGN-42). Auth: OAuth, vía Settings > Connectors. Cuenta real de la agencia: el sistema nunca usa los brand kits de clientes reales, solo genera diseños describiendo la paleta en el prompt (ver docs/fase5-canva.md)."
     },
     "glif": {
       "command": "npx",

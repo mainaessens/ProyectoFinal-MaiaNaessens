@@ -1,7 +1,16 @@
 # Fase 5 — Diseño con Canva
 
-**Estado:** construida en modo plan; bloqueada para funcionar de punta a punta hasta que se
-conecte una cuenta real de Canva (PFMGN-42) y se diseñen las plantillas maestras (PFMGN-43).
+**Estado:** conector de Canva conectado y verificado (PFMGN-42). 3 plantillas maestras de
+prueba generadas para `cedite-drive-test` (PFMGN-43): post, carrusel y portada de historia.
+`/crear-post` genera piezas reales en Canva cuando el conector está disponible, y cae a modo
+plan (`diseno_pendiente: true`) si no lo está — ver sección "Modo plan" más abajo, que sigue
+vigente como comportamiento de resiliencia del sistema aunque hoy Canva ya esté conectado.
+
+**Importante — separación de cuentas:** la cuenta de Canva conectada es la cuenta real de la
+agencia, con los brand kits de clientes reales (Marino Brimer, Creatief, GLOW, etc.). El
+sistema **nunca usa esos brand kits** — todas las plantillas de prueba se generan sin
+`brand_kit_id`, describiendo la paleta del cliente de prueba directamente en el prompt. Ningún
+diseño ni brand kit real fue tocado durante el desarrollo/testing de esta fase.
 
 ## Arquitectura
 
@@ -57,6 +66,5 @@ registrado y la pieza se haya generado realmente.
 
 | Historia | Bloqueo |
 |---|---|
-| PFMGN-42 | Conectar una cuenta de Canva (OAuth, acción del usuario) |
-| PFMGN-43 | Diseñar 3 plantillas maestras por cliente en la interfaz de Canva (trabajo manual) |
-| PFMGN-46 (parcial) | Validar con CEDITE que la paleta/tono de los diseños generados es correcta |
+| PFMGN-46 (parcial) | Validar con CEDITE (cliente institucional real) que la paleta/tono de los diseños generados es correcta — sigue pendiente de esa sesión real |
+| PFMGN-16 | Publicación real (Late/Postiz) — las piezas ya se generan, pero no se publican hasta que exista ese conector |

@@ -9,12 +9,14 @@
   },
   "diseno": {
     "fuente": "plantilla_sin_foto",
-    "plantilla_canva": "cedite-carrusel-tips (pendiente de crear - PFMGN-43)",
-    "diseno_pendiente": true
+    "plantilla_canva": "cedite-carrusel-tips (DAHTQtHOb8U)",
+    "design_id": "DAHTQn41mvY",
+    "design_view_url": "https://www.canva.com/d/63p5GunXELI0P_w",
+    "diseno_pendiente": false
   },
   "fecha_programada": "2026-08-30T10:00:00-03:00",
   "estado": "listo_para_publicar_cuando_exista_conector",
   "checklist_marca": "OK - sin violaciones detectadas",
   "pilar": "tips rapidos del area",
-  "nota": "Dry-run PFMGN-46 (Fase 5) - valida que /crear-post documenta el paso de diseno en modo plan mientras Canva no esta conectado."
+  "nota": "Dry-run PFMGN-46 (Fase 5) - actualizado 2026-08-24 con pieza real generada en Canva tras conectar la cuenta. La publicacion sigue pendiente del conector Late/Postiz (PFMGN-16)."
 }
