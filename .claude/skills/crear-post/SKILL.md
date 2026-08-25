@@ -1,6 +1,6 @@
 ---
 name: crear-post
-description: Pipeline completo para armar un post — hook + caption adaptado por red + propuesta de programación — y generar un PLAN de publicación tras aprobación humana. En esta versión (Fase 1) nunca publica de verdad ni llama a ningún conector real de redes sociales; genera un archivo .plan.json en estado "pendiente_aprobacion" / "aprobado" que quedará listo para publicarse cuando se registre el conector Late/Postiz (historia PFMGN-16, pendiente).
+description: Pipeline completo para armar un post — hook + caption adaptado por red + pieza gráfica (Canva) + propuesta de programación — y generar un PLAN de publicación tras aprobación humana. En esta versión nunca publica de verdad ni llama a ningún conector real de redes sociales; genera un archivo .plan.json en estado "pendiente_aprobacion" / "aprobado" que quedará listo para publicarse cuando se registren los conectores Late/Postiz (PFMGN-16) y Canva (PFMGN-42), ambos pendientes de coordinación externa.
 tools: Read, Write, AskUserQuestion
 ---
 
@@ -32,17 +32,24 @@ exista el conector real (Late/Postiz).
 3. **Adaptar el caption por red** (subagente `community-manager`): una versión por cada red
    activa del cliente (Instagram / Facebook, según `perfil.md`).
 
-4. **Sugerir horario** usando la lógica de `agents/horario-optimo.md` (Calendar + histórico si
+4. **Producir la pieza gráfica** (subagente `disenador`, Fase 5): siguiendo la prioridad de
+   material (foto real del cliente → plantilla Canva sin foto → imagen IA, Fase 6). **Mientras
+   el conector de Canva no esté registrado (PFMGN-42, pendiente de que se conecte la cuenta)**,
+   este paso queda en modo plan: en vez de generar la pieza real, se anota en el `.plan.json`
+   qué plantilla y qué material se usarían (`diseno_pendiente: true`), para que quede
+   documentado y no se pierda ese paso del pipeline. No bloquea el resto del flujo.
+
+5. **Sugerir horario** usando la lógica de `agents/horario-optimo.md` (Calendar + histórico si
    existe), si el cliente tiene `google_calendar_id` configurado en su perfil.
 
-5. **Presentar la propuesta completa** al usuario: hook, caption por red, horario sugerido, y
-   pieza gráfica si ya existe (Fase 5, todavía no implementada — se indica como pendiente).
-   Usar `AskUserQuestion` para que el usuario apruebe, pida cambios, o rechace.
+6. **Presentar la propuesta completa** al usuario: hook, caption por red, horario sugerido, y
+   pieza gráfica (o la nota de diseño pendiente si Canva todavía no está conectado). Usar
+   `AskUserQuestion` para que el usuario apruebe, pida cambios, o rechace.
 
-6. **Si pide cambios**: volver al paso 2 o 3 según corresponda, generar una nueva versión, y
+7. **Si pide cambios**: volver al paso 2, 3 o 4 según corresponda, generar una nueva versión, y
    volver a presentar. No se sobrescribe silenciosamente la versión anterior.
 
-7. **Si aprueba**: generar `clientes/<cliente>/historial/<fecha>-<slug>.plan.json` con:
+8. **Si aprueba**: generar `clientes/<cliente>/historial/<fecha>-<slug>.plan.json` con:
    ```json
    {
      "cliente": "<cliente>",
@@ -51,17 +58,23 @@ exista el conector real (Late/Postiz).
      "red": "<red o lista de redes>",
      "hook_texto": "...",
      "caption": { "instagram": "...", "facebook": "..." },
+     "diseno": {
+       "fuente": "foto_cliente | plantilla_sin_foto | glif",
+       "plantilla_canva": "<id o nombre, si aplica>",
+       "diseno_pendiente": true
+     },
      "fecha_programada": "<horario aprobado>",
      "estado": "listo_para_publicar_cuando_exista_conector"
    }
    ```
-   **No se llama a ningún conector MCP de publicación** — el conector Late/Postiz no está
-   registrado todavía en este proyecto (PFMGN-16, pendiente de coordinación externa). Este PLAN
-   queda guardado y es justamente lo que el hook `validar-publicacion.ps1` exige que exista
-   (con `aprobado: true`) antes de permitir cualquier llamada real de publicación en el futuro.
+   **No se llama a ningún conector MCP de publicación ni de Canva** — ninguno de los dos está
+   registrado todavía en este proyecto (PFMGN-16 y PFMGN-42, pendientes de coordinación
+   externa). Este PLAN queda guardado y es justamente lo que el hook `validar-publicacion.ps1`
+   exige que exista (con `aprobado: true`) antes de permitir cualquier llamada real de
+   publicación en el futuro.
 
-8. Confirmar al usuario que el PLAN quedó guardado, y aclarar explícitamente que **no se publicó
-   nada** — es un plan a la espera del conector real.
+9. Confirmar al usuario que el PLAN quedó guardado, y aclarar explícitamente qué quedó
+   pendiente de ejecutar de verdad (publicación, y diseño si Canva no estaba conectado).
 
 ## Reglas
 
