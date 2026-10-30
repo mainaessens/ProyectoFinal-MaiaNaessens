@@ -25,6 +25,16 @@ oficial de Meta. Publica solo el caption de un `.plan.json` **aprobado**, una ve
 
 Y el `ig_user_id` (no es secreto) en `.claude/instagram-cuentas.json`.
 
+**Dos caminos de login en Meta** (cambia el host de la API):
+
+- **Instagram Login** (recomendado, no requiere página de Facebook): token generado en el panel
+  de la app. Hay que apuntar el conector a ese host:
+  `META_GRAPH_BASE=https://graph.instagram.com/v23.0`
+- **Facebook Login** (cuenta vinculada a una página): es el host por defecto
+  (`https://graph.facebook.com/v23.0`), no hace falta variable.
+
+La versión de la API (`v23.0`) se cambia con `META_GRAPH_VERSION` si Meta la retira.
+
 ## Probar sin riesgo
 
 1. `ver_cuenta` → debe mostrar tu usuario y la cuota de publicación (solo lectura).
