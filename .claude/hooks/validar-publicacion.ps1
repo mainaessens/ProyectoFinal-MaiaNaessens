@@ -36,7 +36,7 @@ if ([string]::IsNullOrWhiteSpace($inputJson)) {
 $data = $inputJson | ConvertFrom-Json
 
 $toolName = $data.tool_name
-$publicacionPattern = "mcp__postiz__|mcp__late__"
+$publicacionPattern = "mcp__postiz__|mcp__late__|mcp__instagram__(publicar|subir)"
 $gastoPattern = "mcp__meta-ads__create|mcp__meta-ads__update"
 
 if ($toolName -notmatch $publicacionPattern -and $toolName -notmatch $gastoPattern) {
@@ -56,6 +56,78 @@ if ([string]::IsNullOrWhiteSpace($cliente)) {
 
 $agenciaRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $historialCliente = Join-Path $agenciaRoot "clientes\$cliente\historial"
+
+function Block([string]$msg) {
+    [Console]::Error.WriteLine("BLOQUEADO por validar-publicacion.ps1: $msg")
+    exit 2
+}
+
+# --- v2: GASTO (Meta Ads). Exige su propia aprobacion (*.ads.json) con monto exacto, tope mensual
+# --- y campania en pausa. Un plan de publicacion aprobado NO habilita gasto.
+if ($toolName -match $gastoPattern) {
+    if ($cliente -notmatch '^[a-z0-9][a-z0-9\-]*$') {
+        Block "nombre de cliente invalido '$cliente' para una llamada de gasto."
+    }
+
+    $limitesPath = if ($env:AGENCIA_LIMITES_PATH) { $env:AGENCIA_LIMITES_PATH } else { Join-Path $agenciaRoot ".claude\limites.json" }
+    if (-not (Test-Path $limitesPath)) { Block "no existe limites.json: no hay tope de gasto configurado." }
+    $limites = Get-Content -Raw -Path $limitesPath | ConvertFrom-Json
+    $limCliente = $limites.clientes.$cliente
+    if ($null -eq $limCliente -or $null -eq $limCliente.tope_mensual -or [double]$limCliente.tope_mensual -le 0) {
+        Block "el cliente '$cliente' no tiene un tope_mensual > 0 en limites.json."
+    }
+    $tope = [double]$limCliente.tope_mensual
+
+    $aprobaciones = @()
+    foreach ($a in (Get-ChildItem -Path $historialCliente -Filter "*.ads.json" -ErrorAction SilentlyContinue)) {
+        try {
+            $obj = Get-Content -Raw -Path $a.FullName | ConvertFrom-Json
+            if ($obj.aprobado -eq $true -and [double]$obj.monto_confirmado -gt 0) { $aprobaciones += $obj }
+        } catch { continue }
+    }
+    if ($aprobaciones.Count -eq 0) {
+        Block "no hay aprobacion de gasto (*.ads.json con aprobado:true y monto_confirmado) para '$cliente'."
+    }
+
+    $mesActual = (Get-Date).ToString("yyyy-MM")
+    $gastadoMes = ($aprobaciones | Where-Object { "$($_.fecha_aprobacion)".StartsWith($mesActual) } |
+        Measure-Object -Property monto_confirmado -Sum).Sum
+    if ($gastadoMes -gt $tope) {
+        Block "las aprobaciones de $mesActual suman $gastadoMes, por encima del tope mensual $tope de '$cliente'."
+    }
+
+    # Monto de la llamada (Meta usa centavos en daily_budget/lifetime_budget; 'monto' va en unidades).
+    $ti = $data.tool_input
+    $montoLlamada = $null
+    if ($null -ne $ti.monto) { $montoLlamada = [double]$ti.monto }
+    elseif ($null -ne $ti.lifetime_budget) { $montoLlamada = [double]$ti.lifetime_budget / 100 }
+    elseif ($null -ne $ti.daily_budget) { $montoLlamada = 0 }  # se resuelve con duracion abajo
+
+    $ok = $false
+    foreach ($ap in $aprobaciones) {
+        $conf = [double]$ap.monto_confirmado
+        $monto = $montoLlamada
+        if ($null -ne $ti.daily_budget -and $null -eq $ti.monto -and $null -eq $ti.lifetime_budget) {
+            $dias = if ($ap.duracion_dias) { [double]$ap.duracion_dias } else { 0 }
+            $monto = ([double]$ti.daily_budget / 100) * $dias
+            if ($dias -le 0) { continue }
+        }
+        if ($null -eq $monto -or $monto -le $conf) { $ok = $true; $apOk = $ap; break }
+    }
+    if (-not $ok) { Block "el monto de la llamada supera el monto_confirmado de toda aprobacion vigente de '$cliente'." }
+
+    $status = "$($ti.status)".ToUpper()
+    if ($toolName -match "create" -and $status -and $status -ne "PAUSED") {
+        Block "las campanas se crean siempre en pausa (status=PAUSED); recibido '$status'."
+    }
+    if ($status -eq "ACTIVE" -and $apOk.activacion_confirmada -ne $true) {
+        Block "activar una campana requiere segunda confirmacion (activacion_confirmada:true en la aprobacion)."
+    }
+
+    Write-Host "validar-publicacion: OK gasto, aprobacion de $($apOk.monto_confirmado) encontrada (mes ${mesActual}: $gastadoMes de $tope)."
+    exit 0
+}
+
 $planesEncontrados = Get-ChildItem -Path $historialCliente -Filter "*.plan.json" -ErrorAction SilentlyContinue
 
 $planAprobado = $null

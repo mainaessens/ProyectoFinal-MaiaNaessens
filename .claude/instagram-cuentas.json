@@ -1,0 +1,6 @@
+{
+  "descripcion": "Cuenta de Instagram (ig_user_id de la Graph API) de cada cliente. No es un secreto; el token va en variables de entorno.",
+  "clientes": {
+    "lumbre-pilates": { "ig_user_id": null }
+  }
+}

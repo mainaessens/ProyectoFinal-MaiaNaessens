@@ -32,8 +32,11 @@ Propone el calendario editorial completo de un mes para un cliente.
 
 3. **Proponer el calendario** como tabla:
 
-   | Fecha | Red | Formato | Tema | Hook | CTA |
-   |---|---|---|---|---|---|
+   | # | Fecha | Red | Formato | Tema | Hook | CTA |
+   |---|---|---|---|---|---|---|
+
+   `#` es el número correlativo del posteo dentro del mes (1, 2, 3…). Cada fila también lleva
+   un nombre corto (slug) para poder referenciarla luego en `/crear-post`.
 
    Cada hook debe poder justificarse con un dato concreto (tendencia, pilar del perfil, o
    aprendizaje previo) — nunca un hook genérico. Respetar los pilares de contenido y las
@@ -55,6 +58,14 @@ Propone el calendario editorial completo de un mes para un cliente.
      contenido anterior de ese mes si existía.
 
 7. Confirmar al usuario cuántas tareas y eventos se crearon, con enlaces.
+
+8. **Siguiente paso (cuando la campaña está aprobada por el cliente)**: ofrecer con
+   `AskUserQuestion` cómo seguir con las piezas:
+   - **Un posteo puntual**: indicar el número (`#`) o el nombre/slug → `/crear-post <cliente> <#|slug>`.
+   - **Todos juntos**: `/crear-post <cliente> todos`, que diseña el lote completo y presenta
+     las piezas una por una para aprobación individual.
+   - **Más tarde**: no hacer nada ahora.
+   Solo ofrecer este paso si la tabla fue aprobada; no iniciarlo sin que el usuario elija.
 
 ## Reglas
 

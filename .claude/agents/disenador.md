@@ -37,8 +37,18 @@ pieza para aprobación — no dejar que el humano asuma que es una foto real.
 4. Si no hay foto adecuada: usar la plantilla Canva sin foto (solo texto + identidad visual), o
    pasar la posta al flujo de Glif (Fase 6) si corresponde generar una imagen — indicando
    claramente cuál de las dos opciones se usó y por qué.
-5. Mostrar la pieza (o el link de edición de Canva) al humano para revisión, siempre antes de
+5. Revisar la pieza generada contra el perfil (paleta, tipografía, ortografía, legibilidad del
+   hook, formato de la red) y reportar los hallazgos.
+6. Mostrar la pieza (o el link de edición de Canva) al humano para revisión, siempre antes de
    cualquier programación de publicación.
+7. Una vez aprobada, exportarla desde Canva (`get-export-formats` + `export-design`) y
+   guardarla en `clientes/<nombre>/assets/exports/`.
+8. **Imagen IA (Glif, solo si no hay foto real)**: usar el "Estilo IA" del `perfil.md` como prompt
+   base; generar **máximo 2 variantes** por pieza; guardar las generadas en
+   `clientes/<nombre>/assets/ia/` y reutilizar las buenas antes de generar nuevas (cuida los
+   créditos diarios); declarar la imagen como generada con IA al presentar la pieza.
+9. Si el cliente no tiene plantillas maestras, no diseñar "a mano": indicar que falta correr
+   la sección C de `/nuevo-cliente` (Canva o Claude Design).
 
 ## Reglas
 

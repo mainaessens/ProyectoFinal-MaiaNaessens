@@ -7,7 +7,10 @@
       "Write(./agencia/.claude/**)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [
+      "mcp__meta-ads__create*",
+      "mcp__meta-ads__update*"
+    ]
   },
   "env": {
     "GLIF_API_TOKEN": "${GLIF_API_TOKEN}",
@@ -17,22 +20,22 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__postiz__.*|mcp__meta-ads__create.*|mcp__meta-ads__update.*",
+        "matcher": "mcp__postiz__.*|mcp__late__.*|mcp__instagram__(publicar|subir).*|mcp__meta-ads__create.*|mcp__meta-ads__update.*",
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -File .claude/hooks/validar-publicacion.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/validar-publicacion.ps1\""
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__postiz__.*|mcp__meta-ads__.*|mcp__atlassian__.*",
+        "matcher": "mcp__postiz__.*|mcp__late__.*|mcp__instagram__.*|mcp__meta-ads__.*|mcp__atlassian__.*",
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -File .claude/hooks/registrar-actividad.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/registrar-actividad.ps1\""
           }
         ]
       }

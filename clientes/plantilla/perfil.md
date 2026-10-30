@@ -61,6 +61,13 @@
 - **Proyecto/clave de Jira:** (ej: `SAM1`) — donde viven las tareas de contenido de este cliente
 - **ID de Google Calendar:** (ej: `nombre@gmail.com`) — calendario donde se agendan sus publicaciones
 
+## Estado del alta (`/nuevo-cliente`)
+
+- [ ] Drive ordenado (o plan de orden en `orden-drive.md`)
+- [ ] Fotos y videos descargados a `assets/`
+- [ ] 3 plantillas maestras de Canva registradas (origen: Drive / Canva / Claude Design)
+- [ ] Perfil aprobado por el humano
+
 ---
 
 ## Ejemplo — Café Lunar (cliente ficticio, referencia)

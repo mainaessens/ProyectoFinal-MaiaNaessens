@@ -44,6 +44,20 @@ Describe "Esquema de archivos .plan.json" {
             }
         }
 
+        It "si trae 'numero_post' es un entero positivo" -ForEach $PlanFiles {
+            $plan = Get-Content -Raw $_.FullName | ConvertFrom-Json
+            if ($null -ne $plan.numero_post) {
+                [int]$plan.numero_post | Should -BeGreaterThan 0
+            }
+        }
+
+        It "si el diseno esta terminado y exportado, indica el archivo exportado" -ForEach $PlanFiles {
+            $plan = Get-Content -Raw $_.FullName | ConvertFrom-Json
+            if ($plan.diseno -and $plan.diseno.diseno_pendiente -eq $false -and $plan.diseno.PSObject.Properties['archivo_exportado']) {
+                $plan.diseno.archivo_exportado | Should -Not -BeNullOrEmpty
+            }
+        }
+
         It "el 'cliente' del plan coincide con la carpeta que lo contiene" -ForEach $PlanFiles {
             $plan = Get-Content -Raw $_.FullName | ConvertFrom-Json
             $carpetaCliente = Split-Path -Leaf (Split-Path -Parent (Split-Path -Parent $_.FullName))

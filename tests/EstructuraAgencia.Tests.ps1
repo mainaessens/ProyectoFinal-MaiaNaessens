@@ -40,6 +40,20 @@ Describe "Estructura base de .claude/" {
         { Get-Content -Raw $path | ConvertFrom-Json } | Should -Not -Throw
     }
 
+    It "los comandos de hooks usan un ejecutable disponible y apuntan a scripts existentes" {
+        $settings = Get-Content -Raw (Join-Path $ClaudeDir "settings.json") | ConvertFrom-Json
+        $comandos = foreach ($evento in $settings.hooks.PSObject.Properties) {
+            foreach ($grupo in $evento.Value) { foreach ($h in $grupo.hooks) { $h.command } }
+        }
+        $comandos | Should -Not -BeNullOrEmpty
+        foreach ($cmd in $comandos) {
+            $exe = ($cmd -split '\s+')[0]
+            Get-Command $exe -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty -Because "el hook '$cmd' usa '$exe'"
+            $script = [regex]::Match($cmd, '\.claude/hooks/[\w\-]+\.ps1').Value
+            Test-Path (Join-Path (Split-Path $ClaudeDir) $script) | Should -BeTrue -Because "'$script' debe existir"
+        }
+    }
+
     It ".env.example existe y no contiene valores reales (solo placeholders vacios)" {
         $path = Join-Path $ClaudeDir ".env.example"
         Test-Path $path | Should -BeTrue

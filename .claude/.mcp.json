@@ -15,6 +15,11 @@
       "url": "${POSTIZ_SSE_URL}",
       "note": "Fase 1 — pendiente. Publicación IG+FB+TikTok vía Late (free tier) o Postiz self-hosted. Auth: API key. ⚠ verificar URL antes de registrar."
     },
+    "instagram": {
+      "command": "node",
+      "args": ["mcp/instagram-publisher/server.mjs"],
+      "note": "Fase 1 — conector propio de publicación en Instagram (Graph API oficial de Meta, sin dependencias). Variables: INSTAGRAM_ACCESS_TOKEN (o INSTAGRAM_TOKEN_<CLIENTE>), SUPABASE_URL y SUPABASE_KEY para alojar la imagen. Mapa cliente→ig_user_id en .claude/instagram-cuentas.json. Ver docs/conectar-instagram.md."
+    },
     "canva": {
       "transport": "http",
       "url": "https://mcp.canva.com/mcp",

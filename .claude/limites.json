@@ -1,0 +1,6 @@
+{
+  "descripcion": "Tope de gasto mensual en Meta Ads por cliente, en la moneda de la cuenta publicitaria. Segunda barrera tecnica (la primera es el limite de gasto en la propia cuenta de Meta). Sin entrada, o con tope 0, el hook bloquea todo gasto.",
+  "clientes": {
+    "lumbre-pilates": { "tope_mensual": 0, "moneda": "ARS" }
+  }
+}
