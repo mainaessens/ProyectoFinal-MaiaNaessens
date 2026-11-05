@@ -100,7 +100,8 @@ Lecturas de diagnóstico usadas (todas de solo lectura, con el token en el encab
 
 ### 3.6 Verificación
 Con el token correcto, `ver_cuenta` devolvió el usuario y la cuota (0 de 100 publicaciones por 24 h).
-Eso confirma lectura; **la publicación real todavía no se probó**.
+Eso confirmó la lectura. La publicación real de un carrusel de 2 placas también funcionó (con un store
+de Blob público y el plan aprobado); la API devolvió el `media_id` y el enlace de la publicación.
 
 ## 4. Vercel Blob — `BLOB_READ_WRITE_TOKEN`
 
@@ -111,7 +112,8 @@ Meta descarga la imagen desde una URL pública, así que hay que alojarla.
 
 Error encontrado: el primer store se creó **privado** y la subida falló con
 *"Cannot use public access on a private store"*. Un store no puede cambiar de privado a público:
-hay que crear otro con acceso público.
+hay que crear otro con acceso público. Con el store público, la subida respondió con URLs
+`https://<id>.public.blob.vercel-storage.com/<cliente>/<archivo>-<sufijo>.png`, accesibles sin autenticación.
 
 ## 5. Pendientes de credenciales
 

@@ -59,8 +59,8 @@ Los comandos usan `powershell -NoProfile -ExecutionPolicy Bypass -File "$CLAUDE_
 | Google Drive / Calendar | conector de la plataforma | OAuth | en uso |
 | Atlassian (Jira) | conector de la plataforma | OAuth 2.1 | en uso, **solo para el tablero de la tesis (PFMGN)** |
 | Canva | conector de la plataforma | OAuth | en uso; las plantillas se generan **sin brand kit** |
-| **Instagram** | propio: `mcp/instagram-publisher/` | token de Meta en variable de entorno | lectura verificada contra Meta real (2026-11-04); publicación real pendiente |
-| Vercel Blob | API REST (la usa el conector) | `BLOB_READ_WRITE_TOKEN` | pendiente de verificar (el store debe ser **público**) |
+| **Instagram** | propio: `mcp/instagram-publisher/` | token de Meta en variable de entorno | lectura y publicación de carrusel verificadas contra Meta real (2026-11-04); imagen y reel solo con simulados |
+| Vercel Blob | API REST (la usa el conector) | `BLOB_READ_WRITE_TOKEN` | subida verificada (el store debe ser **público**) |
 | Glif | `@glifxyz/glif-mcp-server` | `GLIF_API_TOKEN` | token cargado; sin probar |
 | Meta Ads | `meta-ads-mcp` (Pipeboard) | `PIPEBOARD_API_TOKEN` | no conectado; la barrera de gasto está probada con tests |
 
@@ -163,8 +163,8 @@ un plan aprobado es inmutable.
 - Tipos de token de Meta: los de Facebook Login (`EAA…`, usuario del sistema) necesitan la cuenta de
   Instagram y la página **asignadas** al usuario en Meta Business; los de Instagram Login (`IGAA…`)
   usan otro host.
-- Meta Ads, Glif y la publicación real están programados y testeados contra servicios simulados,
-  pero no se probaron contra los servicios reales.
+- Meta Ads y Glif están programados y testeados contra servicios simulados, pero no se probaron
+  contra los servicios reales. De Instagram, solo se verificó en real el carrusel (e `imagen`/`reel` no).
 - El checklist de marca marca palabras sueltas (por ejemplo "antes" o "después") como posibles
   violaciones: genera falsos positivos.
 

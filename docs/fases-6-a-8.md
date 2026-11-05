@@ -2,7 +2,7 @@
 
 | Fase | Pieza | Estado |
 |---|---|---|
-| 1 — Publicación | Conector propio de Instagram (`mcp/instagram-publisher/`): imagen, **carrusel**, reel, subida a Vercel Blob | Lectura verificada contra Meta real; publicación real **pendiente** (hace falta un store de Blob público). 24 tests con servicios simulados |
+| 1 — Publicación | Conector propio de Instagram (`mcp/instagram-publisher/`): imagen, **carrusel**, reel, subida a Vercel Blob | Lectura, subida a Blob y **publicación de un carrusel verificadas contra servicios reales** (2026-11-04); imagen y reel solo con simulados. 24 tests |
 | 6 — Imágenes IA (Glif) | Regla de prioridad en `CLAUDE.md`, "Estilo IA" en el perfil, `assets/ia/`, máximo 2 variantes y reutilización en `agents/disenador.md` | Reglas y token listos; **sin probar** contra Glif real |
 | 7 — Meta Ads, lectura | `agents/ads-manager.md` (modo lectura), alimenta `/reporte-semanal` y `/cierre-mensual` | Agente listo; **sin conectar** (decisión: Meta Ads queda para el final) |
 | 8 — Meta Ads, creación | `validar-publicacion.ps1` v2, `limites.json`, `/lanzar-campania-ads`, `*.ads.json`, permisos `ask` | Barrera técnica probada con 12 tests (`tests/ValidarGasto.Tests.ps1`); skill sin ejecutar contra Meta real |
@@ -21,7 +21,6 @@
 
 ## Pendiente externo
 
-- Store de Vercel Blob **público** y su token, para la primera publicación real.
 - Token de Glif probado; `PIPEBOARD_API_TOKEN` y cuenta publicitaria (cuando se decida usar Meta Ads).
 - Facebook y TikTok: sin conector.
 - Rutina que ejecute las publicaciones a su hora (la API de Instagram publica al instante).

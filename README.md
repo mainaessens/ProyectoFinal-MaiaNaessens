@@ -103,7 +103,7 @@ El detalle de cada fase está en el PDF del plan y en las historias del proyecto
 - **Fases 0 a 5 funcionando**: alta de cliente con Drive, campaña mensual, creación de piezas en Canva
   con exportación y planes aprobados.
 - **Fase 1 (publicación)**: conector propio de Instagram con imagen, carrusel y reel; lectura verificada
-  contra Meta real; **primera publicación real pendiente** (requiere un store de Vercel Blob público).
+  contra Meta real y **primera publicación real (carrusel) verificada el 2026-11-04**.
 - **Fases 6 a 8** (Glif, Meta Ads): programadas y testeadas con servicios simulados, sin probar contra
   los servicios reales. Meta Ads queda para el final por decisión.
 - **Pruebas**: 175 tests Pester (incluyen el wrapper de los 24 tests de Node del conector).

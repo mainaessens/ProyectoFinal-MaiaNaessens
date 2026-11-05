@@ -70,10 +70,12 @@ La API de Instagram **no permite borrar** publicaciones: se borran desde la app.
 - El token no aparece en errores ni en logs.
 
 ## Estado de verificación
-- **Verificado contra Meta real (2026-11-04):** `ver_cuenta` con una cuenta profesional real
-  (cuota 0/100 por 24 h).
-- **Probado solo con servicios simulados:** subida a Blob, publicación de imagen, carrusel y reel.
-- **Pendiente:** primera publicación real.
+- **Verificado contra servicios reales (2026-11-04):**
+  - `ver_cuenta` con una cuenta profesional real (cuota 0/100 por 24 h).
+  - `subir_archivo_publico` contra un store público de Vercel Blob (2 placas, URLs con HTTP 200 y `image/png`).
+  - `publicar_carrusel` de 2 placas: publicado en Instagram, con registro `<plan>.publicado.json`,
+    línea de auditoría y bloqueo de una segunda publicación del mismo plan.
+- **Probado solo con servicios simulados:** `publicar_imagen` y `publicar_reel`.
 
 ## Tests
 `node --test mcp/instagram-publisher` (24 tests con Graph API y Vercel Blob simulados).
