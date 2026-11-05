@@ -89,7 +89,9 @@ registro-actividad.log    auditoría
   "hook_texto": "...", "caption": { "instagram": "...", "facebook": "..." },
   "diseno": { "fuente": "foto_cliente | plantilla_sin_foto | glif", "plantilla_canva": "...",
               "design_id": "...", "archivo_exportado": "ruta | [rutas de cada placa]",
-              "diseno_pendiente": false },
+              "diseno_pendiente": false,
+              "imagen_ia": { "archivo": "...", "proyecto_glif": "...", "creditos": 5.1,
+                             "declarada_como_ia": true, "justificacion": "..." } },
   "video": null, "fecha_programada": "ISO-8601",
   "estado": "listo_para_publicar | listo_para_publicar_cuando_exista_conector"
 }
@@ -152,6 +154,7 @@ un plan aprobado es inmutable.
 - **Jira solo para la tesis**: no hay proyecto de Jira por cliente; el calendario vive en
   `calendario-editorial.md`.
 - **Hooks con Windows PowerShell 5.1**: un test verifica que el ejecutable de cada hook exista.
+- **Imagen generada con IA, solo si es necesaria**: deben cumplirse tres condiciones (no hay foto real del cliente que represente el tema, la plantilla sin foto no alcanza, y la imagen ilustra un concepto o ambiente genérico, nunca personas, resultados ni instalaciones reales del cliente). Siempre se declara como IA en la pieza y en el plan; una prueba exige esa declaración.
 - **Plantillas de Canva sin brand kit**: la cuenta de Canva contiene brand kits de clientes reales;
   los diseños se generan describiendo la paleta en el brief.
 

@@ -18,8 +18,26 @@ plantillas maestras de Canva de esa cuenta.
    siempre la primera opción.
 2. **Plantilla Canva sin foto** (solo texto/diseño con la paleta e identidad del cliente),
    cuando no hay foto adecuada al tema pero tampoco hace falta generar una imagen.
-3. **Imagen generada con IA** (Glif, Fase 6) — solo cuando ninguna de las anteriores aplica,
-   máximo 2 variantes por pieza, y siempre declarada como tal si el cliente lo exige.
+3. **Imagen generada con IA** (Glif, Fase 6) — **excepcional**, solo cuando ninguna de las
+   anteriores aplica y se cumple el criterio de necesidad de abajo. Máximo 2 variantes por pieza y
+   siempre declarada como IA.
+
+## Criterio de necesidad de la imagen IA
+
+Antes de generar, comprobar y dejar escrito en la propuesta las tres condiciones:
+
+1. **No hay foto ni video real del cliente** que represente el tema (se revisó `assets/fotos` y
+   `assets/videos`; no alcanza con que la foto no sea perfecta).
+2. **La plantilla sin foto no alcanza**: el tema pide una imagen (por ejemplo, explicar un equipo o
+   un concepto visual) y un diseño solo de texto lo deja pobre.
+3. **Es una ilustración de un concepto o ambiente genérico.** Nunca se usa IA para mostrar
+   personas reales, testimonios, resultados, ni productos, local o instalaciones propias del
+   cliente como si fueran reales: eso engaña a su público. En esos casos se pide material real al
+   cliente (lista de tomas o fotos) y mientras tanto se usa la plantilla sin foto.
+
+Si falta alguna condición, no se genera: se usa la plantilla sin foto y se pide el material.
+Si se genera, se declara en la pieza presentada y en el `.plan.json`
+(`diseno.imagen_ia` con archivo, proyecto de Glif, créditos y `declarada_como_ia: true`).
 
 Nunca se salta este orden. Si se usa la opción 2 o 3, decirlo explícitamente al presentar la
 pieza para aprobación — no dejar que el humano asuma que es una foto real.

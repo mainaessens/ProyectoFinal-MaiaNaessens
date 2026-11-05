@@ -106,6 +106,6 @@ El detalle de cada fase está en el PDF del plan y en las historias del proyecto
   contra Meta real y **primera publicación real (carrusel) verificada el 2026-11-04**.
 - **Fases 6 a 8** (Glif, Meta Ads): programadas y testeadas con servicios simulados, sin probar contra
   los servicios reales. Meta Ads queda para el final por decisión.
-- **Pruebas**: 175 tests Pester (incluyen el wrapper de los 24 tests de Node del conector).
+- **Pruebas**: 195 tests Pester (incluyen el wrapper de los 24 tests de Node del conector).
 - Jira (proyecto **PFMGN**) se usa solo para trackear la tesis; el epic **PFMGN-71** es la interfaz
   web (fuera de este roadmap).

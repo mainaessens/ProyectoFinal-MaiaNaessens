@@ -36,8 +36,12 @@ existe una aprobación registrada.
 
 1. Foto o video real del cliente (Drive → `clientes/<nombre>/assets/`).
 2. Plantilla Canva sin foto (solo texto/diseño).
-3. Imagen generada con IA (Glif) — únicamente cuando no hay foto adecuada, máximo 2 variantes
-   por pieza, y declarada como tal si el cliente lo exige.
+3. Imagen generada con IA (Glif) — **excepcional**: solo cuando es realmente necesaria. Deben
+   cumplirse las tres condiciones: (a) el cliente no tiene ninguna foto o video real que represente
+   el tema; (b) la plantilla sin foto no alcanza para comunicarlo; (c) la imagen ilustra un concepto
+   o un ambiente genérico, y **nunca** personas reales, testimonios, resultados, productos ni
+   instalaciones propias del cliente presentados como si fueran reales. Máximo 2 variantes por
+   pieza, una imagen por llamada, y siempre declarada como IA al presentar la pieza y en el plan.
 
 ## Tono por defecto
 

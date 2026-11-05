@@ -38,7 +38,7 @@ Archivos agregados en las fases 1 y 8:
 | `InstagramPublisher.Tests.ps1` | Corre los tests de Node del conector y verifica que el hook trate `mcp__instagram__publicar*`/`subir*` como publicación. |
 | `../mcp/instagram-publisher/publisher.test.mjs` | 24 tests del conector con Graph API y Vercel Blob simulados: simulacro, plan aprobado/no aprobado, otro cliente, ya publicado, fecha programada, carrusel (hijos, orden, cantidad), subida, token no filtrado. Se corre con `node --test`. |
 
-Total actual: 175 tests (Pester, incluye el wrapper de los de Node) + 24 de Node.
+Total actual: 195 tests (Pester, incluye el wrapper de los de Node) + 24 de Node.
 
 ## Por qué esta separación (unitario vs. estructural)
 

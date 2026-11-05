@@ -58,6 +58,15 @@ Describe "Esquema de archivos .plan.json" {
             }
         }
 
+        It "si la fuente del diseno es glif, declara la imagen como generada con IA" -ForEach $PlanFiles {
+            $plan = Get-Content -Raw $_.FullName | ConvertFrom-Json
+            if ($plan.diseno -and $plan.diseno.fuente -eq "glif") {
+                $plan.diseno.imagen_ia | Should -Not -BeNullOrEmpty
+                $plan.diseno.imagen_ia.declarada_como_ia | Should -BeTrue
+                $plan.diseno.imagen_ia.justificacion | Should -Not -BeNullOrEmpty
+            }
+        }
+
         It "el 'cliente' del plan coincide con la carpeta que lo contiene" -ForEach $PlanFiles {
             $plan = Get-Content -Raw $_.FullName | ConvertFrom-Json
             $carpetaCliente = Split-Path -Leaf (Split-Path -Parent (Split-Path -Parent $_.FullName))
