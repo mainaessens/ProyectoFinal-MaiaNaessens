@@ -91,6 +91,8 @@ El detalle de cada fase está en el PDF del plan y en las historias del proyecto
 - [`docs/arquitectura.md`](docs/arquitectura.md): componentes, modelo de datos, barreras de seguridad,
   variables de entorno, decisiones y limitaciones.
 - [`docs/flujo-de-trabajo.md`](docs/flujo-de-trabajo.md): recorrido de un cliente, con cada parada humana.
+- [`docs/obtencion-de-credenciales.md`](docs/obtencion-de-credenciales.md): paso a paso para conseguir cada
+  API y token (Meta, Glif, Vercel Blob, conectores), con los errores encontrados y su solución.
 - [`docs/conectar-instagram.md`](docs/conectar-instagram.md): conector de publicación, tokens y pruebas.
 - [`docs/fases-6-a-8.md`](docs/fases-6-a-8.md): estado de Glif, Meta Ads y publicación.
 - [`docs/fase5-canva.md`](docs/fase5-canva.md), [`docs/mvp-fase-0-4.md`](docs/mvp-fase-0-4.md),

@@ -125,6 +125,9 @@ repositorio. `.claude/.env.example` solo lista los nombres.
 | `GLIF_API_TOKEN` | imágenes con IA |
 | `PIPEBOARD_API_TOKEN` | Meta Ads (no usado todavía) |
 
+Cómo se consiguió cada una, paso a paso y con los errores encontrados:
+[obtencion-de-credenciales.md](obtencion-de-credenciales.md).
+
 ## 5. Barreras de seguridad
 
 | Capa | Mecanismo | Qué impide |
