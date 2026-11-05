@@ -82,9 +82,10 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
     registrado y el cliente tiene `ig_user_id` en `.claude/instagram-cuentas.json`
     (guía: `docs/conectar-instagram.md`). Pedir un OK explícito y separado ("publicar esta pieza
     en Instagram ahora / el <día> a las <hora>"). Luego, siempre pasando `cliente` y `plan`:
-    1. `subir_archivo_publico` → devuelve la URL https pública del archivo exportado.
-    2. `publicar_imagen` (o `publicar_reel`) **sin** `confirmar` → simulacro; mostrar al usuario
-       qué se publicaría.
+    1. `subir_archivo_publico` → devuelve la(s) URL(s) https pública(s) del/los archivo(s)
+       exportado(s) (una por placa, en orden, si es carrusel).
+    2. `publicar_imagen`, `publicar_carrusel` (`image_urls` en orden de placa) o `publicar_reel`
+       **sin** `confirmar` → simulacro; mostrar al usuario qué se publicaría.
     3. Con el OK, repetir con `confirmar:true`. El caption sale del plan aprobado, no del chat.
     La API publica al instante: para una fecha futura, no llamar hasta ese momento (rutina
     programada); el conector se niega a publicar antes de `fecha_programada` salvo

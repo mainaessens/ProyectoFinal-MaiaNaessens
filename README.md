@@ -19,8 +19,9 @@ agencia/
 ├── .claude/                        # configuración del agente — ver detalle abajo
 ├── clientes/                       # memoria local por cuenta de cliente
 │   └── plantilla/                  # copiar esta carpeta para dar de alta un cliente nuevo
-├── tests/                          # suite de tests automatizados (Pester) — ver tests/README.md
-└── docs/                           # documentación de arquitectura por fase
+├── mcp/instagram-publisher/        # conector propio de publicación en Instagram (Node, sin dependencias)
+├── tests/                          # suite de tests automatizados (Pester + Node) — ver tests/README.md
+└── docs/                           # documentación técnica — ver "Documentación"
 ```
 
 ### `.claude/` — la carpeta más importante del proyecto
@@ -35,26 +36,31 @@ tocar código.
 │                                    #   convenciones de idioma/nomenclatura, ciclo de estados
 ├── settings.json                   # permisos y registro de hooks (PreToolUse/PostToolUse)
 ├── .mcp.json                       # conectores MCP declarados (Drive, Calendar, Jira, Canva,
-│                                    #   Late/Postiz pendiente) — solo referencias a env vars
+│                                    #   Instagram propio, Glif, Meta Ads) — solo referencias a env vars
 ├── .env.example                    # variables de entorno necesarias, sin valores reales
+├── limites.json                    # tope mensual de gasto en anuncios por cliente
+├── instagram-cuentas.json          # cliente → ig_user_id (no es un secreto)
 │
 ├── agents/                         # SUBAGENTES — especialistas invocados por los skills
 │   ├── estratega.md                #   campaña mensual, tendencias (WebSearch), calendario editorial
 │   ├── disenador.md                #   piezas gráficas: prioridad foto real → Canva → Glif (Fase 6)
 │   ├── community-manager.md        #   adapta captions por red (IG/FB), arma el PLAN de publicación
-│   └── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
+│   ├── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
+│   └── ads-manager.md              #   Meta Ads: lectura (Fase 7) y creación en pausa (Fase 8)
 │
 ├── skills/                         # SKILLS — procedimientos invocables como /comando
-│   ├── nuevo-cliente/SKILL.md      #   alta de cliente + lectura automática de brief/manual (Drive)
+│   ├── nuevo-cliente/SKILL.md      #   alta: ordena el Drive (con OK), descarga assets, plantillas Canva, perfil
 │   ├── plan-del-dia/SKILL.md       #   vista unificada Calendar + Jira, prioridades del día
-│   ├── crear-post/SKILL.md         #   hook + caption + diseño + horario → PLAN aprobado
+│   ├── crear-post/SKILL.md         #   por número/slug/todos: caption + diseño + export → PLAN aprobado → Instagram
+│   ├── crear-reel/SKILL.md         #   guion + video real del cliente + portada Canva → PLAN
+│   ├── lanzar-campania-ads/SKILL.md#   campaña de Meta Ads con doble confirmación, siempre en pausa
 │   ├── campania-mensual/SKILL.md   #   tendencias + historial → calendario editorial del mes
 │   ├── reporte-semanal/SKILL.md    #   informe semanal de actividad (sin inventar métricas)
 │   └── cierre-mensual/SKILL.md     #   consolida el mes → actualiza aprendizajes.md de la cuenta
 │
 ├── hooks/                          # RED DE SEGURIDAD técnica (no negociable)
-│   ├── validar-publicacion.ps1     #   PreToolUse: bloquea publicar/gastar sin plan aprobado
-│   │                                #   del cliente exacto de la operación (probado con Pester)
+│   ├── validar-publicacion.ps1     #   PreToolUse: bloquea publicar sin plan aprobado del cliente
+│   │                                #   exacto y gastar sin monto aprobado, tope y campaña en pausa
 │   └── registrar-actividad.ps1     #   PostToolUse: registra toda acción relevante en el log
 │                                    #   de auditoría del cliente correspondiente
 │
@@ -80,11 +86,24 @@ El sistema se construye en 9 fases iterativas (Fase 0 a Fase 8), cada una añadi
 conector o capacidad nueva, con la fase de gasto real (creación de campañas Meta Ads) al final.
 El detalle de cada fase está en el PDF del plan y en las historias del proyecto Jira **PFMGN**.
 
-## Estado actual
+## Documentación
 
-Fases 0 a 4 completas y validadas (ver [`docs/mvp-fase-0-4.md`](docs/mvp-fase-0-4.md)). Fase 5
-(diseño con Canva) construida en modo plan — ver [`docs/fase5-canva.md`](docs/fase5-canva.md);
-bloqueada para funcionar de punta a punta hasta conectar una cuenta real de Canva y diseñar las
-plantillas maestras. Ver el tablero de Jira (proyecto **PFMGN**) para el estado historia por
-historia, y el epic **PFMGN-71** para la interfaz web (fuera de este roadmap, sin planificar
-todavía).
+- [`docs/arquitectura.md`](docs/arquitectura.md): componentes, modelo de datos, barreras de seguridad,
+  variables de entorno, decisiones y limitaciones.
+- [`docs/flujo-de-trabajo.md`](docs/flujo-de-trabajo.md): recorrido de un cliente, con cada parada humana.
+- [`docs/conectar-instagram.md`](docs/conectar-instagram.md): conector de publicación, tokens y pruebas.
+- [`docs/fases-6-a-8.md`](docs/fases-6-a-8.md): estado de Glif, Meta Ads y publicación.
+- [`docs/fase5-canva.md`](docs/fase5-canva.md), [`docs/mvp-fase-0-4.md`](docs/mvp-fase-0-4.md),
+  [`docs/guia-testeo-manual.md`](docs/guia-testeo-manual.md): fases anteriores y guía de pruebas.
+
+## Estado actual (2026-11-04)
+
+- **Fases 0 a 5 funcionando**: alta de cliente con Drive, campaña mensual, creación de piezas en Canva
+  con exportación y planes aprobados.
+- **Fase 1 (publicación)**: conector propio de Instagram con imagen, carrusel y reel; lectura verificada
+  contra Meta real; **primera publicación real pendiente** (requiere un store de Vercel Blob público).
+- **Fases 6 a 8** (Glif, Meta Ads): programadas y testeadas con servicios simulados, sin probar contra
+  los servicios reales. Meta Ads queda para el final por decisión.
+- **Pruebas**: 175 tests Pester (incluyen el wrapper de los 24 tests de Node del conector).
+- Jira (proyecto **PFMGN**) se usa solo para trackear la tesis; el epic **PFMGN-71** es la interfaz
+  web (fuera de este roadmap).

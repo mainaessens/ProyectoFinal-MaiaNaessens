@@ -30,6 +30,16 @@ Exit code `0` si todo pasa, `1` si hay algún fallo (para usar en CI).
 | `EstructuraAgencia.Tests.ps1` | `.claude/` está completo y bien formado: `CLAUDE.md`, `settings.json` (JSON válido), `.env.example` sin secretos, cada `SKILL.md`/agente tiene el frontmatter mínimo requerido, y los `.ps1` parsean sin errores de sintaxis. |
 | `PlanJsonSchema.Tests.ps1` | Todo `.plan.json` generado por `/crear-post` cumple el esquema que el resto del sistema espera (campos requeridos, tipos correctos, coherencia cliente↔carpeta). |
 
+Archivos agregados en las fases 1 y 8:
+
+| Archivo | Qué valida |
+|---|---|
+| `ValidarGasto.Tests.ps1` | Hook v2: el gasto exige `*.ads.json` con monto, respeta el tope mensual de `limites.json`, solo crea en pausa y exige segunda confirmación para activar; un plan de publicación aprobado no habilita gasto. |
+| `InstagramPublisher.Tests.ps1` | Corre los tests de Node del conector y verifica que el hook trate `mcp__instagram__publicar*`/`subir*` como publicación. |
+| `../mcp/instagram-publisher/publisher.test.mjs` | 24 tests del conector con Graph API y Vercel Blob simulados: simulacro, plan aprobado/no aprobado, otro cliente, ya publicado, fecha programada, carrusel (hijos, orden, cantidad), subida, token no filtrado. Se corre con `node --test`. |
+
+Total actual: 175 tests (Pester, incluye el wrapper de los de Node) + 24 de Node.
+
 ## Por qué esta separación (unitario vs. estructural)
 
 Los **hooks y scripts** son código PowerShell determinístico: mismo input, mismo output —

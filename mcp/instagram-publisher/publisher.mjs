@@ -97,53 +97,110 @@ export function createPublisher({ env = process.env, fetchImpl = fetch, agenciaR
     return u;
   };
 
+  const listaExportada = (plan) => {
+    const a = plan.diseno?.archivo_exportado;
+    return Array.isArray(a) ? a : null;
+  };
+
   async function publicar(args, tipo) {
     const { cliente, plan: planName, confirmar = false, ignorar_fecha_programada = false } = args;
     const { plan, file, dir } = cargarPlan(cliente, planName);
     const caption = plan.caption?.instagram;
     if (!caption) throw new ToolError("el plan no tiene caption.instagram.");
-    const mediaUrl = httpsUrl(tipo === "reel" ? args.video_url : args.image_url, tipo === "reel" ? "video_url" : "image_url");
+
+    let mediaUrls;
+    if (tipo === "carrusel") {
+      const urls = args.image_urls;
+      if (!Array.isArray(urls) || urls.length < 2 || urls.length > 10) throw new ToolError("image_urls debe ser una lista de 2 a 10 URLs https.");
+      mediaUrls = urls.map((u, i) => httpsUrl(u, `image_urls[${i}]`));
+      const esperadas = listaExportada(plan);
+      if (esperadas && esperadas.length !== mediaUrls.length) {
+        throw new ToolError(`el plan tiene ${esperadas.length} placas exportadas pero recibí ${mediaUrls.length} URLs.`);
+      }
+    } else {
+      mediaUrls = [httpsUrl(tipo === "reel" ? args.video_url : args.image_url, tipo === "reel" ? "video_url" : "image_url")];
+    }
     chequearHorario(plan, ignorar_fecha_programada);
 
-    const resumen = { cliente, plan: planName, tipo, caption, url: mediaUrl, fecha_programada: plan.fecha_programada ?? null };
+    const resumen = { cliente, plan: planName, tipo, caption, urls: mediaUrls, fecha_programada: plan.fecha_programada ?? null };
     if (confirmar !== true) {
       return `SIMULACRO (no se publicó nada). Se publicaría en Instagram:\n${JSON.stringify(resumen, null, 2)}\nPara publicar de verdad, repetí la llamada con confirmar:true tras el OK explícito del usuario.`;
     }
 
     const { igUserId, token } = cuenta(cliente);
-    const params = tipo === "reel"
-      ? { media_type: "REELS", video_url: mediaUrl, caption, share_to_feed: "true", ...(args.cover_url ? { cover_url: httpsUrl(args.cover_url, "cover_url") } : {}) }
-      : { image_url: mediaUrl, caption };
-    const cont = await graph("POST", `${igUserId}/media`, token, params);
-    await esperarContenedor(cont.id, token, tipo === "reel" ? { intentos: 60, esperaMs: 5000 } : { intentos: 20, esperaMs: 2000 });
-    const pub = await graph("POST", `${igUserId}/media_publish`, token, { creation_id: cont.id });
+    let creationId, hijos;
+    if (tipo === "carrusel") {
+      hijos = [];
+      for (const u of mediaUrls) {
+        const h = await graph("POST", `${igUserId}/media`, token, { image_url: u, is_carousel_item: "true" });
+        await esperarContenedor(h.id, token, { intentos: 20, esperaMs: 2000 });
+        hijos.push(h.id);
+      }
+      const cont = await graph("POST", `${igUserId}/media`, token, { media_type: "CAROUSEL", children: hijos.join(","), caption });
+      creationId = cont.id;
+      await esperarContenedor(creationId, token, { intentos: 20, esperaMs: 2000 });
+    } else {
+      const params = tipo === "reel"
+        ? { media_type: "REELS", video_url: mediaUrls[0], caption, share_to_feed: "true", ...(args.cover_url ? { cover_url: httpsUrl(args.cover_url, "cover_url") } : {}) }
+        : { image_url: mediaUrls[0], caption };
+      const cont = await graph("POST", `${igUserId}/media`, token, params);
+      creationId = cont.id;
+      await esperarContenedor(creationId, token, tipo === "reel" ? { intentos: 60, esperaMs: 5000 } : { intentos: 20, esperaMs: 2000 });
+    }
+    const pub = await graph("POST", `${igUserId}/media_publish`, token, { creation_id: creationId });
     const info = await graph("GET", pub.id, token, { fields: "permalink" }).catch(() => ({}));
-    const registro = { fecha: new Date().toISOString(), tipo, creation_id: cont.id, media_id: pub.id, permalink: info.permalink ?? null };
+    const registro = { fecha: new Date().toISOString(), tipo, creation_id: creationId, ...(hijos ? { hijos } : {}), media_id: pub.id, permalink: info.permalink ?? null };
     registrar(cliente, dir, path.basename(file), registro);
     return `PUBLICADO en Instagram. media_id=${pub.id}${info.permalink ? ` · ${info.permalink}` : ""}`;
   }
 
-  async function subir(args) {
-    const { cliente, plan: planName, bucket = "publicaciones" } = args;
-    const { plan, dir } = cargarPlan(cliente, planName);
-    const rel = plan.diseno?.archivo_exportado || plan.video;
-    if (!rel) throw new ToolError("el plan no tiene diseno.archivo_exportado ni video para subir.");
-    const archivo = path.resolve(dir, rel);
-    if (!archivo.startsWith(path.join(dir, "assets") + path.sep)) throw new ToolError("el archivo del plan está fuera de assets/.");
-    if (!fs.existsSync(archivo)) throw new ToolError(`no existe ${rel}.`);
+  async function subirUno(archivo, cliente, bucket) {
     const mime = MIME[path.extname(archivo).toLowerCase()];
     if (!mime) throw new ToolError("tipo de archivo no soportado (png, jpg, mp4, mov).");
-    if (!/^[a-z0-9-]+$/.test(bucket)) throw new ToolError("bucket inválido.");
-    const base = env.SUPABASE_URL, key = env.SUPABASE_KEY;
-    if (!base || !key) throw new ToolError("faltan SUPABASE_URL y/o SUPABASE_KEY.");
     const nombre = `${cliente}/${path.basename(archivo).replace(/[^A-Za-z0-9._-]/g, "_")}`;
+
+    // Vercel Blob (recomendado): token acotado a un único store, URL con sufijo aleatorio.
+    if (env.BLOB_READ_WRITE_TOKEN) {
+      const res = await fetchImpl(`${env.BLOB_API_URL || "https://blob.vercel-storage.com"}/${nombre}`, {
+        method: "PUT",
+        headers: { authorization: `Bearer ${env.BLOB_READ_WRITE_TOKEN}`, "x-api-version": env.BLOB_API_VERSION || "7",
+          "x-content-type": mime, "x-add-random-suffix": "1" },
+        body: fs.readFileSync(archivo),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.url) throw new ToolError(`Vercel Blob ${res.status}: ${redact(body.error?.message || JSON.stringify(body))}`);
+      return body.url;
+    }
+
+    const base = env.SUPABASE_URL, key = env.SUPABASE_KEY;
+    if (!base || !key) throw new ToolError("falta BLOB_READ_WRITE_TOKEN (Vercel Blob) o SUPABASE_URL y SUPABASE_KEY.");
     const res = await fetchImpl(`${base}/storage/v1/object/${bucket}/${nombre}`, {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, apikey: key, "content-type": mime, "x-upsert": "true" },
       body: fs.readFileSync(archivo),
     });
     if (!res.ok) throw new ToolError(`Supabase ${res.status}: ${redact(await res.text())}`);
-    return `Subido. URL pública: ${base}/storage/v1/object/public/${bucket}/${nombre}`;
+    return `${base}/storage/v1/object/public/${bucket}/${nombre}`;
+  }
+
+  async function subir(args) {
+    const { cliente, plan: planName, bucket = "publicaciones" } = args;
+    const { plan, dir } = cargarPlan(cliente, planName);
+    const rels = listaExportada(plan) || [plan.diseno?.archivo_exportado || plan.video].filter(Boolean);
+    if (rels.length === 0) throw new ToolError("el plan no tiene diseno.archivo_exportado ni video para subir.");
+    if (!/^[a-z0-9-]+$/.test(bucket)) throw new ToolError("bucket inválido.");
+
+    const archivos = rels.map((rel) => {
+      const archivo = path.resolve(dir, rel);
+      if (!archivo.startsWith(path.join(dir, "assets") + path.sep)) throw new ToolError("un archivo del plan está fuera de assets/.");
+      if (!fs.existsSync(archivo)) throw new ToolError(`no existe ${rel}.`);
+      return archivo;
+    });
+    const urls = [];
+    for (const a of archivos) urls.push(await subirUno(a, cliente, bucket));
+    return urls.length === 1
+      ? `Subido. URL pública: ${urls[0]}`
+      : `Subidos ${urls.length} archivos. URLs públicas (en orden de placa):\n${urls.join("\n")}`;
   }
 
   async function verCuenta({ cliente }) {
@@ -156,16 +213,20 @@ export function createPublisher({ env = process.env, fetchImpl = fetch, agenciaR
 
   const planProp = { type: "string", description: "Nombre del archivo .plan.json aprobado en clientes/<cliente>/historial/." };
   const clienteProp = { type: "string", description: "Carpeta del cliente en clientes/." };
+  const comunes = { confirmar: { type: "boolean" }, ignorar_fecha_programada: { type: "boolean" } };
   const tools = [
     { name: "ver_cuenta", description: "Muestra la cuenta de Instagram conectada del cliente y su cuota de publicación. Solo lectura.",
       inputSchema: { type: "object", properties: { cliente: clienteProp }, required: ["cliente"] }, handler: verCuenta },
-    { name: "subir_archivo_publico", description: "Sube a Supabase Storage el archivo exportado (diseno.archivo_exportado o video) de un plan APROBADO y devuelve su URL pública, que Instagram necesita para descargarlo.",
+    { name: "subir_archivo_publico", description: "Sube a Vercel Blob (o Supabase Storage) el/los archivo(s) exportado(s) (diseno.archivo_exportado, una lista para carruseles, o video) de un plan APROBADO y devuelve sus URLs públicas, que Instagram necesita para descargarlos.",
       inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, bucket: { type: "string" } }, required: ["cliente", "plan"] }, handler: subir },
     { name: "publicar_imagen", description: "Publica una imagen en Instagram usando el caption del plan APROBADO. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
-      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, image_url: { type: "string", description: "URL https pública de la imagen." }, confirmar: { type: "boolean" }, ignorar_fecha_programada: { type: "boolean" } }, required: ["cliente", "plan", "image_url"] },
+      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, image_url: { type: "string", description: "URL https pública de la imagen." }, ...comunes }, required: ["cliente", "plan", "image_url"] },
       handler: (a) => publicar(a, "imagen") },
+    { name: "publicar_carrusel", description: "Publica un carrusel (2 a 10 imágenes) en Instagram usando el caption del plan APROBADO. image_urls va en el orden de las placas. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
+      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, image_urls: { type: "array", items: { type: "string" }, description: "URLs https públicas, en orden." }, ...comunes }, required: ["cliente", "plan", "image_urls"] },
+      handler: (a) => publicar(a, "carrusel") },
     { name: "publicar_reel", description: "Publica un Reel en Instagram usando el caption del plan APROBADO. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
-      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, video_url: { type: "string" }, cover_url: { type: "string" }, confirmar: { type: "boolean" }, ignorar_fecha_programada: { type: "boolean" } }, required: ["cliente", "plan", "video_url"] },
+      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, video_url: { type: "string" }, cover_url: { type: "string" }, ...comunes }, required: ["cliente", "plan", "video_url"] },
       handler: (a) => publicar(a, "reel") },
   ];
   return { tools };
