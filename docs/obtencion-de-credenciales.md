@@ -44,10 +44,25 @@ Particularidades encontradas:
 1. Crear cuenta en glif.app.
 2. Ir a glif.app/settings/api-tokens y generar un token.
 3. Cargarlo como variable `GLIF_API_TOKEN` (comando de la sección 0) y reiniciar Claude Code.
-4. `.mcp.json` ya referencia `${GLIF_API_TOKEN}` y arranca el servidor con `npx -y @glifxyz/glif-mcp-server`.
+4. Conectar el **servidor MCP alojado de Glif**: `https://glif.app/api/mcp`, con la API key como
+   token Bearer (`Authorization: Bearer <GLIF_API_TOKEN>`). `.mcp.json` lo referencia con `${GLIF_API_TOKEN}`.
+   Para Claude Code por terminal: `claude mcp add --scope user --transport http glif https://glif.app/api/mcp`
+   (con OAuth o el encabezado Bearer).
 
-Estado: token cargado; **sin probar** una generación real. Los créditos gratuitos y límites del plan no
-se pudieron confirmar en las fuentes consultadas: revisarlos en glif.app.
+**Cambio importante:** el paquete npm `@glifxyz/glif-mcp-server` (servidor local por stdio) está
+**obsoleto**: npm lo marca como deprecado y su API devuelve una página HTML en lugar de JSON, por lo que
+sus herramientas fallan con `Unexpected token '<'`. Hay que usar el servidor alojado.
+
+Verificación (2026-11-04, solo con el token, desde HTTP):
+1. `initialize` y `tools/list` → 12 herramientas (`compose_project`, `get_job_status`, `whoami`, `list_projects`,
+   `upload_file`, `get_project`, entre otras).
+2. `whoami` → cuenta válida, **50 créditos** disponibles; costo típico de una imagen: 5 a 27 créditos.
+3. `compose_project` (`intelligence: lite`, una sola imagen) → `get_job_status` hasta `completed` → imagen de
+   928×1152 en `assets/ia/`, **5,1 créditos** gastados.
+
+Notas: cada llamada a `compose_project` es un trabajo **facturable**; el servidor alojado no usa sesiones;
+la respuesta de `get_job_status` es un flujo de eventos (`event: message` / `data: {…}`) y la URL de la
+imagen llega en `structuredContent.media[].url`. Los créditos gratuitos y límites del plan se ven en glif.app.
 
 ## 3. Instagram y Meta — `INSTAGRAM_ACCESS_TOKEN`
 
@@ -120,7 +135,7 @@ hay que crear otro con acceso público. Con el store público, la subida respond
 - **Meta Ads** (`PIPEBOARD_API_TOKEN`, cuenta publicitaria y límite de gasto en Meta): decisión de
   dejarlo para el final.
 - **Facebook y TikTok**: sin conector.
-- **Revocar** el token de Glif que se compartió en un chat y el token anterior del otro usuario del sistema.
+- **Revocar** el token de Glif que se compartió en un chat (generar otro y cargarlo) y el token anterior del otro usuario del sistema.
 - **Renovar** el token de Meta antes de los 60 días.
 
 Ver también [conectar-instagram.md](conectar-instagram.md) y [arquitectura.md](arquitectura.md).

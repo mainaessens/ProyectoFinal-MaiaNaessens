@@ -3,7 +3,7 @@
 | Fase | Pieza | Estado |
 |---|---|---|
 | 1 — Publicación | Conector propio de Instagram (`mcp/instagram-publisher/`): imagen, **carrusel**, reel, subida a Vercel Blob | Lectura, subida a Blob y **publicación de un carrusel verificadas contra servicios reales** (2026-11-04); imagen y reel solo con simulados. 24 tests |
-| 6 — Imágenes IA (Glif) | Regla de prioridad en `CLAUDE.md`, "Estilo IA" en el perfil, `assets/ia/`, máximo 2 variantes y reutilización en `agents/disenador.md` | Reglas y token listos; **sin probar** contra Glif real |
+| 6 — Imágenes IA (Glif) | Regla de prioridad en `CLAUDE.md`, "Estilo IA" en el perfil, `assets/ia/`, máximo 2 variantes y reutilización en `agents/disenador.md` | Verificado contra Glif real (2026-11-04): servidor alojado `glif.app/api/mcp`, 1 imagen con `compose_project` (5,1 créditos). El paquete npm local está obsoleto |
 | 7 — Meta Ads, lectura | `agents/ads-manager.md` (modo lectura), alimenta `/reporte-semanal` y `/cierre-mensual` | Agente listo; **sin conectar** (decisión: Meta Ads queda para el final) |
 | 8 — Meta Ads, creación | `validar-publicacion.ps1` v2, `limites.json`, `/lanzar-campania-ads`, `*.ads.json`, permisos `ask` | Barrera técnica probada con 12 tests (`tests/ValidarGasto.Tests.ps1`); skill sin ejecutar contra Meta real |
 | Extra — `/crear-reel` | Guion, video real del cliente, portada Canva, plan | Escrito; dry-run con datos de prueba |
@@ -21,7 +21,7 @@
 
 ## Pendiente externo
 
-- Token de Glif probado; `PIPEBOARD_API_TOKEN` y cuenta publicitaria (cuando se decida usar Meta Ads).
+- Revocar el token de Glif compartido en un chat; `PIPEBOARD_API_TOKEN` y cuenta publicitaria (cuando se decida usar Meta Ads).
 - Facebook y TikTok: sin conector.
 - Rutina que ejecute las publicaciones a su hora (la API de Instagram publica al instante).
 - Antes del primer cliente con gasto real: simulacro de campaña pausada de monto mínimo.

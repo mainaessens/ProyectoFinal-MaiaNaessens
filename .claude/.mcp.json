@@ -26,10 +26,10 @@
       "note": "Fase 5 — conectado y verificado (PFMGN-42). Auth: OAuth, vía Settings > Connectors. Cuenta real de la agencia: el sistema nunca usa los brand kits de clientes reales, solo genera diseños describiendo la paleta en el prompt (ver docs/fase5-canva.md)."
     },
     "glif": {
-      "command": "npx",
-      "args": ["-y", "@glifxyz/glif-mcp-server"],
-      "env": { "GLIF_API_TOKEN": "${GLIF_API_TOKEN}" },
-      "note": "Fase 6 — pendiente. Imágenes IA, créditos diarios gratuitos."
+      "transport": "http",
+      "url": "https://glif.app/api/mcp",
+      "headers": { "Authorization": "Bearer ${GLIF_API_TOKEN}" },
+      "note": "Fase 6 — servidor MCP alojado de Glif (el paquete npm @glifxyz/glif-mcp-server está obsoleto y su API ya no responde). Auth: la API key glif_v1_… como Bearer. Verificado el 2026-11-04: una imagen con compose_project (5,1 créditos). Ver docs/obtencion-de-credenciales.md."
     },
     "meta-ads": {
       "command": "uvx",

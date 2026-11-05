@@ -46,7 +46,12 @@ pieza para aprobación — no dejar que el humano asuma que es una foto real.
 8. **Imagen IA (Glif, solo si no hay foto real)**: usar el "Estilo IA" del `perfil.md` como prompt
    base; generar **máximo 2 variantes** por pieza; guardar las generadas en
    `clientes/<nombre>/assets/ia/` y reutilizar las buenas antes de generar nuevas (cuida los
-   créditos diarios); declarar la imagen como generada con IA al presentar la pieza.
+   créditos); declarar la imagen como generada con IA al presentar la pieza.
+   Con el servidor alojado de Glif: `compose_project` con `intelligence: "lite"` y un prompt que
+   pida **una sola imagen** (cada llamada es un trabajo facturable: una imagen cuesta entre 5 y 27
+   créditos), y `get_job_status` con el `job_id` hasta que termine. Nunca volver a llamar
+   `compose_project` automáticamente; para refinar, continuar con `project_id`. Antes de gastar,
+   revisar el saldo con `whoami` y avisar al usuario si es bajo.
 9. Si el cliente no tiene plantillas maestras, no diseñar "a mano": indicar que falta correr
    la sección C de `/nuevo-cliente` (Canva o Claude Design).
 

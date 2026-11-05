@@ -61,7 +61,7 @@ Los comandos usan `powershell -NoProfile -ExecutionPolicy Bypass -File "$CLAUDE_
 | Canva | conector de la plataforma | OAuth | en uso; las plantillas se generan **sin brand kit** |
 | **Instagram** | propio: `mcp/instagram-publisher/` | token de Meta en variable de entorno | lectura y publicación de carrusel verificadas contra Meta real (2026-11-04); imagen y reel solo con simulados |
 | Vercel Blob | API REST (la usa el conector) | `BLOB_READ_WRITE_TOKEN` | subida verificada (el store debe ser **público**) |
-| Glif | `@glifxyz/glif-mcp-server` | `GLIF_API_TOKEN` | token cargado; sin probar |
+| Glif | servidor MCP alojado `https://glif.app/api/mcp` (el paquete npm está obsoleto) | `GLIF_API_TOKEN` como Bearer | verificado contra Glif real (2026-11-04): 1 imagen, 5,1 créditos |
 | Meta Ads | `meta-ads-mcp` (Pipeboard) | `PIPEBOARD_API_TOKEN` | no conectado; la barrera de gasto está probada con tests |
 
 ### Conector propio de Instagram (`mcp/instagram-publisher/`)
@@ -163,8 +163,9 @@ un plan aprobado es inmutable.
 - Tipos de token de Meta: los de Facebook Login (`EAA…`, usuario del sistema) necesitan la cuenta de
   Instagram y la página **asignadas** al usuario en Meta Business; los de Instagram Login (`IGAA…`)
   usan otro host.
-- Meta Ads y Glif están programados y testeados contra servicios simulados, pero no se probaron
-  contra los servicios reales. De Instagram, solo se verificó en real el carrusel (e `imagen`/`reel` no).
+- Meta Ads está programado y testeado contra servicios simulados, pero no se probó contra el servicio real.
+- Glif factura cada generación (créditos): el agente genera una imagen por llamada, con `intelligence: lite`.
+- De Instagram, solo se verificó en real el carrusel (`imagen` y `reel` no).
 - El checklist de marca marca palabras sueltas (por ejemplo "antes" o "después") como posibles
   violaciones: genera falsos positivos.
 
