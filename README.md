@@ -19,7 +19,9 @@ agencia/
 ├── .claude/                        # configuración del agente — ver detalle abajo
 ├── clientes/                       # memoria local por cuenta de cliente
 │   └── plantilla/                  # copiar esta carpeta para dar de alta un cliente nuevo
-├── mcp/instagram-publisher/        # conector propio de publicación en Instagram (Node, sin dependencias)
+├── mcp/instagram-publisher/        # conector propio de Instagram: publicación (imagen, carrusel, reel, historias) y estadísticas (Node, sin dependencias)
+├── herramientas/moviola/           # editor de video local (Node + FFmpeg + Whisper): cortes, subtítulos, títulos, plan aprobable
+├── ui/                             # Faro: panel web (React + Express + WebSocket) para operar el agente
 ├── tests/                          # suite de tests automatizados (Pester + Node) — ver tests/README.md
 └── docs/                           # documentación técnica — ver "Documentación"
 ```
@@ -44,19 +46,26 @@ tocar código.
 ├── agents/                         # SUBAGENTES — especialistas invocados por los skills
 │   ├── estratega.md                #   campaña mensual, tendencias (WebSearch), calendario editorial
 │   ├── disenador.md                #   piezas gráficas: prioridad foto real → Canva → Glif (Fase 6)
-│   ├── community-manager.md        #   adapta captions por red (IG/FB), arma el PLAN de publicación
+│   ├── community-manager.md        #   analiza las estadísticas de IG cada mes; adapta captions, arma el PLAN
+│   ├── editor-video.md             #   edita el video en bruto con Moviola (director, editor, crítico)
 │   ├── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
 │   └── ads-manager.md              #   Meta Ads: lectura (Fase 7) y creación en pausa (Fase 8)
 │
 ├── skills/                         # SKILLS — procedimientos invocables como /comando
 │   ├── nuevo-cliente/SKILL.md      #   alta: ordena el Drive (con OK), descarga assets, plantillas Canva, perfil
+│   ├── analisis-cuenta/SKILL.md    #   estadísticas reales de Instagram (community-manager) → decisiones para el plan
 │   ├── plan-del-dia/SKILL.md       #   vista unificada Calendar + Jira, prioridades del día
 │   ├── crear-post/SKILL.md         #   por número/slug/todos: caption + diseño + export → PLAN aprobado → Instagram
+│   ├── crear-historias/SKILL.md    #   secuencia de historias → plan → publicación por API (sin stickers)
+│   ├── editar-video/SKILL.md       #   edita el bruto del cliente → plan escena por escena → video terminado
 │   ├── crear-reel/SKILL.md         #   guion + video real del cliente + portada Canva → PLAN
 │   ├── lanzar-campania-ads/SKILL.md#   campaña de Meta Ads con doble confirmación, siempre en pausa
 │   ├── campania-mensual/SKILL.md   #   tendencias + historial → calendario editorial del mes
 │   ├── reporte-semanal/SKILL.md    #   informe semanal de actividad (sin inventar métricas)
 │   └── cierre-mensual/SKILL.md     #   consolida el mes → actualiza aprendizajes.md de la cuenta
+│
+├── referencias/                    # método del community-manager: criterios editoriales, guía de
+│                                    #   reels/carruseles/historias, autoevaluación de piezas
 │
 ├── hooks/                          # RED DE SEGURIDAD técnica (no negociable)
 │   ├── validar-publicacion.ps1     #   PreToolUse: bloquea publicar sin plan aprobado del cliente
