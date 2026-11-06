@@ -26,6 +26,10 @@ Cierra el mes de una cuenta: consolida datos, propone 3 aprendizajes, y actualiz
    - `clientes/<cliente>/calendario-editorial.md` (lo que se planificó vs. lo que efectivamente
      se publicó, comparando fechas).
 
+   - `clientes/<cliente>/analisis/<mes>.md` y `<mes>.datos.json` (análisis de Instagram del
+     community-manager, con métricas reales de la API). **Es la fuente preferida de rendimiento**;
+     si el mes todavía no tiene análisis, ofrecer `/analisis-cuenta <cliente> <mes>` antes de cerrar.
+
    Si falta alguna fuente, decirlo explícitamente y trabajar con lo que sí hay — no inventar
    métricas que no se pudieron leer.
 

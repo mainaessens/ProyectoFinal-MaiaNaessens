@@ -27,10 +27,20 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
    hook y CTA de la fila. Si el número/nombre no existe o es ambiguo, listar las filas y
    preguntar. Si el calendario no está aprobado, avisar y detenerse.
 
-2. **Leer el perfil** (`perfil.md`): tono, pilares, restricciones, redes, plantillas de Canva.
+2. **Leer el perfil** (`perfil.md`): tono, pilares, restricciones, *reglas de estilo y
+   validación*, redes, plantillas de Canva. Leer también `.claude/referencias/criterios-editoriales.md`
+   y, según el formato, `guia-formatos.md` (carrusel: progresión placa a placa).
 
-3. **Hook y caption base** (copywriter). Correr `checklist-marca.ps1` sobre el caption y mostrar
-   las alertas (no bloquea, informa).
+3. **Ficha de idea, hook y caption base** (copywriter):
+   - Ficha corta: objetivo, público, insight, hipótesis (*si comunicamos X desde Y en Z,
+     esperamos W porque V*) y KPI principal. Lo que no esté confirmado va marcado
+     **SUPUESTO / POR CONFIRMAR**.
+   - **2–3 hooks sustancialmente distintos**; elegir uno y justificarlo.
+   - Para un **carrusel**: describir cada placa (título, texto final, función, idea visual,
+     elemento real requerido) siguiendo la guía; para un post simple, el foco y el CTA único.
+   - Correr `checklist-marca.ps1` sobre el caption y mostrar las alertas (no bloquea, informa).
+   - **Autoevaluar** la pieza con `.claude/referencias/autoevaluacion.md`: menos de 16/20 o una
+     falla de exactitud/seguridad → reescribir antes de seguir.
 
 4. **Adaptar el caption por red** (subagente `community-manager`).
 
@@ -46,7 +56,8 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
 7. **Sugerir horario** (lógica de `agents/horario-optimo.md`) si hay `google_calendar_id`; si la
    fila ya trae fecha de la campaña, proponer esa y solo ajustar la hora.
 
-8. **Presentar este posteo** (hook, captions, imagen/link de Canva, horario, hallazgos) y pedir
+8. **Presentar este posteo** (ficha, hooks considerados y elegido, captions, imagen/link de Canva,
+   horario, puntaje de autoevaluación con sus criterios flojos, datos POR CONFIRMAR, hallazgos) y pedir
    decisión con `AskUserQuestion`: aprobar / pedir cambios / rechazar.
    - En modo `todos` se presenta **un posteo por vez** y no se avanza al siguiente sin decisión.
    - Si pide cambios: volver al paso 3, 4 o 5 y presentar una versión nueva, sin pisar la anterior.
@@ -72,6 +83,8 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
          "archivo_exportado": "assets/exports/<fecha>-<slug>.png",
          "diseno_pendiente": false
        },
+       "objetivo": "...", "kpi": "...", "hipotesis": "...",
+       "autoevaluacion": { "puntaje": 18, "abiertos": [] },
        "fecha_programada": "<horario aprobado>",
        "estado": "listo_para_publicar | listo_para_publicar_cuando_exista_conector"
      }

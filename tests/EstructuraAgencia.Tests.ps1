@@ -142,3 +142,32 @@ Describe "Scripts y hooks - sintaxis PowerShell valida" {
         $errors.Count | Should -Be 0
     }
 }
+
+Describe "Referencias del community-manager" {
+
+    BeforeAll {
+        $script:Refs = @(Get-ChildItem -Path (Join-Path $ClaudeDir "referencias") -Filter "*.md" -ErrorAction SilentlyContinue)
+        $script:Consumidores = @(Get-ChildItem -Path (Join-Path $ClaudeDir "skills") -Filter "SKILL.md" -Recurse) +
+                               @(Get-ChildItem -Path (Join-Path $ClaudeDir "agents") -Filter "*.md")
+        $script:TextoConsumidores = ($Consumidores | ForEach-Object { Get-Content -Raw $_.FullName }) -join "`n"
+    }
+
+    It "existen las tres guias base" {
+        foreach ($n in "criterios-editoriales.md", "guia-formatos.md", "autoevaluacion.md") {
+            Test-Path (Join-Path $ClaudeDir "referencias\$n") | Should -BeTrue -Because "$n debe existir"
+        }
+    }
+
+    It "cada referencia esta citada por algun skill o agente (sin archivos huerfanos)" {
+        foreach ($r in $Refs) {
+            $TextoConsumidores | Should -Match ([regex]::Escape($r.Name)) -Because "$($r.Name) debe usarse"
+        }
+    }
+
+    It "todo archivo de referencias/ citado por un skill o agente existe" {
+        $citados = [regex]::Matches($TextoConsumidores, 'referencias/([\w\-]+\.md)') | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+        foreach ($c in $citados) {
+            Test-Path (Join-Path $ClaudeDir "referencias\$c") | Should -BeTrue -Because "'$c' esta citado pero no existe"
+        }
+    }
+}

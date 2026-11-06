@@ -1,7 +1,7 @@
 ---
 name: nuevo-cliente
 description: Da de alta un cliente nuevo. Con una URL de Drive, lee el contenido, propone (y tras aprobación aplica) un orden de la carpeta, descarga todo el material audiovisual a assets/, genera el perfil.md desde el brief y el manual, y deja listas las 3 plantillas maestras de Canva (las toma del Drive si existen; si no, ofrece generarlas con Canva o con Claude Design). Sin URL, arma el perfil con lo que indique el usuario en el chat.
-tools: Read, Write, Glob, Bash, AskUserQuestion, mcp__gworkspace__*, mcp__canva__*
+tools: Read, Write, Glob, Bash, AskUserQuestion, mcp__gworkspace__*, mcp__canva__*, mcp__instagram__ver_cuenta, mcp__instagram__recopilar_estadisticas
 ---
 
 # /nuevo-cliente
@@ -33,15 +33,22 @@ Da de alta un cliente nuevo de la agencia.
    │   ├── fotos/
    │   ├── videos/
    │   ├── ia/             (imágenes generadas con Glif, reutilizables)
-   │   └── exports/        (piezas exportadas de Canva)
+   │   ├── exports/        (piezas exportadas de Canva)
+   │   ├── referencias/    (reels de referencia, solo para estudiar estilo)
+   │   ├── edicion/        (planes de edición, transcripciones y previews)
+   │   └── terminados/     (videos finales editados con Moviola)
    └── registro-actividad.log
    ```
 3. **Con `url-drive`**: ejecutar las secciones A → D. **Sin `url-drive`**: preguntar (no
    asumir) sector, público, tono, 2-3 pilares y qué NO publicar, y pasar directo a la sección D.
 4. **Presentar el perfil completo** y esperar aprobación antes de darlo por definitivo.
+4b. **Diagnóstico inicial de Instagram** (sección E): el community-manager analiza las
+   estadísticas reales de la cuenta, con o sin Drive. Es la base del primer plan de contenido.
 5. **Crear `registro-actividad.log`** con la línea de alta: `[<fecha>] Cliente <nombre-cliente> dado de alta.`
 6. Resumir qué quedó hecho, qué quedó pendiente, y sugerir el siguiente paso:
    `/campania-mensual <cliente> <mes> <objetivo>`.
+
+   Orden de las secciones: A → B → C → D → **E (diagnóstico de Instagram)**.
 
 ## A. Leer y ordenar el Drive
 
@@ -101,10 +108,28 @@ Da de alta un cliente nuevo de la agencia.
 4. El perfil sigue el formato de `clientes/plantilla/perfil.md`, incluyendo la sección
    "Estado del alta" (Drive ordenado, assets descargados, plantillas Canva).
 
+## E. Diagnóstico inicial de Instagram (community-manager)
+
+Antes de planificar el primer mes hay que saber cómo rinde la cuenta hoy.
+
+1. **Conectar la cuenta**: preguntar el `ig_user_id` (o dónde encontrarlo, ver
+   `docs/conectar-instagram.md`) y registrarlo en `.claude/instagram-cuentas.json` bajo el
+   cliente. **Nunca pedir ni escribir el token en el chat o en archivos**: lo carga el humano como
+   variable de entorno (`INSTAGRAM_TOKEN_<CLIENTE>` o `INSTAGRAM_ACCESS_TOKEN`), con el permiso
+   `instagram_manage_insights` además de los de publicación.
+2. **Invocar `/analisis-cuenta <cliente> baseline`** (subagente `community-manager`): trae los
+   últimos 90 días con todo lo que entrega la API y produce `analisis/baseline-<fecha>.md` con
+   decisiones para el primer plan. El usuario lo valida ahí mismo.
+3. **Si no se puede** (cuenta sin conectar, token sin permiso de insights, cuenta nueva sin
+   publicaciones o con menos de 100 seguidores): decirlo, dejar el estado como **pendiente** en el
+   perfil ("Diagnóstico de Instagram") y avanzar. Sin diagnóstico, el primer plan se marca como
+   *hipótesis sin datos propios* y debe revisarse al cerrar el mes (`/analisis-cuenta` mensual).
+
 ## Reglas
 
 - Nunca crear tareas en Jira ni eventos en Calendar desde este skill.
 - Nunca sobrescribir un cliente existente sin confirmación explícita.
 - Nunca modificar el Drive del cliente sin aprobación del plan de orden, ni borrar nada.
 - Nunca usar brand kits de Canva; las plantillas se generan describiendo la marca en el prompt.
-- Nunca publicar nada.
+- Nunca publicar nada. El diagnóstico de Instagram es solo lectura.
+- Nunca pedir ni guardar tokens de Meta.
