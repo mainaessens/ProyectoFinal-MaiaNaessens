@@ -252,8 +252,77 @@ test("protocolo MCP: initialize, tools/list y error de herramienta como isError"
   const init = await handleMessage({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-03-26" } }, m.pub);
   assert.equal(init.result.serverInfo.name, "instagram-publisher");
   const list = await handleMessage({ jsonrpc: "2.0", id: 2, method: "tools/list" }, m.pub);
-  assert.deepEqual(list.result.tools.map((t) => t.name).sort(), ["publicar_carrusel", "publicar_imagen", "publicar_reel", "subir_archivo_publico", "ver_cuenta"]);
+  assert.deepEqual(list.result.tools.map((t) => t.name).sort(), [
+    "audiencia", "benchmark_competidor", "insights_cuenta", "insights_publicacion", "listar_publicaciones", "perfil_cuenta",
+    "publicar_carrusel", "publicar_historia", "publicar_imagen", "publicar_reel", "recopilar_estadisticas", "subir_archivo_publico", "ver_cuenta",
+  ]);
   assert.equal(await handleMessage({ jsonrpc: "2.0", method: "notifications/initialized" }, m.pub), null);
   const bad = await handleMessage({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "publicar_imagen", arguments: { cliente: "demo", plan: "../x.plan.json", image_url: "https://a/b.png" } } }, m.pub);
   assert.equal(bad.result.isError, true);
+});
+
+// ---------- Historias ----------
+const plan2 = (extra = {}) => ({ formato: "historia", historias: [{ tipo: "imagen", archivo: "assets/exports/pieza.png" }, { tipo: "imagen", archivo: "assets/exports/pieza.png" }], ...extra });
+const items2 = [{ tipo: "imagen", url: "https://cdn.test/h1.png" }, { tipo: "video", url: "https://cdn.test/h2.mp4" }];
+const hargs = (m, extra = {}) => ({ cliente: "demo", plan: m.planName, items: items2, ...extra });
+
+test("publicar_historia sin confirmar es simulacro y no llama a la API", async () => {
+  const m = mundo({ plan: plan2() });
+  const out = await m.call("publicar_historia", hargs(m));
+  assert.match(out, /SIMULACRO.*2 historia/s);
+  assert.equal(m.calls.length, 0);
+});
+
+test("publicar_historia crea un contenedor STORIES por item (imagen/video), publica en orden y registra", async () => {
+  const m = mundo({ plan: plan2() });
+  const out = await m.call("publicar_historia", hargs(m, { confirmar: true }));
+  assert.match(out, /PUBLICADAS 2 historia/);
+  const creaciones = m.calls.filter((c) => c.method === "POST" && c.path.endsWith("/1789/media")).map((c) => decodeURIComponent(c.body.replace(/\+/g, " ")));
+  assert.equal(creaciones.length, 2);
+  assert.match(creaciones[0], /media_type=STORIES/);
+  assert.match(creaciones[0], /image_url=https:\/\/cdn.test\/h1.png/);
+  assert.match(creaciones[1], /video_url=https:\/\/cdn.test\/h2.mp4/);
+  assert.ok(!creaciones.some((c) => /caption=/.test(c)), "las historias no llevan caption");
+  const reg = JSON.parse(fs.readFileSync(path.join(m.dir, "historial", `${m.planName}.publicado.json`), "utf8"));
+  assert.equal(reg.historias.length, 2);
+  await assert.rejects(m.call("publicar_historia", hargs(m, { confirmar: true })), /ya fue publicado/);
+});
+
+test("publicar_historia rechaza planes que no son de historia, manuales, no aprobados o con otra cantidad", async () => {
+  await assert.rejects(mundo({ plan: { formato: "reel" } }).call("publicar_historia", hargs({ planName: "2026-11-03-demo.plan.json" })), /formato 'historia'/);
+  const man = mundo({ plan: plan2({ publicacion: "manual" }) });
+  await assert.rejects(man.call("publicar_historia", hargs(man)), /publicación manual/);
+  const no = mundo({ plan: plan2({ aprobado: false }) });
+  await assert.rejects(no.call("publicar_historia", hargs(no)), /NO está aprobado/);
+  const cant = mundo({ plan: plan2() });
+  await assert.rejects(cant.call("publicar_historia", hargs(cant, { items: [items2[0]] })), /2 historias pero recibí 1/);
+});
+
+test("publicar_historia valida tipo, https y cantidad", async () => {
+  const m = mundo({ plan: { formato: "historia" } });
+  await assert.rejects(m.call("publicar_historia", hargs(m, { items: [{ tipo: "gif", url: "https://a/b" }] })), /tipo/);
+  await assert.rejects(m.call("publicar_historia", hargs(m, { items: [{ tipo: "imagen", url: "http://a/b.png" }] })), /https/);
+  await assert.rejects(m.call("publicar_historia", hargs(m, { items: [] })), /1 a 10/);
+});
+
+test("publicar_historia: si falla una a mitad de la secuencia, registra PARCIAL y bloquea el reintento", async () => {
+  let n = 0;
+  const graph = (u, o) => {
+    if (o.method === "POST" && u.pathname.endsWith("/media")) { n++; return n === 2 ? { error: { message: "video rechazado" } } : { id: "C" + n }; }
+    if (/\/C\d$/.test(u.pathname)) return { status_code: "FINISHED" };
+    if (u.pathname.endsWith("/media_publish")) return { id: "M" + n };
+    return { error: { message: "no mock" } };
+  };
+  const m = mundo({ plan: plan2(), graph });
+  await assert.rejects(m.call("publicar_historia", hargs(m, { confirmar: true })), /1 de 2 historias.*PARCIAL/s);
+  const reg = JSON.parse(fs.readFileSync(path.join(m.dir, "historial", `${m.planName}.publicado.json`), "utf8"));
+  assert.equal(reg.parcial, true);
+  await assert.rejects(m.call("publicar_historia", hargs(m, { confirmar: true })), /ya fue publicado/);
+});
+
+test("subir_archivo_publico sube un archivo por cada historia del plan (plan.historias[].archivo)", async () => {
+  const m = mundo({ plan: plan2(), env: { SUPABASE_URL: "https://sb.test", SUPABASE_KEY: "clave-supabase-123456" }, graph: () => ({}) });
+  const out = await m.call("subir_archivo_publico", { cliente: "demo", plan: m.planName });
+  assert.match(out, /Subidos 2 archivos/);
+  assert.equal(m.calls.length, 2);
 });

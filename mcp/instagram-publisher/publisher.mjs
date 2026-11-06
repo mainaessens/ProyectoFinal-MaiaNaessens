@@ -3,6 +3,7 @@
 // solo publica el caption de un .plan.json aprobado, del cliente correcto, una sola vez.
 import fs from "node:fs";
 import path from "node:path";
+import { crearHerramientasInsights } from "./insights.mjs";
 
 const CLIENTE_RE = /^[a-z0-9][a-z0-9-]*$/;
 const PLAN_RE = /^[A-Za-z0-9][A-Za-z0-9._-]*\.plan\.json$/;
@@ -154,6 +155,46 @@ export function createPublisher({ env = process.env, fetchImpl = fetch, agenciaR
     return `PUBLICADO en Instagram. media_id=${pub.id}${info.permalink ? ` · ${info.permalink}` : ""}`;
   }
 
+  // Historias: la API solo acepta imagen o video (sin caption, stickers, encuestas ni links).
+  // Un plan = una secuencia de 1 a 10 historias, publicadas una tras otra.
+  async function publicarHistoria(args) {
+    const { cliente, plan: planName, items, confirmar = false, ignorar_fecha_programada = false } = args;
+    const { plan, file, dir } = cargarPlan(cliente, planName);
+    if (plan.formato !== "historia") throw new ToolError("el plan no es de formato 'historia'.");
+    if (plan.publicacion === "manual") throw new ToolError("este plan está marcado para publicación manual (usa stickers, encuestas o links que la API no soporta).");
+    if (!Array.isArray(items) || items.length < 1 || items.length > 10) throw new ToolError("items debe ser una lista de 1 a 10 historias {tipo, url}.");
+    if (Array.isArray(plan.historias) && plan.historias.length !== items.length) {
+      throw new ToolError(`el plan tiene ${plan.historias.length} historias pero recibí ${items.length} items.`);
+    }
+    const norm = items.map((it, i) => {
+      if (!["imagen", "video"].includes(it?.tipo)) throw new ToolError(`items[${i}].tipo debe ser 'imagen' o 'video'.`);
+      return { tipo: it.tipo, url: httpsUrl(it.url, `items[${i}].url`) };
+    });
+    chequearHorario(plan, ignorar_fecha_programada);
+
+    if (confirmar !== true) {
+      return `SIMULACRO (no se publicó nada). Se publicarían ${norm.length} historia(s) en Instagram, en este orden:\n${JSON.stringify({ cliente, plan: planName, items: norm, fecha_programada: plan.fecha_programada ?? null }, null, 2)}\nLas historias duran 24 h y la API no agrega stickers ni links. Para publicar de verdad, repetí la llamada con confirmar:true tras el OK explícito del usuario.`;
+    }
+
+    const { igUserId, token } = cuenta(cliente);
+    const publicadas = [];
+    try {
+      for (const it of norm) {
+        const params = { media_type: "STORIES", ...(it.tipo === "video" ? { video_url: it.url } : { image_url: it.url }) };
+        const cont = await graph("POST", `${igUserId}/media`, token, params);
+        await esperarContenedor(cont.id, token, it.tipo === "video" ? { intentos: 60, esperaMs: 5000 } : { intentos: 20, esperaMs: 2000 });
+        const pub = await graph("POST", `${igUserId}/media_publish`, token, { creation_id: cont.id });
+        publicadas.push({ tipo: it.tipo, creation_id: cont.id, media_id: pub.id });
+      }
+    } catch (e) {
+      if (publicadas.length === 0) throw e;
+      registrar(cliente, dir, path.basename(file), { fecha: new Date().toISOString(), tipo: "historia", parcial: true, historias: publicadas, media_id: publicadas.map((p) => p.media_id).join(",") });
+      throw new ToolError(`Se publicaron ${publicadas.length} de ${norm.length} historias antes del error: ${e.message}. El plan quedó registrado como PARCIAL y no se puede reintentar completo (duplicaría historias): publicá el resto a mano.`);
+    }
+    registrar(cliente, dir, path.basename(file), { fecha: new Date().toISOString(), tipo: "historia", historias: publicadas, media_id: publicadas.map((p) => p.media_id).join(",") });
+    return `PUBLICADAS ${publicadas.length} historia(s) en Instagram. media_id=${publicadas.map((p) => p.media_id).join(",")} (duran 24 h)`;
+  }
+
   async function subirUno(archivo, cliente, bucket) {
     const mime = MIME[path.extname(archivo).toLowerCase()];
     if (!mime) throw new ToolError("tipo de archivo no soportado (png, jpg, mp4, mov).");
@@ -186,7 +227,8 @@ export function createPublisher({ env = process.env, fetchImpl = fetch, agenciaR
   async function subir(args) {
     const { cliente, plan: planName, bucket = "publicaciones" } = args;
     const { plan, dir } = cargarPlan(cliente, planName);
-    const rels = listaExportada(plan) || [plan.diseno?.archivo_exportado || plan.video].filter(Boolean);
+    const deHistorias = Array.isArray(plan.historias) ? plan.historias.map((h) => h?.archivo).filter(Boolean) : [];
+    const rels = deHistorias.length ? deHistorias : listaExportada(plan) || [plan.diseno?.archivo_exportado || plan.video].filter(Boolean);
     if (rels.length === 0) throw new ToolError("el plan no tiene diseno.archivo_exportado ni video para subir.");
     if (!/^[a-z0-9-]+$/.test(bucket)) throw new ToolError("bucket inválido.");
 
@@ -225,9 +267,13 @@ export function createPublisher({ env = process.env, fetchImpl = fetch, agenciaR
     { name: "publicar_carrusel", description: "Publica un carrusel (2 a 10 imágenes) en Instagram usando el caption del plan APROBADO. image_urls va en el orden de las placas. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
       inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, image_urls: { type: "array", items: { type: "string" }, description: "URLs https públicas, en orden." }, ...comunes }, required: ["cliente", "plan", "image_urls"] },
       handler: (a) => publicar(a, "carrusel") },
+    { name: "publicar_historia", description: "Publica una secuencia de 1 a 10 historias (imagen o video, en orden) de un plan APROBADO de formato 'historia'. La API no admite stickers, encuestas ni links: las historias que los necesiten van en un plan con publicacion:'manual', que se rechaza acá. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
+      inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, items: { type: "array", description: "Historias en orden: [{tipo:'imagen'|'video', url:'https://...'}].", items: { type: "object", properties: { tipo: { type: "string", enum: ["imagen", "video"] }, url: { type: "string" } }, required: ["tipo", "url"] } }, ...comunes }, required: ["cliente", "plan", "items"] },
+      handler: publicarHistoria },
     { name: "publicar_reel", description: "Publica un Reel en Instagram usando el caption del plan APROBADO. Sin confirmar:true solo simula. Requiere OK explícito del usuario para esa pieza.",
       inputSchema: { type: "object", properties: { cliente: clienteProp, plan: planProp, video_url: { type: "string" }, cover_url: { type: "string" }, ...comunes }, required: ["cliente", "plan", "video_url"] },
       handler: (a) => publicar(a, "reel") },
   ];
+  tools.push(...crearHerramientasInsights({ graph, cuenta, checkCliente, agenciaRoot, ToolError, env }));
   return { tools };
 }
