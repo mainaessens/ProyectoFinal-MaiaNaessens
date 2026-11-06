@@ -32,6 +32,31 @@ Esta regla tiene doble barrera: (1) comportamental, en este archivo y en cada sk
 mediante los hooks en `.claude/hooks/` que bloquean llamadas MCP de publicación o gasto si no
 existe una aprobación registrada.
 
+## Decidir con datos — análisis antes del plan
+
+El plan de contenido se decide sobre las **estadísticas reales de Instagram** de esa cuenta:
+
+- Al dar de alta un cliente, el `community-manager` hace el diagnóstico inicial (`/analisis-cuenta
+  <cliente> baseline`, últimos 90 días).
+- **Todos los meses**, antes de `/campania-mensual`, se analiza el mes anterior
+  (`/analisis-cuenta <cliente> AAAA-MM`). El resultado (`clientes/<cliente>/analisis/`) termina en
+  decisiones numeradas que el calendario cita.
+- Los números salen del conector (solo lectura), nunca se inventan; lo que Meta no entrega se
+  declara como hueco de datos y las muestras chicas son hipótesis, no conclusiones.
+- El humano valida el análisis antes de que sea definitivo.
+
+## Criterio editorial
+
+El método de trabajo del community-manager está en `.claude/referencias/`
+(`criterios-editoriales.md`, `guia-formatos.md`, `autoevaluacion.md`). Orden de prioridad ante un
+conflicto: **1) hechos confirmados y seguridad, 2) brief y posicionamiento de la marca, 3) objetivos
+comerciales, 4) experiencia de audiencia y originalidad, 5) formato, estética y tendencias.** Las
+reglas del `perfil.md` de cada cliente prevalecen sobre cualquier criterio general.
+
+- Lo que no está confirmado se marca **SUPUESTO / POR CONFIRMAR / IDEA PROPUESTA**; nunca se inventan
+  precios, promociones, testimonios, estadísticas, plazos, stock ni resultados.
+- Cada pieza se autoevalúa (0–2 en 10 criterios) y se reescribe si no llega a 16/20 o falla en exactitud.
+
 ## Prioridad de material para piezas gráficas
 
 1. Foto o video real del cliente (Drive → `clientes/<nombre>/assets/`).

@@ -51,6 +51,19 @@
 - [ ] Facebook
 - [ ] TikTok (Business)
 
+## Reglas de estilo y validación
+
+> Lo lee el community-manager antes de idear. Guía: `.claude/referencias/criterios-editoriales.md`.
+
+- **Vertical y personalidad:** (ej: gastronomía con humor local / salud sobria / servicios técnicos)
+- **Humor y modismos permitidos:** (sí/no, cuáles; en qué formatos)
+- **Reglas sensibles:** (salud, legal, menores, datos personales, claims que requieren sustento)
+- **Validación experta requerida antes de publicar:** (quién y para qué tipo de pieza)
+- **CTA preferidos / a evitar:** (WhatsApp, turno, presupuesto, visita…)
+- **Estilo de copy y hashtags:** (trato vos/usted, emojis sí/no, hashtags descriptivos de búsqueda local…)
+- **Contrato de contenido mensual:** (reels, carruseles, historias, posteos; tope por mes)
+- **Consentimientos:** (testimonios, obras, imagen de personas)
+
 ## Cuenta publicitaria Meta Ads (si aplica)
 
 - **ID cuenta:**
@@ -66,6 +79,7 @@
 - [ ] Drive ordenado (o plan de orden en `orden-drive.md`)
 - [ ] Fotos y videos descargados a `assets/`
 - [ ] 3 plantillas maestras de Canva registradas (origen: Drive / Canva / Claude Design)
+- [ ] Diagnóstico inicial de Instagram (`analisis/baseline-*.md`, community-manager)
 - [ ] Perfil aprobado por el humano
 
 ---

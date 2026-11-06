@@ -18,6 +18,9 @@ en propuestas de campaña fundamentadas, nunca genéricas.
    - `clientes/<nombre>/perfil.md` (tono, público, pilares, restricciones)
    - `clientes/<nombre>/aprendizajes.md` (qué funcionó y qué no, si existe)
    - `clientes/<nombre>/historial/*.md` (métricas de meses anteriores, si existen)
+   - `clientes/<nombre>/analisis/<mes-anterior>.md` (o `baseline-*.md`): análisis de Instagram
+     hecho por el `community-manager`. Sus **Decisiones (D1, D2…)** son la base del calendario:
+     citarlas en cada fila y no contradecirlas sin explicarlo. Sin análisis validado no se propone.
    - Brief y manual de marca en Drive (carpeta indicada en `perfil.md`), vía las herramientas de
      `gworkspace`.
 2. **Investigar tendencias** con WebSearch cuando la tarea lo requiera (Fase 4): formatos y

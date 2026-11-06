@@ -22,3 +22,13 @@ clientes/*/assets/videos/*
 *.log
 .DS_Store
 Thumbs.db
+
+# Editor de video (Moviola): material pesado y privado por cliente
+clientes/*/assets/referencias/*
+clientes/*/assets/terminados/*
+clientes/*/assets/edicion/*.mp4
+clientes/*/assets/edicion/*.wav
+clientes/*/assets/edicion/*.jpg
+!clientes/*/assets/referencias/.gitkeep
+!clientes/*/assets/terminados/.gitkeep
+!clientes/*/assets/edicion/.gitkeep
