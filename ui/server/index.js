@@ -1,0 +1,111 @@
+import http from 'node:http';
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import express from 'express';
+import { WebSocketServer } from 'ws';
+import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFile, AGENCIA_ROOT } from './data.js';
+import { buildPrompt, startRun } from './runner.js';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const PORT = Number(process.env.FARO_PORT || 4310);
+const HOST = '127.0.0.1'; // solo local: el panel puede ejecutar el agente
+// El token se guarda en ui/.faro-token para que no cambie en cada reinicio.
+const tokenFile = path.join(here, '..', '.faro-token');
+const loadToken = () => {
+  if (process.env.FARO_TOKEN) return process.env.FARO_TOKEN;
+  try { const t = fs.readFileSync(tokenFile, 'utf8').trim(); if (t) return t; } catch {}
+  const t = crypto.randomBytes(18).toString('base64url');
+  fs.writeFileSync(tokenFile, t, { mode: 0o600 });
+  return t;
+};
+const TOKEN = loadToken();
+
+const tokenOk = (t) => {
+  if (typeof t !== 'string') return false;
+  const a = Buffer.from(t), b = Buffer.from(TOKEN);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
+
+const app = express();
+app.use(express.json({ limit: '50kb' }));
+
+app.use('/api', (req, res, next) => {
+  const h = req.headers.authorization || '';
+  if (tokenOk(h.replace(/^Bearer\s+/i, ''))) return next();
+  res.status(401).json({ error: 'Token inválido' });
+});
+
+const wrap = (fn) => (req, res) => fn(req, res).catch((e) => res.status(500).json({ error: e.message }));
+
+app.get('/api/clientes', wrap(async (_q, res) => res.json(await listClientes())));
+
+app.get('/api/clientes/:slug', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  const c = slug && (await getCliente(slug));
+  c ? res.json(c) : res.status(404).json({ error: 'Cliente no encontrado' });
+}));
+
+app.post('/api/clientes/:slug/planes/:archivo/decision', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  const archivo = safePlanFile(req.params.archivo);
+  if (!slug || !archivo || typeof req.body?.aprobado !== 'boolean') {
+    return res.status(400).json({ error: 'Solicitud inválida' });
+  }
+  res.json(await decidirPlan(slug, archivo, req.body.aprobado));
+}));
+
+app.get('/api/skills', wrap(async (_q, res) => res.json(await listSkills())));
+
+// Frontend compilado (npm run build). En desarrollo lo sirve Vite.
+const dist = path.join(here, '..', 'dist');
+if (fs.existsSync(dist)) {
+  app.use(express.static(dist));
+  app.get('*', (_q, res) => res.sendFile(path.join(dist, 'index.html')));
+}
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ noServer: true });
+
+server.on('upgrade', (req, socket, head) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const originOk = !req.headers.origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(req.headers.origin);
+  if (url.pathname !== '/ws' || !originOk || !tokenOk(url.searchParams.get('token'))) {
+    socket.destroy();
+    return;
+  }
+  wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws));
+});
+
+wss.on('connection', (ws) => {
+  let current = null; // una ejecución a la vez por conexión
+  const send = (o) => ws.readyState === 1 && ws.send(JSON.stringify(o));
+
+  ws.on('message', async (raw) => {
+    let msg;
+    try { msg = JSON.parse(raw.toString()); } catch { return; }
+    if (msg.type === 'cancel') { current?.kill(); return; }
+    if (msg.type !== 'run') return;
+    if (current) return send({ type: 'error', text: 'Ya hay una ejecución en curso.' });
+    try {
+      const prompt = await buildPrompt(msg);
+      send({ type: 'start', prompt });
+      current = startRun({
+        prompt,
+        sessionId: msg.sessionId,
+        emit: (ev) => { send(ev); if (ev.type === 'done') current = null; },
+      });
+    } catch (e) {
+      send({ type: 'error', text: e.message });
+    }
+  });
+  ws.on('close', () => current?.kill());
+});
+
+server.listen(PORT, HOST, () => {
+  console.log(`\n  Faro listo → http://localhost:${PORT}/?token=${TOKEN}`);
+  console.log(`  Agencia: ${AGENCIA_ROOT}\n`);
+});
+
+export { app, TOKEN };
