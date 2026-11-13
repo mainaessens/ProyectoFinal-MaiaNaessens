@@ -9,6 +9,7 @@ import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFi
 import { buildPrompt, startRun } from './runner.js';
 import { manejarConexion } from './conexion.js';
 import { crearAlmacen, esIdValido } from './sesiones.js';
+import { listarModelos, modeloPorDefecto } from './modelos.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.FARO_PORT || 4310);
@@ -57,6 +58,8 @@ app.post('/api/clientes/:slug/planes/:archivo/decision', wrap(async (req, res) =
   }
   res.json(await decidirPlan(slug, archivo, req.body.aprobado));
 }));
+
+app.get('/api/modelos', (_q, res) => res.json({ modelos: listarModelos(), porDefecto: modeloPorDefecto() }));
 
 app.get('/api/skills', wrap(async (_q, res) => res.json(await listSkills())));
 

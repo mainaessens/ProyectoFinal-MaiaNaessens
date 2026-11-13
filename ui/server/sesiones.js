@@ -35,7 +35,7 @@ export function crearAlmacen({ dir, max = 50 }) {
     for (const f of files) {
       const r = await leer(f.slice(0, -5));
       if (!r || (cliente !== undefined && (r.cliente || '') !== cliente)) continue;
-      out.push({ id: r.id, cliente: r.cliente || '', skill: r.skill || '', titulo: r.titulo || '', creada: r.creada || 0, actualizada: r.actualizada || 0, entradas: (r.entradas || []).length });
+      out.push({ id: r.id, cliente: r.cliente || '', skill: r.skill || '', modelo: r.modelo || '', costo: Number(r.costo) || 0, titulo: r.titulo || '', creada: r.creada || 0, actualizada: r.actualizada || 0, entradas: (r.entradas || []).length });
     }
     return out.sort((a, b) => b.actualizada - a.actualizada);
   }
@@ -46,7 +46,8 @@ export function crearAlmacen({ dir, max = 50 }) {
     async existe(id) { return esIdValido(id) && (await leer(id)) !== null; },
     async guardar(reg) {
       const final = {
-        id: reg.id, cliente: reg.cliente || '', skill: reg.skill || '', titulo: String(reg.titulo || '').slice(0, 120),
+        id: reg.id, cliente: reg.cliente || '', skill: reg.skill || '', modelo: String(reg.modelo || '').slice(0, 60),
+        costo: Number.isFinite(reg.costo) ? reg.costo : 0, titulo: String(reg.titulo || '').slice(0, 120),
         creada: reg.creada || Date.now(), actualizada: Date.now(), entradas: limpiar(reg.entradas || []),
       };
       await fs.mkdir(dir, { recursive: true });

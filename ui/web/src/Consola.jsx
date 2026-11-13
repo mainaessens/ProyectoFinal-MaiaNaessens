@@ -4,6 +4,13 @@ import Md from './Md.jsx';
 import Solicitudes from './Solicitud.jsx';
 
 const fechaCorta = (ms) => (ms ? new Date(ms).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '');
+const usd = (n) => (n >= 0.01 ? `US$ ${n.toFixed(2)}` : `US$ ${n.toFixed(4)}`);
+
+// El último modelo elegido se recuerda en el navegador (solo es una preferencia; el servidor valida contra su lista).
+const CLAVE_MODELO = 'faro.modelo';
+const leerModelo = () => { try { return localStorage.getItem(CLAVE_MODELO) || ''; } catch { return ''; } };
+const guardarModelo = (m) => { try { localStorage.setItem(CLAVE_MODELO, m); } catch { /* sin almacenamiento */ } };
+const AYUDA_COSTO = 'Estimación de Claude Code a precios de lista de la API, acumulada en la sesión. Con un plan de suscripción consume tu cupo de uso; no es una factura.';
 
 /**
  * Consola del agente. App la mantiene SIEMPRE montada (oculta cuando no se está en esa vista), así que su estado
@@ -26,6 +33,9 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
   const [pedidos, setPedidos] = useState([]);
   const [sesiones, setSesiones] = useState([]);
   const [verLista, setVerLista] = useState(false);
+  const [modelo, setModelo] = useState(leerModelo);   // '' = el predeterminado de Claude Code
+  const [modelos, setModelos] = useState({ modelos: [], porDefecto: '' });
+  const [costo, setCosto] = useState(0);              // costo estimado acumulado de la sesión en curso
   const [conn, setConn] = useState('conectando');
   const ws = useRef(null);
   const end = useRef(null);
@@ -56,6 +66,14 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
   useEffect(() => { cb.current.onCorriendo?.(running); }, [running]);
   useEffect(() => { cb.current.onPendientes?.(pedidos.length); }, [pedidos]);
   useEffect(() => { cargarSesiones(); }, [cargarSesiones]);
+  useEffect(() => {
+    api(token, '/modelos').then((r) => {
+      setModelos(r);
+      // Un modelo recordado que ya no está permitido se descarta.
+      setModelo((m) => (m && !r.modelos.some((x) => x.id === m) ? '' : m));
+    }).catch(() => {});
+  }, [token]);
+  const elegirModelo = (m) => { setModelo(m); guardarModelo(m); };
 
   // Recargar o cerrar la pestaña cancela el skill en curso: se avisa antes.
   useEffect(() => {
@@ -71,6 +89,7 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
       if (m.type === 'start') { setRunning(true); setPedidos([]); }
       else if (m.type === 'entradas') push(m.entradas);
       else if (m.type === 'sesion') setSession(m.id);
+      else if (m.type === 'costo') setCosto(m.total);
       else if (m.type === 'solicitud') setPedidos((p) => [...p.filter((x) => x.id !== m.id), m]);
       else if (m.type === 'solicitud_resuelta') setPedidos((p) => p.filter((x) => x.id !== m.id));
       else if (m.type === 'aviso') push([{ k: 'err', text: m.text }]);
@@ -97,13 +116,13 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
   const send = (payload) => ws.current?.readyState === 1 && ws.current.send(JSON.stringify(payload));
   const ejecutar = (e) => {
     e.preventDefault();
-    setLog([]); setSession(null);
-    send({ type: 'run', skill, cliente: cliente || undefined, args });
+    setLog([]); setSession(null); setCosto(0);
+    send({ type: 'run', skill, cliente: cliente || undefined, args, modelo });
   };
   const responder = (e) => {
     e.preventDefault();
     if (!reply.trim() || !session) return;
-    send({ type: 'run', text: reply, sessionId: session });
+    send({ type: 'run', text: reply, sessionId: session, modelo });
     setReply('');
   };
   const responderPedido = (id, decision) => send({ type: 'responder', id, decision });
@@ -113,7 +132,8 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
       const s = await api(token, `/sesiones/${id}`);
       eligio.current = true;
       setLog([...(s.entradas || []), { k: 'meta', text: '— Sesión retomada: escribile al agente para continuar —' }]);
-      setSession(s.id); setPedidos([]);
+      setSession(s.id); setPedidos([]); setCosto(Number(s.costo) || 0);
+      if (s.modelo) elegirModelo(s.modelo);
       if (s.cliente) setCliente(s.cliente); else setCliente('');
       if (s.skill) setSkill(s.skill);
       setVerLista(false);
@@ -151,7 +171,7 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
             <div key={s.id} className="fila-sesion">
               <div className="grow-1">
                 <strong>{s.titulo || '(sin título)'}</strong>
-                <p className="muted small">{s.cliente || 'sin cliente'}{s.skill ? ` · /${s.skill}` : ''} · {fechaCorta(s.actualizada)} · {s.entradas} mensajes</p>
+                <p className="muted small">{s.cliente || 'sin cliente'}{s.skill ? ` · /${s.skill}` : ''}{s.modelo ? ` · ${s.modelo}` : ''} · {fechaCorta(s.actualizada)} · {s.entradas} mensajes{s.costo > 0 ? ` · ${usd(s.costo)}` : ''}</p>
               </div>
               <div className="row">
                 <button type="button" className="ghost danger" onClick={() => borrar(s.id)} disabled={running}>Eliminar</button>
@@ -163,7 +183,7 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
       )}
 
       <form className="card form" onSubmit={ejecutar}>
-        <div className="grid3">
+        <div className="grid4">
           <label>Skill
             <select value={skill} onChange={(e) => setSkill(e.target.value)} disabled={running}>
               {skills.map((s) => <option key={s.name} value={s.name}>/{s.name}</option>)}
@@ -175,6 +195,12 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
               {clientes.map((c) => <option key={c.slug} value={c.slug}>{c.slug}</option>)}
             </select>
           </label>
+          <label title="Cambiar de modelo a mitad de una sesión obliga a reprocesar todo el contexto y encarece ese mensaje: conviene elegirlo al empezar.">Modelo{session && !running && <span className="muted small"> · cambiar acá encarece el próximo mensaje</span>}
+            <select value={modelo} onChange={(e) => elegirModelo(e.target.value)} disabled={running}>
+              <option value="">{modelos.porDefecto ? `Predeterminado (${modelos.porDefecto})` : 'Predeterminado de Claude Code'}</option>
+              {modelos.modelos.map((m) => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            </select>
+          </label>
           <label>Argumentos
             <input value={args} onChange={(e) => setArgs(e.target.value)} disabled={running}
               placeholder={actual?.argumentHint || 'tema, mes, etc.'} maxLength={500} />
@@ -183,6 +209,7 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
         {actual && <p className="muted small">{actual.description}</p>}
         <div className="row end">
           <span className={`dot ${conn}`}>{conn}</span>
+          {costo > 0 && <span className="costo" title={AYUDA_COSTO}>Costo estimado de la sesión: <strong>{usd(costo)}</strong></span>}
           {running
             ? <button type="button" className="ghost danger" onClick={() => send({ type: 'cancel' })}>Cancelar</button>
             : <button className="primary" disabled={conn !== 'conectado' || !skill}>Ejecutar</button>}

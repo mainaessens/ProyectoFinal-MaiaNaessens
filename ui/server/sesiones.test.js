@@ -72,3 +72,14 @@ test('entradasDe resume herramientas y marca errores de autenticación con el pa
   assert.match(err[0].text, /\/login/);
   assert.deepEqual(entradasDe(null), []);
 });
+
+test('guarda y lista el modelo y el costo de cada sesión', async () => {
+  const a = nuevo();
+  await a.guardar({ id: id(1), cliente: 'demo', modelo: 'sonnet', costo: 0.1234, entradas: [] });
+  await a.guardar({ id: id(2), costo: 'x', entradas: [] });
+  const l = await a.listar();
+  assert.equal(l.find((s) => s.id === id(1)).modelo, 'sonnet');
+  assert.equal(l.find((s) => s.id === id(1)).costo, 0.1234);
+  assert.equal(l.find((s) => s.id === id(2)).costo, 0, 'un costo inválido queda en 0');
+  assert.equal((await a.leer(id(1))).modelo, 'sonnet');
+});

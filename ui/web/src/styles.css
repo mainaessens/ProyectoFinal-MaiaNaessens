@@ -106,3 +106,9 @@ label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; colo
 .fila-sesion:last-child { border-bottom: 0; padding-bottom: 0; }
 .fila-sesion p { margin: 0; }
 .grow-1 { flex: 1; min-width: 200px; }
+
+/* Selector de modelo y costo estimado */
+.grid4 { display: grid; grid-template-columns: 1fr 1fr 1.2fr 1.6fr; gap: 12px; }
+.costo { font-size: .82rem; color: var(--muted); margin-right: auto; cursor: help; }
+.costo strong { color: var(--text); }
+@media (max-width: 760px) { .grid4 { grid-template-columns: 1fr; } }

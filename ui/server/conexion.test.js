@@ -16,8 +16,8 @@ function montar({ prompt = async (m) => (m.text ?? `/${m.skill ?? 'x'}`), guarda
   const h = manejarConexion({
     send: (o) => enviados.push(o),
     buildPrompt: prompt,
-    startRun: ({ prompt: p, sessionId, emit }) => {
-      const c = { prompt: p, sessionId, emit, kills: 0, respondidos: [], kill() { this.kills++; }, responder(id, d) { if (id === 'malo') throw new Error('pedido inválido'); this.respondidos.push([id, d]); } };
+    startRun: ({ prompt: p, sessionId, modelo, emit }) => {
+      const c = { prompt: p, sessionId, modelo, emit, kills: 0, respondidos: [], kill() { this.kills++; }, responder(id, d) { if (id === 'malo') throw new Error('pedido inválido'); this.respondidos.push([id, d]); } };
       corridas.push(c);
       return c;
     },
@@ -170,4 +170,46 @@ test('si resumir cambia el id de sesión, el historial pasa a la nueva sin perde
   assert.equal(almacenados.at(-1).id, UUID2);
   assert.ok(almacenados.at(-1).entradas.some((e) => e.text === 'antes'));
   assert.equal(previa.id, UUID, 'la sesión anterior no se toca');
+});
+
+test('el modelo elegido viaja a startRun y se guarda en la sesión', async () => {
+  const { h, corridas, almacenados, run } = montar();
+  await run({ modelo: 'sonnet' });
+  assert.equal(corridas[0].modelo, 'sonnet');
+  corridas[0].emit(claude({ type: 'system', session_id: UUID }));
+  corridas[0].emit({ type: 'done', code: 0 });
+  await h.flush();
+  assert.equal(almacenados.at(-1).modelo, 'sonnet');
+});
+
+test('un modelo no permitido hace fallar la ejecución con un error y libera el lugar', async () => {
+  const h = manejarConexion({
+    send: (o) => (h.enviados ??= []).push(o), buildPrompt: async () => '/x',
+    startRun: () => { throw new Error('Modelo no permitido.'); },
+  });
+  await h.onMessage(JSON.stringify({ type: 'run', skill: 'x', modelo: 'raro' }));
+  assert.equal(h.ocupado, false);
+  assert.deepEqual(h.enviados.at(-1), { type: 'error', text: 'Modelo no permitido.' });
+});
+
+test('el costo es acumulado de la sesión: se toma el último total, no se suma', async () => {
+  const previa = { id: UUID, cliente: '', skill: 'x', titulo: 't', creada: 1, costo: 0.5, modelo: 'haiku', entradas: [] };
+  const { h, enviados, corridas, almacenados, run } = montar({ guardadas: { [UUID]: previa } });
+  await run({ text: 'sigo', sessionId: UUID });
+  corridas[0].emit(claude({ type: 'system', session_id: UUID }));
+  corridas[0].emit(claude({ type: 'result', session_id: UUID, total_cost_usd: 0.62, num_turns: 1 }));
+  corridas[0].emit({ type: 'done', code: 0 });
+  await h.flush();
+  assert.deepEqual(enviados.filter((e) => e.type === 'costo'), [{ type: 'costo', total: 0.62 }]);
+  assert.equal(almacenados.at(-1).costo, 0.62);
+  assert.equal(almacenados.at(-1).modelo, 'haiku', 'sin elegir otro, hereda el de la sesión');
+});
+
+test('un total_cost_usd inválido se ignora', async () => {
+  const { h, enviados, corridas, run } = montar();
+  await run();
+  corridas[0].emit(claude({ type: 'result', session_id: UUID, total_cost_usd: 'mucho' }));
+  assert.ok(!enviados.some((e) => e.type === 'costo'));
+  corridas[0].emit({ type: 'done', code: 0 });
+  await h.flush();
 });
