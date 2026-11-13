@@ -8,6 +8,7 @@ import { WebSocketServer } from 'ws';
 import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFile, AGENCIA_ROOT } from './data.js';
 import { buildPrompt, startRun } from './runner.js';
 import { manejarConexion } from './conexion.js';
+import { crearAlmacen, esIdValido } from './sesiones.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.FARO_PORT || 4310);
@@ -59,6 +60,25 @@ app.post('/api/clientes/:slug/planes/:archivo/decision', wrap(async (req, res) =
 
 app.get('/api/skills', wrap(async (_q, res) => res.json(await listSkills())));
 
+// Sesiones guardadas del agente (historial para poder continuarlas). Datos locales: no se versionan.
+const almacen = crearAlmacen({ dir: process.env.FARO_DATA_DIR ? path.resolve(process.env.FARO_DATA_DIR) : path.join(here, '..', '.faro-data', 'sesiones') });
+
+app.get('/api/sesiones', wrap(async (req, res) => {
+  const c = req.query.cliente;
+  if (c !== undefined && c !== '' && !safeSlug(c)) return res.status(400).json({ error: 'Cliente inválido' });
+  res.json(await almacen.listar(c === undefined ? {} : { cliente: c }));
+}));
+app.get('/api/sesiones/:id', wrap(async (req, res) => {
+  if (!esIdValido(req.params.id)) return res.status(400).json({ error: 'Id inválido' });
+  const s = await almacen.leer(req.params.id);
+  s ? res.json(s) : res.status(404).json({ error: 'Sesión no encontrada' });
+}));
+app.delete('/api/sesiones/:id', wrap(async (req, res) => {
+  if (!esIdValido(req.params.id)) return res.status(400).json({ error: 'Id inválido' });
+  await almacen.borrar(req.params.id);
+  res.json({ ok: true });
+}));
+
 // Frontend compilado (npm run build). En desarrollo lo sirve Vite.
 const dist = path.join(here, '..', 'dist');
 if (fs.existsSync(dist)) {
@@ -83,7 +103,7 @@ wss.on('connection', (ws) => {
   // Una ejecución a la vez por conexión. Solo se cancela con `cancel` o al cerrarse la conexión
   // (cerrar o recargar la pestaña). Ver conexion.js.
   const send = (o) => ws.readyState === 1 && ws.send(JSON.stringify(o));
-  const conexion = manejarConexion({ send, buildPrompt, startRun });
+  const conexion = manejarConexion({ send, buildPrompt, startRun, almacen });
   ws.on('message', (raw) => conexion.onMessage(raw));
   ws.on('close', () => conexion.onClose());
 });

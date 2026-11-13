@@ -1,70 +1,61 @@
-import { useEffect, useRef, useState } from 'react';
-import { openSocket } from './api.js';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api, openSocket } from './api.js';
 import Md from './Md.jsx';
-import { leerSesion, guardarSesion, borrarSesion, ultimoCliente } from './sesion.js';
-
-// Convierte un evento stream-json de Claude Code en entradas para el transcript.
-function entradasDe(ev) {
-  const d = ev.data;
-  if (!d) return [];
-  if (d.type === 'assistant') {
-    return (d.message?.content || []).flatMap((b) => {
-      if (b.type === 'text' && b.text?.trim()) return [{ k: 'agent', text: b.text }];
-      if (b.type === 'tool_use') {
-        const resumen = JSON.stringify(b.input || {}).slice(0, 140);
-        return [{ k: 'tool', text: `${b.name} ${resumen}` }];
-      }
-      return [];
-    });
-  }
-  if (d.type === 'result') {
-    const authHint = d.is_error && /authenticate|OAuth|login/i.test(d.result || '')
-      ? ' → Iniciá sesión de nuevo abriendo una terminal y ejecutando `claude` (luego /login).' : '';
-    return [{ k: d.is_error ? 'err' : 'meta', text: d.is_error ? `Terminó con error: ${d.result || d.subtype}${authHint}` : `Listo · ${d.num_turns ?? '?'} pasos${d.total_cost_usd ? ` · US$ ${d.total_cost_usd.toFixed(3)}` : ''}` }];
-  }
-  return [];
-}
+import Solicitudes from './Solicitud.jsx';
 
 const fechaCorta = (ms) => (ms ? new Date(ms).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '');
 
 /**
  * Consola del agente. App la mantiene SIEMPRE montada (oculta cuando no se está en esa vista), así que su estado
- * (log, sesión, skill, cliente, argumentos) y su WebSocket sobreviven a la navegación por el panel.
+ * (historial, sesión, skill, cliente, argumentos) y su WebSocket sobreviven a la navegación por el panel.
  *  - visible:      si la vista del agente está a la vista.
- *  - onCorriendo:  avisa a App si hay un skill corriendo (indicador de la barra lateral).
+ *  - onCorriendo:  avisa a App si hay un skill corriendo.
+ *  - onPendientes: avisa a App cuántos pedidos del agente esperan respuesta (preguntas y permisos).
  *  - onAviso:      avisa a App que un skill terminó mientras la vista estaba oculta.
+ *
+ * El historial lo arma y lo guarda el servidor: se puede abrir una sesión anterior y continuarla (--resume).
  */
-export default function Consola({ token, skills, clientes, preCliente, visible, onCorriendo, onAviso }) {
+export default function Consola({ token, skills, clientes, preCliente, visible, onCorriendo, onPendientes, onAviso }) {
   const [skill, setSkill] = useState('');
-  const [cliente, setCliente] = useState(() => preCliente || ultimoCliente());
+  const [cliente, setCliente] = useState(preCliente || '');
   const [args, setArgs] = useState('');
   const [reply, setReply] = useState('');
   const [log, setLog] = useState([]);
   const [running, setRunning] = useState(false);
   const [session, setSession] = useState(null);
-  const [previa, setPrevia] = useState(null);
+  const [pedidos, setPedidos] = useState([]);
+  const [sesiones, setSesiones] = useState([]);
+  const [verLista, setVerLista] = useState(false);
   const [conn, setConn] = useState('conectando');
   const ws = useRef(null);
   const end = useRef(null);
-  const ctx = useRef({ cliente: '', skill: '' }); // cliente y skill de la ejecución actual (para guardar la sesión)
   const visibleRef = useRef(visible);
+  const eligio = useRef(Boolean(preCliente)); // el operador ya eligió cliente: no se le pisa con el de la última sesión
   const cb = useRef({});
-  cb.current = { onCorriendo, onAviso };
+  cb.current = { onCorriendo, onPendientes, onAviso };
 
-  // El cliente elegido en otra vista («Ejecutar skill» de un cliente) se aplica solo si hay uno; navegar sin cliente no lo borra.
-  useEffect(() => { if (preCliente && !running) setCliente(preCliente); }, [preCliente]); // eslint-disable-line react-hooks/exhaustive-deps
+  const cargarSesiones = useCallback(async () => {
+    try { setSesiones(await api(token, '/sesiones')); } catch { /* el panel sigue funcionando sin la lista */ }
+  }, [token]);
+
+  useEffect(() => { if (preCliente && !running) { eligio.current = true; setCliente(preCliente); } }, [preCliente]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!skill && skills.length) setSkill(skills[0].name); }, [skills, skill]);
-  // Si el cliente recordado ya no existe, se vuelve a «(ninguno)».
+  // Al abrir el panel, se preselecciona el cliente de la última sesión (si el operador todavía no eligió uno).
+  useEffect(() => {
+    if (!eligio.current && sesiones.length && sesiones[0].cliente && clientes.some((c) => c.slug === sesiones[0].cliente)) {
+      eligio.current = true;
+      setCliente(sesiones[0].cliente);
+    }
+  }, [sesiones, clientes]);
   useEffect(() => { if (cliente && clientes.length && !clientes.some((x) => x.slug === cliente)) setCliente(''); }, [clientes, cliente]);
   useEffect(() => {
     visibleRef.current = visible;
-    if (visible) end.current?.scrollIntoView({ block: 'end' });
-  }, [visible]);
-  useEffect(() => { if (visibleRef.current) end.current?.scrollIntoView({ block: 'end' }); }, [log]);
+    if (visible) { end.current?.scrollIntoView({ block: 'end' }); cargarSesiones(); }
+  }, [visible, cargarSesiones]);
+  useEffect(() => { if (visibleRef.current) end.current?.scrollIntoView({ block: 'end' }); }, [log, pedidos]);
   useEffect(() => { cb.current.onCorriendo?.(running); }, [running]);
-
-  // Sesión anterior de este cliente (recargar la página mata el proceso, pero la conversación se puede retomar con --resume).
-  useEffect(() => { setPrevia(leerSesion(cliente)); }, [cliente, session]);
+  useEffect(() => { cb.current.onPendientes?.(pedidos.length); }, [pedidos]);
+  useEffect(() => { cargarSesiones(); }, [cargarSesiones]);
 
   // Recargar o cerrar la pestaña cancela el skill en curso: se avisa antes.
   useEffect(() => {
@@ -77,19 +68,17 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
   useEffect(() => {
     const push = (e) => setLog((l) => [...l, ...e]);
     const sock = openSocket(token, (m) => {
-      if (m.type === 'start') { setRunning(true); push([{ k: 'user', text: m.prompt }]); }
-      else if (m.type === 'claude') {
-        const id = m.data?.session_id;
-        if (id) { setSession(id); guardarSesion(ctx.current.cliente, { id, skill: ctx.current.skill }); }
-        push(entradasDe(m));
-      }
-      else if (m.type === 'stdout') push([{ k: 'meta', text: m.text }]);
-      else if (m.type === 'stderr') push([{ k: 'err', text: m.text }]);
-      else if (m.type === 'error') { setRunning(false); push([{ k: 'err', text: m.text }]); }
+      if (m.type === 'start') { setRunning(true); setPedidos([]); }
+      else if (m.type === 'entradas') push(m.entradas);
+      else if (m.type === 'sesion') setSession(m.id);
+      else if (m.type === 'solicitud') setPedidos((p) => [...p.filter((x) => x.id !== m.id), m]);
+      else if (m.type === 'solicitud_resuelta') setPedidos((p) => p.filter((x) => x.id !== m.id));
+      else if (m.type === 'aviso') push([{ k: 'err', text: m.text }]);
+      else if (m.type === 'error') { setRunning(false); setPedidos([]); push([{ k: 'err', text: m.text }]); }
       else if (m.type === 'done') {
-        setRunning(false);
-        push([{ k: 'meta', text: `Proceso finalizado (código ${m.code})` }]);
+        setRunning(false); setPedidos([]);
         if (!visibleRef.current) cb.current.onAviso?.(true);
+        cargarSesiones();
       }
     }, () => {
       setConn('desconectado');
@@ -98,16 +87,16 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
         if (r) setLog((l) => [...l, { k: 'err', text: 'Se perdió la conexión con el servidor: la ejecución se canceló. Recargá la página para reconectar.' }]);
         return false;
       });
+      setPedidos([]);
     });
     sock.onopen = () => setConn('conectado');
     ws.current = sock;
     return () => sock.close();
-  }, [token]);
+  }, [token, cargarSesiones]);
 
   const send = (payload) => ws.current?.readyState === 1 && ws.current.send(JSON.stringify(payload));
   const ejecutar = (e) => {
     e.preventDefault();
-    ctx.current = { cliente: cliente || '', skill };
     setLog([]); setSession(null);
     send({ type: 'run', skill, cliente: cliente || undefined, args });
   };
@@ -117,29 +106,59 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
     send({ type: 'run', text: reply, sessionId: session });
     setReply('');
   };
-  const retomar = () => {
-    if (!previa) return;
-    ctx.current = { cliente: cliente || '', skill: previa.skill };
-    if (previa.skill) setSkill(previa.skill);
-    setLog([{ k: 'meta', text: `Sesión retomada${previa.skill ? ` (/${previa.skill})` : ''}. El historial anterior no se conserva: escribile al agente para continuar.` }]);
-    setSession(previa.id);
+  const responderPedido = (id, decision) => send({ type: 'responder', id, decision });
+
+  const abrir = async (id) => {
+    try {
+      const s = await api(token, `/sesiones/${id}`);
+      eligio.current = true;
+      setLog([...(s.entradas || []), { k: 'meta', text: '— Sesión retomada: escribile al agente para continuar —' }]);
+      setSession(s.id); setPedidos([]);
+      if (s.cliente) setCliente(s.cliente); else setCliente('');
+      if (s.skill) setSkill(s.skill);
+      setVerLista(false);
+    } catch (e) { setLog((l) => [...l, { k: 'err', text: `No se pudo abrir la sesión: ${e.message}` }]); }
   };
-  const descartar = () => { borrarSesion(cliente); setPrevia(null); };
+  const borrar = async (id) => {
+    if (!window.confirm('¿Eliminar esta sesión guardada? No se puede deshacer.')) return;
+    try { await api(token, `/sesiones/${id}`, { method: 'DELETE' }); } catch { /* ya no estaba */ }
+    if (id === session) setSession(null);
+    cargarSesiones();
+  };
 
   const actual = skills.find((s) => s.name === skill);
+  const ultima = sesiones.find((s) => !cliente || s.cliente === cliente);
+  const mostrables = sesiones.filter((s) => !cliente || s.cliente === cliente).slice(0, 12);
 
   return (
     <section className="stack">
-      {previa && !session && !running && (
+      {!session && !running && ultima && (
         <div className="card resume">
           <div>
-            <strong>Sesión anterior{cliente ? ` de ${cliente}` : ''}</strong>
-            <p className="muted small">{previa.skill ? `/${previa.skill} · ` : ''}{fechaCorta(previa.fecha)}</p>
+            <strong>Última sesión{ultima.cliente ? ` de ${ultima.cliente}` : ''}</strong>
+            <p className="muted small">{ultima.skill ? `/${ultima.skill} · ` : ''}{fechaCorta(ultima.actualizada)} · {ultima.titulo}</p>
           </div>
           <div className="row">
-            <button type="button" className="ghost" onClick={descartar}>Descartar</button>
-            <button type="button" className="primary" onClick={retomar} disabled={conn !== 'conectado'}>Continuar la sesión anterior</button>
+            <button type="button" className="ghost" onClick={() => setVerLista((v) => !v)}>{verLista ? 'Ocultar' : `Sesiones anteriores (${mostrables.length})`}</button>
+            <button type="button" className="primary" onClick={() => abrir(ultima.id)} disabled={conn !== 'conectado'}>Continuar la última sesión</button>
           </div>
+        </div>
+      )}
+      {verLista && (
+        <div className="card lista-sesiones">
+          {mostrables.length === 0 && <p className="muted">No hay sesiones guardadas{cliente ? ` para ${cliente}` : ''}.</p>}
+          {mostrables.map((s) => (
+            <div key={s.id} className="fila-sesion">
+              <div className="grow-1">
+                <strong>{s.titulo || '(sin título)'}</strong>
+                <p className="muted small">{s.cliente || 'sin cliente'}{s.skill ? ` · /${s.skill}` : ''} · {fechaCorta(s.actualizada)} · {s.entradas} mensajes</p>
+              </div>
+              <div className="row">
+                <button type="button" className="ghost danger" onClick={() => borrar(s.id)} disabled={running}>Eliminar</button>
+                <button type="button" className="primary" onClick={() => abrir(s.id)} disabled={running}>Abrir</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -151,7 +170,7 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
             </select>
           </label>
           <label>Cliente
-            <select value={cliente} onChange={(e) => setCliente(e.target.value)} disabled={running}>
+            <select value={cliente} onChange={(e) => { eligio.current = true; setCliente(e.target.value); }} disabled={running}>
               <option value="">(ninguno)</option>
               {clientes.map((c) => <option key={c.slug} value={c.slug}>{c.slug}</option>)}
             </select>
@@ -171,15 +190,18 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
       </form>
 
       <div className="card transcript">
-        {!log.length && <p className="muted">La salida del agente aparece acá. Las acciones sensibles (publicar, crear en bloque, gastar) siguen requiriendo tu OK explícito.</p>}
+        {!log.length && <p className="muted">La salida del agente aparece acá. Las preguntas y los permisos que pida el agente los resolvés desde este panel. Las acciones sensibles (publicar, crear en bloque, gastar) siguen requiriendo tu OK explícito.</p>}
         {log.map((x, i) => (
           <div key={i} className={`msg ${x.k}`}>
             {x.k === 'agent' ? <Md>{x.text}</Md> : <span>{x.k === 'tool' ? '⚙ ' : x.k === 'user' ? '› ' : ''}{x.text}</span>}
           </div>
         ))}
-        {running && <div className="msg meta pulse">trabajando…</div>}
+        {running && !pedidos.length && <div className="msg meta pulse">trabajando…</div>}
+        {running && pedidos.length > 0 && <div className="msg meta pulse">esperando tu respuesta…</div>}
         <div ref={end} />
       </div>
+
+      <Solicitudes pedidos={pedidos} onResponder={responderPedido} />
 
       {session && !running && (
         <form className="row grow" onSubmit={responder}>

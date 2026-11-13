@@ -114,6 +114,7 @@ export default function App() {
   const [skills, setSkills] = useState([]);
   const [view, setView] = useState({ name: 'inicio' });
   const [corriendo, setCorriendo] = useState(false); // hay un skill en ejecución (aunque se esté en otra vista)
+  const [esperando, setEsperando] = useState(0);      // pedidos del agente (preguntas, permisos) que esperan respuesta
   const [aviso, setAviso] = useState(false);          // un skill terminó mientras se miraba otra vista
 
   const cargar = useCallback(async () => {
@@ -128,8 +129,8 @@ export default function App() {
   useEffect(() => { cargar(); }, [cargar, view.name === 'inicio']);
   useEffect(() => { if (view.name === 'agente') setAviso(false); }, [view]);
   useEffect(() => {
-    document.title = corriendo ? '● Faro (ejecutando)' : aviso ? '• Faro (el agente terminó)' : 'Faro — panel de la agencia';
-  }, [corriendo, aviso]);
+    document.title = esperando ? '? Faro (el agente espera tu respuesta)' : corriendo ? '● Faro (ejecutando)' : aviso ? '• Faro (el agente terminó)' : 'Faro — panel de la agencia';
+  }, [corriendo, aviso, esperando]);
 
   if (!token) return <Login error={error} onToken={(t) => { saveToken(t); setToken(t); }} />;
 
@@ -140,8 +141,9 @@ export default function App() {
         <button className={`nav ${view.name === 'inicio' ? 'on' : ''}`} onClick={() => setView({ name: 'inicio' })}>Clientes</button>
         <button className={`nav ${view.name === 'agente' ? 'on' : ''}`} onClick={() => setView({ name: 'agente' })}>
           Agente
-          {corriendo && <span className="estado corriendo" title="Hay un skill ejecutándose"><i className="spin" />ejecutando</span>}
-          {!corriendo && aviso && <span className="estado listo" title="El agente terminó: hay algo para revisar o responder"><i className="punto" />terminó</span>}
+          {esperando > 0 && <span className="estado esperando" title="El agente te hizo una pregunta o pidió un permiso"><i className="punto" />responder{esperando > 1 ? ` (${esperando})` : ''}</span>}
+          {esperando === 0 && corriendo && <span className="estado corriendo" title="Hay un skill ejecutándose"><i className="spin" />ejecutando</span>}
+          {esperando === 0 && !corriendo && aviso &&<span className="estado listo" title="El agente terminó: hay algo para revisar o responder"><i className="punto" />terminó</span>}
         </button>
         <div className="side-label">Cuentas</div>
         {(clientes || []).map((c) => (
@@ -158,7 +160,7 @@ export default function App() {
         <section hidden={view.name !== 'agente'}>
           <header className="page-head"><div><h2>Agente</h2><p className="muted small">Ejecutá un skill y seguí el trabajo en vivo</p></div></header>
           <Consola token={token} skills={skills} clientes={clientes || []} preCliente={view.name === 'agente' ? view.slug : undefined}
-            visible={view.name === 'agente'} onCorriendo={setCorriendo} onAviso={setAviso} />
+            visible={view.name === 'agente'} onCorriendo={setCorriendo} onPendientes={setEsperando} onAviso={setAviso} />
         </section>
       </main>
     </div>
