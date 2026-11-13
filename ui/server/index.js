@@ -7,6 +7,8 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFile, AGENCIA_ROOT } from './data.js';
 import { buildPrompt, startRun } from './runner.js';
+import { manejarConexion } from './conexion.js';
+import { crearAlmacen, esIdValido } from './sesiones.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.FARO_PORT || 4310);
@@ -58,6 +60,25 @@ app.post('/api/clientes/:slug/planes/:archivo/decision', wrap(async (req, res) =
 
 app.get('/api/skills', wrap(async (_q, res) => res.json(await listSkills())));
 
+// Sesiones guardadas del agente (historial para poder continuarlas). Datos locales: no se versionan.
+const almacen = crearAlmacen({ dir: process.env.FARO_DATA_DIR ? path.resolve(process.env.FARO_DATA_DIR) : path.join(here, '..', '.faro-data', 'sesiones') });
+
+app.get('/api/sesiones', wrap(async (req, res) => {
+  const c = req.query.cliente;
+  if (c !== undefined && c !== '' && !safeSlug(c)) return res.status(400).json({ error: 'Cliente inválido' });
+  res.json(await almacen.listar(c === undefined ? {} : { cliente: c }));
+}));
+app.get('/api/sesiones/:id', wrap(async (req, res) => {
+  if (!esIdValido(req.params.id)) return res.status(400).json({ error: 'Id inválido' });
+  const s = await almacen.leer(req.params.id);
+  s ? res.json(s) : res.status(404).json({ error: 'Sesión no encontrada' });
+}));
+app.delete('/api/sesiones/:id', wrap(async (req, res) => {
+  if (!esIdValido(req.params.id)) return res.status(400).json({ error: 'Id inválido' });
+  await almacen.borrar(req.params.id);
+  res.json({ ok: true });
+}));
+
 // Frontend compilado (npm run build). En desarrollo lo sirve Vite.
 const dist = path.join(here, '..', 'dist');
 if (fs.existsSync(dist)) {
@@ -79,28 +100,12 @@ server.on('upgrade', (req, socket, head) => {
 });
 
 wss.on('connection', (ws) => {
-  let current = null; // una ejecución a la vez por conexión
+  // Una ejecución a la vez por conexión. Solo se cancela con `cancel` o al cerrarse la conexión
+  // (cerrar o recargar la pestaña). Ver conexion.js.
   const send = (o) => ws.readyState === 1 && ws.send(JSON.stringify(o));
-
-  ws.on('message', async (raw) => {
-    let msg;
-    try { msg = JSON.parse(raw.toString()); } catch { return; }
-    if (msg.type === 'cancel') { current?.kill(); return; }
-    if (msg.type !== 'run') return;
-    if (current) return send({ type: 'error', text: 'Ya hay una ejecución en curso.' });
-    try {
-      const prompt = await buildPrompt(msg);
-      send({ type: 'start', prompt });
-      current = startRun({
-        prompt,
-        sessionId: msg.sessionId,
-        emit: (ev) => { send(ev); if (ev.type === 'done') current = null; },
-      });
-    } catch (e) {
-      send({ type: 'error', text: e.message });
-    }
-  });
-  ws.on('close', () => current?.kill());
+  const conexion = manejarConexion({ send, buildPrompt, startRun, almacen });
+  ws.on('message', (raw) => conexion.onMessage(raw));
+  ws.on('close', () => conexion.onClose());
 });
 
 server.listen(PORT, HOST, () => {

@@ -1,3 +1,4 @@
 node_modules/
 dist/
 .faro-token
+.faro-data/
