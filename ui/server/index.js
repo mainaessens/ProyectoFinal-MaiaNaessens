@@ -7,6 +7,7 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFile, AGENCIA_ROOT } from './data.js';
 import { buildPrompt, startRun } from './runner.js';
+import { manejarConexion } from './conexion.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.FARO_PORT || 4310);
@@ -79,28 +80,12 @@ server.on('upgrade', (req, socket, head) => {
 });
 
 wss.on('connection', (ws) => {
-  let current = null; // una ejecución a la vez por conexión
+  // Una ejecución a la vez por conexión. Solo se cancela con `cancel` o al cerrarse la conexión
+  // (cerrar o recargar la pestaña). Ver conexion.js.
   const send = (o) => ws.readyState === 1 && ws.send(JSON.stringify(o));
-
-  ws.on('message', async (raw) => {
-    let msg;
-    try { msg = JSON.parse(raw.toString()); } catch { return; }
-    if (msg.type === 'cancel') { current?.kill(); return; }
-    if (msg.type !== 'run') return;
-    if (current) return send({ type: 'error', text: 'Ya hay una ejecución en curso.' });
-    try {
-      const prompt = await buildPrompt(msg);
-      send({ type: 'start', prompt });
-      current = startRun({
-        prompt,
-        sessionId: msg.sessionId,
-        emit: (ev) => { send(ev); if (ev.type === 'done') current = null; },
-      });
-    } catch (e) {
-      send({ type: 'error', text: e.message });
-    }
-  });
-  ws.on('close', () => current?.kill());
+  const conexion = manejarConexion({ send, buildPrompt, startRun });
+  ws.on('message', (raw) => conexion.onMessage(raw));
+  ws.on('close', () => conexion.onClose());
 });
 
 server.listen(PORT, HOST, () => {

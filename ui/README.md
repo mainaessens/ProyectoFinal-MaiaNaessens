@@ -14,6 +14,12 @@ Implementa el epic **PFMGN-71** (React + Express + WebSockets + auth).
 | **Cliente → Calendario / Perfil / Aprendizajes / Actividad** | Vista de los `.md` y del log de auditoría. |
 | **Agente** | Elegís un skill (`/crear-post`, `/plan-del-dia`, …), cliente y argumentos; se ejecuta Claude Code en `agencia/` y ves la salida en vivo por WebSocket. Podés responderle al agente (continúa la misma sesión) o cancelar. |
 
+## Sesión del agente
+
+- La consola del agente **sigue activa al navegar** por el panel: el historial, el skill elegido y la ejecución en curso no se pierden al ir a Clientes o a un cliente. En la barra lateral, «Agente» muestra **ejecutando** mientras corre un skill y **terminó** (punto verde) si terminó mientras mirabas otra vista; el título de la pestaña también lo indica.
+- Una ejecución **solo se cancela** con el botón *Cancelar* o al cerrar o recargar la pestaña (el navegador avisa antes). Se sigue ejecutando un skill a la vez por conexión.
+- Al recargar, Faro ofrece **Continuar la sesión anterior** del cliente (usa `--resume`). Solo se guarda el id de la sesión en el navegador (`localStorage`), no el historial: la conversación se retoma escribiéndole al agente.
+
 ## Requisitos
 
 - **Node.js 20 o superior** (probado con 24).

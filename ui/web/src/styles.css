@@ -77,3 +77,13 @@ label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; colo
   .shell { grid-template-columns: 1fr; } aside { position: static; height: auto; flex-direction: row; flex-wrap: wrap; }
   .side-label { display: none; } main { padding: 16px; } .grid3 { grid-template-columns: 1fr; }
 }
+
+[hidden] { display: none !important; }
+.estado { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; padding: 1px 8px; border-radius: 99px; }
+.estado.corriendo { background: rgba(242,177,52,.16); color: var(--accent); }
+.estado.listo { background: rgba(76,195,138,.16); color: #4cc38a; }
+.estado .punto { width: 8px; height: 8px; border-radius: 50%; background: currentColor; display: inline-block; }
+.estado .spin { width: 9px; height: 9px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; display: inline-block; animation: giro .8s linear infinite; }
+@keyframes giro { to { transform: rotate(360deg); } }
+.resume { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-color: var(--accent); }
+.resume p { margin: 0; }
