@@ -9,12 +9,11 @@
 // que el propio Claude Code emitió (se recuerdan por id); las opciones se validan contra las preguntas hechas.
 import { spawn as spawnReal, execFile } from 'node:child_process';
 import { AGENCIA_ROOT, listSkills, safeSlug } from './data.js';
+import { validarModelo, modeloPorDefecto } from './modelos.js';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
-const MODELO_RE = /^[A-Za-z0-9._\[\]-]{1,60}$/;
 const PERMISSION_MODE = process.env.FARO_PERMISSION_MODE || 'acceptEdits';
 const CLAUDE_BIN = process.env.FARO_CLAUDE_BIN || 'claude';
-const MODELO = process.env.FARO_MODEL && MODELO_RE.test(process.env.FARO_MODEL) ? process.env.FARO_MODEL : null;
 const MAX_RESPUESTA = 500;
 
 export async function buildPrompt({ skill, cliente, args, text }) {
@@ -70,13 +69,20 @@ export function construirRespuesta(pedido, decision) {
   return { respuesta, resumen: `Permitiste ${pedido.tool}${siempre ? ' (siempre en esta sesión)' : ''}.` };
 }
 
-/** Lanza una ejecución. Devuelve { kill(), responder(id, decision) }. `emit(obj)` recibe cada evento. */
-export function startRun({ prompt, sessionId, emit, spawnFn = spawnReal }) {
+/** Argumentos de `claude` para una ejecución (puro: se prueba solo). `modelo` debe estar en la lista permitida. */
+export function argsDeClaude({ sessionId, modelo, env = process.env } = {}) {
   if (sessionId && !UUID_RE.test(sessionId)) throw new Error('sessionId inválido');
+  const elegido = validarModelo(modelo, env) ?? (modeloPorDefecto(env) || null);
   const args = ['-p', '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose',
     '--permission-prompt-tool', 'stdio', '--permission-mode', PERMISSION_MODE];
-  if (MODELO) args.push('--model', MODELO);
+  if (elegido) args.push('--model', elegido);
   if (sessionId) args.push('--resume', sessionId);
+  return args;
+}
+
+/** Lanza una ejecución. Devuelve { kill(), responder(id, decision) }. `emit(obj)` recibe cada evento. */
+export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal }) {
+  const args = argsDeClaude({ sessionId, modelo });
 
   // shell:true es necesario en Windows (claude.cmd); los argumentos son todos fijos/validados.
   const child = spawnFn(CLAUDE_BIN, args, { cwd: AGENCIA_ROOT, shell: true, windowsHide: true });

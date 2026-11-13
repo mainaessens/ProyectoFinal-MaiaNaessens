@@ -35,6 +35,11 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
       case 'claude': {
         const id = ev.data?.session_id;
         if (id && id !== reg.id) { reg.id = id; send({ type: 'sesion', id }); }
+        // total_cost_usd es ACUMULADO de la sesión (también al retomarla con --resume): se toma el último valor, no se suma.
+        if (ev.data?.type === 'result' && Number.isFinite(ev.data.total_cost_usd)) {
+          reg.costo = ev.data.total_cost_usd;
+          send({ type: 'costo', total: reg.costo });
+        }
         agregar(entradasDe(ev.data));
         break;
       }
@@ -92,9 +97,10 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
         }
         if (cerrada) { ocupado = false; return; }
 
+        const modelo = typeof msg.modelo === 'string' ? msg.modelo : (previa?.modelo || '');
         reg = previa
-          ? { id: previa.id, cliente: previa.cliente || '', skill: previa.skill || '', titulo: previa.titulo || '', creada: previa.creada || Date.now(), entradas: [...(previa.entradas || [])] }
-          : { id: null, cliente: typeof msg.cliente === 'string' ? msg.cliente : '', skill: typeof msg.skill === 'string' ? msg.skill : '', titulo: '', creada: Date.now(), entradas: [] };
+          ? { id: previa.id, cliente: previa.cliente || '', skill: previa.skill || '', modelo, costo: Number(previa.costo) || 0, titulo: previa.titulo || '', creada: previa.creada || Date.now(), entradas: [...(previa.entradas || [])] }
+          : { id: null, cliente: typeof msg.cliente === 'string' ? msg.cliente : '', skill: typeof msg.skill === 'string' ? msg.skill : '', modelo, costo: 0, titulo: '', creada: Date.now(), entradas: [] };
         if (!reg.titulo) reg.titulo = prompt.split('\n')[0].slice(0, 80);
 
         send({ type: 'start', prompt });
@@ -103,6 +109,7 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
         const r = startRun({
           prompt,
           sessionId: msg.sessionId,
+          modelo: msg.modelo, // se valida contra la lista permitida dentro de startRun
           emit: (ev) => { onEvento(ev); if (ev.type === 'done') termino = true; },
         });
         if (!termino) run = r; // si ya terminó, no queda una referencia vieja

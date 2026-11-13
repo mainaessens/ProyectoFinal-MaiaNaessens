@@ -28,6 +28,13 @@ Cuando el agente necesita algo del operador, el pedido aparece como una **tarjet
 
 Detrás se usa el protocolo del SDK de Claude Code (`--permission-prompt-tool stdio` con entrada y salida `stream-json`): Faro solo reenvía respuestas a pedidos que el propio Claude Code emitió, valida las opciones contra las preguntas hechas y nunca acepta permisos «siempre» armados por el navegador. Los hooks de `.claude/hooks/` siguen actuando igual.
 
+## Modelo y costo
+
+- El selector **Modelo** de la consola elige con qué modelo corre el agente: **Opus** (el más capaz y el más caro), **Sonnet** (equilibrado), **Haiku** (rápido y barato) o el **predeterminado de Claude Code**. El último elegido se recuerda en el navegador y cada sesión guarda el suyo. El historial indica qué modelo se usó realmente (`Modelo: claude-…`).
+- La lista es cerrada y la valida el servidor; `FARO_MODELS` (separados por coma) permite sumar nombres completos y `FARO_MODEL` fija el predeterminado de Faro.
+- Junto al botón se muestra el **costo estimado acumulado de la sesión**. Es la estimación de Claude Code a precios de lista de la API, no una factura: con un plan de suscripción consume el cupo de uso del plan.
+- **Cambiar de modelo a mitad de una sesión reprocesa todo el contexto** (la caché es por modelo) y encarece ese mensaje: conviene elegirlo al empezar. Faro corre dentro de `agencia/`, así que cada ejecución arrastra el contexto del proyecto (`CLAUDE.md`, skills y conectores); con Opus una consulta mínima estimó unos US$ 0,50 y con Haiku menos de un centavo.
+
 ## Sesiones guardadas
 
 - El servidor guarda cada sesión (su historial y su id) en `ui/.faro-data/sesiones/` (ignorado por git; se conservan las 50 más recientes).
@@ -66,7 +73,8 @@ Tests: `npm test`.
 | `FARO_TOKEN` | generado | Token de acceso (si no, se genera y guarda). |
 | `FARO_PERMISSION_MODE` | `acceptEdits` | Modo de permisos con el que se lanza `claude -p`. |
 | `FARO_CLAUDE_BIN` | `claude` | Ruta al ejecutable de Claude Code. |
-| `FARO_MODEL` | el de Claude Code | Modelo con el que se lanza el agente (por ejemplo `haiku` para pruebas baratas). |
+| `FARO_MODEL` | el de Claude Code | Modelo predeterminado de Faro (`opus`, `sonnet`, `haiku` o uno de `FARO_MODELS`). El selector del panel lo pisa. |
+| `FARO_MODELS` | — | Nombres de modelo extra para el selector, separados por coma (formato estricto). |
 | `FARO_DATA_DIR` | `ui/.faro-data/sesiones` | Carpeta donde se guardan las sesiones. |
 | `AGENCIA_ROOT` | carpeta `agencia/` | Raíz de datos del agente. |
 
