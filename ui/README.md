@@ -28,6 +28,22 @@ Cuando el agente necesita algo del operador, el pedido aparece como una **tarjet
 
 Detrás se usa el protocolo del SDK de Claude Code (`--permission-prompt-tool stdio` con entrada y salida `stream-json`): Faro solo reenvía respuestas a pedidos que el propio Claude Code emitió, valida las opciones contra las preguntas hechas y nunca acepta permisos «siempre» armados por el navegador. Los hooks de `.claude/hooks/` siguen actuando igual.
 
+### Qué se concede solo y qué te llega
+
+Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba automáticamente **solo lo que no tiene efecto fuera del proyecto ni gasta dinero**. Todo lo demás te llega como tarjeta. Ante la duda, pregunta. La política está en `server/politica.js`.
+
+| Se concede solo | Te llega a vos |
+|---|---|
+| Lecturas **dentro del proyecto** (`Read`, `Glob`, `Grep`), sin archivos sensibles (`.env`, tokens, claves) | Leer **fuera** del proyecto o archivos sensibles |
+| Escribir dentro de `clientes/**` | Escribir en cualquier otro lado, en especial `.claude/**` (hooks y skills) |
+| `WebSearch` y herramientas internas del agente (`Skill`, `Agent`, listas de tareas) | `WebFetch` y herramientas desconocidas |
+| Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar, Jira o Canva |
+| Comandos de solo lectura sin metacaracteres (`ls`, `cat`, `git status`, los comandos de Moviola), con rutas dentro del proyecto | Cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
+| — | Meta Ads, Glif, Postiz y Late (gastan o publican): **nunca** se aprueban solos, ni sus lecturas |
+| — | Las **preguntas** del agente: siempre las contestás vos |
+
+Lo concedido solo queda auditado: al terminar, el historial agrega una línea como «Permisos concedidos automáticamente: WebSearch ×1». Los hooks de `.claude/hooks/` siguen actuando igual. Con `FARO_PERMISOS_AUTO=off` se pregunta todo.
+
 ## Modelo y costo
 
 - El selector **Modelo** de la consola elige con qué modelo corre el agente: **Opus** (el más capaz y el más caro), **Sonnet** (equilibrado), **Haiku** (rápido y barato) o el **predeterminado de Claude Code**. El último elegido se recuerda en el navegador y cada sesión guarda el suyo. El historial indica qué modelo se usó realmente (`Modelo: claude-…`).
@@ -75,6 +91,7 @@ Tests: `npm test`.
 | `FARO_CLAUDE_BIN` | `claude` | Ruta al ejecutable de Claude Code. |
 | `FARO_MODEL` | el de Claude Code | Modelo predeterminado de Faro (`opus`, `sonnet`, `haiku` o uno de `FARO_MODELS`). El selector del panel lo pisa. |
 | `FARO_MODELS` | — | Nombres de modelo extra para el selector, separados por coma (formato estricto). |
+| `FARO_PERMISOS_AUTO` | `seguros` | `off` desactiva los permisos automáticos: se pregunta todo. |
 | `FARO_DATA_DIR` | `ui/.faro-data/sesiones` | Carpeta donde se guardan las sesiones. |
 | `AGENCIA_ROOT` | carpeta `agencia/` | Raíz de datos del agente. |
 

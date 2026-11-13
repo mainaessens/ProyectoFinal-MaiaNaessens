@@ -213,3 +213,23 @@ test('un total_cost_usd inválido se ignora', async () => {
   corridas[0].emit({ type: 'done', code: 0 });
   await h.flush();
 });
+
+test('los permisos concedidos automáticamente se resumen en el historial al terminar', async () => {
+  const { h, corridas, almacenados, run } = montar();
+  await run();
+  corridas[0].emit(claude({ type: 'system', session_id: UUID }));
+  for (const t of ['Read', 'Read', 'mcp__gworkspace__list_events']) corridas[0].emit({ type: 'permiso_auto', tool: t, motivo: 'x' });
+  corridas[0].emit({ type: 'done', code: 0 });
+  await h.flush();
+  const textos = almacenados.at(-1).entradas.map((e) => e.text);
+  assert.ok(textos.some((t) => /Permisos concedidos automáticamente.*Read ×2.*mcp__gworkspace__list_events ×1/.test(t)), textos.join(' | '));
+});
+
+test('sin permisos automáticos no se agrega ninguna línea de auditoría', async () => {
+  const { h, corridas, almacenados, run } = montar();
+  await run();
+  corridas[0].emit(claude({ type: 'system', session_id: UUID }));
+  corridas[0].emit({ type: 'done', code: 0 });
+  await h.flush();
+  assert.ok(!almacenados.at(-1).entradas.some((e) => /automáticamente/.test(e.text)));
+});
