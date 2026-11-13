@@ -17,6 +17,7 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
   let cerrada = false;
   let reg = null;        // registro de la sesión en curso: { id, cliente, skill, titulo, creada, entradas }
   let cola = Promise.resolve(); // escrituras al almacén, en orden
+  const auto = new Map();       // permisos concedidos solos en la ejecución actual: herramienta -> cantidad
 
   const guardar = () => {
     if (!almacen || !reg?.id) return;
@@ -46,6 +47,7 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
       case 'stdout': agregar([{ k: 'meta', text: ev.text }]); break;
       case 'stderr': agregar([{ k: 'err', text: ev.text }]); break;
       case 'solicitud': send(ev); break;
+      case 'permiso_auto': auto.set(ev.tool, (auto.get(ev.tool) || 0) + 1); break;
       case 'solicitud_resuelta':
         send(ev);
         if (ev.resumen) agregar([{ k: 'user', text: ev.resumen }]);
@@ -54,6 +56,12 @@ export function manejarConexion({ send, buildPrompt, startRun, almacen = null })
         send(ev);
         break;
       case 'done':
+        // Auditoría: qué se concedió sin preguntar (lo que no es de lectura o escritura en clientes/ nunca entra acá).
+        if (auto.size) {
+          const lista = [...auto.entries()].slice(0, 8).map(([t, n]) => `${t} ×${n}`).join(', ');
+          agregar([{ k: 'meta', text: `Permisos concedidos automáticamente (lecturas y escritura en clientes/): ${lista}` }]);
+          auto.clear();
+        }
         agregar([{ k: 'meta', text: `Proceso finalizado (código ${ev.code})` }]);
         send({ type: 'done', code: ev.code });
         run = null;

@@ -10,11 +10,14 @@
 import { spawn as spawnReal, execFile } from 'node:child_process';
 import { AGENCIA_ROOT, listSkills, safeSlug } from './data.js';
 import { validarModelo, modeloPorDefecto } from './modelos.js';
+import { decidirAutomatico } from './politica.js';
 
 const UUID_RE = /^[0-9a-f-]{36}$/i;
 const PERMISSION_MODE = process.env.FARO_PERMISSION_MODE || 'acceptEdits';
 const CLAUDE_BIN = process.env.FARO_CLAUDE_BIN || 'claude';
 const MAX_RESPUESTA = 500;
+// Permisos automáticos: lo claramente seguro se concede solo (ver politica.js). FARO_PERMISOS_AUTO=off pregunta todo.
+const AUTO_ACTIVA = (process.env.FARO_PERMISOS_AUTO || 'seguros').toLowerCase() !== 'off';
 
 export async function buildPrompt({ skill, cliente, args, text }) {
   if (text) {
@@ -81,7 +84,7 @@ export function argsDeClaude({ sessionId, modelo, env = process.env } = {}) {
 }
 
 /** Lanza una ejecución. Devuelve { kill(), responder(id, decision) }. `emit(obj)` recibe cada evento. */
-export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal }) {
+export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal, raiz = AGENCIA_ROOT, autoPermisos = AUTO_ACTIVA }) {
   const args = argsDeClaude({ sessionId, modelo });
 
   // shell:true es necesario en Windows (claude.cmd); los argumentos son todos fijos/validados.
@@ -96,6 +99,13 @@ export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal 
   const procesar = (m) => {
     if (m.type === 'control_request' && m.request?.subtype === 'can_use_tool' && typeof m.request_id === 'string') {
       const r = m.request;
+      // Lo claramente seguro se concede solo: no se le pide al operador algo que el agente puede resolver por su cuenta.
+      const auto = decidirAutomatico({ tool: String(r.tool_name || ''), input: r.input ?? {}, interactivo: r.requires_user_interaction === true }, { raiz, activa: autoPermisos });
+      if (auto) {
+        escribir({ type: 'control_response', response: { subtype: 'success', request_id: m.request_id, response: { behavior: 'allow', updatedInput: r.input ?? {} } } });
+        emit({ type: 'permiso_auto', tool: String(r.tool_name || ''), motivo: auto.motivo });
+        return;
+      }
       pendientes.set(m.request_id, { tool: String(r.tool_name || ''), input: r.input ?? {}, sugerencias: r.permission_suggestions });
       emit({
         type: 'solicitud', id: m.request_id, tool: String(r.tool_name || ''), input: r.input ?? {},

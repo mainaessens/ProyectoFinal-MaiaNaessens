@@ -148,3 +148,41 @@ test('startRun rechaza un sessionId que no es UUID antes de lanzar nada', () => 
   assert.throws(() => startRun({ prompt: 'x', sessionId: '../etc/passwd', emit() {}, spawnFn }), /sessionId inválido/);
   assert.equal(lanzado, false);
 });
+
+// ---- permisos automáticos
+const RAIZ_T = '/agencia-test';
+const pedirCtl = (hijo, id, tool, input, extra = {}) => linea(hijo, { type: 'control_request', request_id: id, request: { subtype: 'can_use_tool', tool_name: tool, input, ...extra } });
+
+test('lo claramente seguro se concede solo: se responde allow, no hay solicitud y se avisa para auditar', async () => {
+  const { hijo, eventos, run } = lanzar({ raiz: RAIZ_T, autoPermisos: true });
+  pedirCtl(hijo, 'a1', 'Read', { file_path: 'clientes/demo/perfil.md' });
+  pedirCtl(hijo, 'a2', 'mcp__gworkspace__list_events', {});
+  await tick();
+  assert.ok(!eventos.some((e) => e.type === 'solicitud'), 'no se le pregunta al operador');
+  assert.deepEqual(run.pendientes(), []);
+  assert.deepEqual(eventos.filter((e) => e.type === 'permiso_auto').map((e) => e.tool), ['Read', 'mcp__gworkspace__list_events']);
+  const resp = hijo.escritos.filter((x) => x.type === 'control_response');
+  assert.deepEqual(resp.map((x) => x.response.request_id), ['a1', 'a2']);
+  assert.ok(resp.every((x) => x.response.response.behavior === 'allow'));
+  assert.deepEqual(resp[0].response.response.updatedInput, { file_path: 'clientes/demo/perfil.md' });
+});
+
+test('lo que no es claramente seguro sigue llegando al operador', async () => {
+  const { hijo, eventos, run } = lanzar({ raiz: RAIZ_T, autoPermisos: true });
+  pedirCtl(hijo, 'b1', 'mcp__instagram__publicar_carrusel', { cliente: 'demo' });
+  pedirCtl(hijo, 'b2', 'Read', { file_path: 'C:/Users/naess/.ssh/id_rsa' });
+  pedirCtl(hijo, 'b3', 'Write', { file_path: '.claude/settings.json', content: 'x' });
+  pedirCtl(hijo, 'b4', 'Bash', { command: 'rm -rf clientes' });
+  pedirCtl(hijo, 'b5', 'AskUserQuestion', PREGUNTAS, { requires_user_interaction: true });
+  await tick();
+  assert.deepEqual(eventos.filter((e) => e.type === 'solicitud').map((e) => e.id), ['b1', 'b2', 'b3', 'b4', 'b5']);
+  assert.deepEqual(run.pendientes(), ['b1', 'b2', 'b3', 'b4', 'b5']);
+  assert.ok(!hijo.escritos.some((x) => x.type === 'control_response'), 'no se respondió nada solo');
+});
+
+test('con autoPermisos desactivado se pregunta todo, también las lecturas', async () => {
+  const { hijo, eventos } = lanzar({ raiz: RAIZ_T, autoPermisos: false });
+  pedirCtl(hijo, 'c1', 'Read', { file_path: 'clientes/demo/perfil.md' });
+  await tick();
+  assert.equal(eventos.filter((e) => e.type === 'solicitud').length, 1);
+});
