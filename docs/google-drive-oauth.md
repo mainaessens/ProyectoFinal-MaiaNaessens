@@ -63,3 +63,55 @@ como *Viewer*. Requiere que el script firme un JWT con la llave (pendiente de im
 
 Revocar en <https://myaccount.google.com/permissions> (buscar la app o "OAuth 2.0 Playground") y
 generar otro.
+
+## Registro del procedimiento aplicado (17/11/2026)
+
+Resumen para el informe final: cómo se resolvió que `descargar-assets.ps1` acceda a Drive sin que el
+token expire cada hora.
+
+**Problema.** El script falló por falta de `GOOGLE_ACCESS_TOKEN`. El conector de Drive de la
+plataforma no era alternativa: devuelve cada archivo en base64 dentro del chat, inviable para 91
+fotos. Un access token de Google dura 1 hora, y el refresh token que entrega el OAuth Playground
+con sus credenciales por defecto se revoca a las 24 h (la respuesta indicaba
+`refresh_token_expires_in: 604799`, es decir 7 días, el plazo de las apps en modo *Testing*).
+
+**Decisión.** Usar credenciales OAuth propias con la app publicada *In production*, para obtener un
+refresh token que no vence y dejar que el script renueve el access token en cada corrida.
+
+**Pasos ejecutados**
+
+1. **Proyecto y API.** Proyecto de Google Cloud `TESIS`; se habilitó *Google Drive API*.
+2. **Cliente OAuth.** *Google Auth Platform → Clients → Create client → Web application*, con el URI
+   de redirección autorizado `https://developers.google.com/oauthplayground`.
+3. **Publicación.** El botón *Publish app* (Audience) estaba bloqueado: Google exigía en *Branding*
+   nombre de la app, mail de soporte, URL de la página principal y URL de la política de
+   privacidad. Se completaron con el repositorio del proyecto y [PRIVACY.md](../PRIVACY.md), se
+   dejaron vacíos el logo y los términos de servicio (el logo obliga a verificación) y se agregó
+   `github.com` como dominio autorizado.
+4. **Repositorio público.** La política de privacidad debe abrir sin iniciar sesión, y el repo era
+   privado. Antes de hacerlo público se revisó el historial completo y las ramas remotas en busca de
+   tokens y datos personales: no había secretos; quedaban visibles solo el mail dedicado del
+   proyecto y los clientes de prueba. Los datos de clientes reales, `.claude/.env` y
+   `ui/.faro-token` no están versionados.
+5. **App en producción.** Con Branding completo, *Publish app* pasó el estado a *In production*.
+6. **Refresh token.** En el OAuth Playground: engranaje → *Use your own OAuth credentials* con el
+   Client ID y el secret propios, *Access type: Offline*; scope
+   `https://www.googleapis.com/auth/drive.readonly`; *Authorize APIs* (aceptando la advertencia de
+   app no verificada, esperable para uso personal) y *Exchange authorization code for tokens*.
+7. **Almacenamiento.** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` y `GOOGLE_REFRESH_TOKEN` se
+   guardaron en `.claude/.env`, ignorado por git. El script los lee, pide un access token nuevo en
+   cada ejecución y descarga con el scope de solo lectura.
+8. **Rotación del secreto.** El Client secret quedó expuesto en una captura de pantalla durante la
+   configuración. Se rota creando uno nuevo en la página del cliente, desactivando el anterior y
+   actualizando `.claude/.env`; el refresh token sigue siendo válido.
+
+**Resultado.** Acceso de solo lectura a Drive sin intervención manual periódica. El script no
+puede modificar ni borrar nada en Drive.
+
+**Alternativa evaluada y no usada.** Cuenta de servicio (opción C): no requiere pantalla de
+consentimiento ni publicación, pero exige compartir cada carpeta de cliente con su mail y firmar un
+JWT en el script.
+
+**Verificación.** Prueba sin descargar: `descargar-assets.ps1 -Cliente <cliente> -DriveFolderId <id>
+-DryRun`. Requiere que exista `clientes/<cliente>/` (se crea con `/nuevo-cliente`) y que el Drive
+siga el orden de [orden-del-drive.md](orden-del-drive.md).
