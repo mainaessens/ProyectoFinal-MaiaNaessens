@@ -1,6 +1,6 @@
 ---
 name: nuevo-cliente
-description: Da de alta un cliente nuevo. Con una URL de Drive, lee el contenido, propone (y tras aprobación aplica) un orden de la carpeta, descarga todo el material audiovisual a assets/, genera el perfil.md desde el brief y el manual, y deja listas las 3 plantillas maestras de Canva (las toma del Drive si existen; si no, ofrece generarlas con Canva o con Claude Design). Sin URL, arma el perfil con lo que indique el usuario en el chat.
+description: Da de alta un cliente nuevo. Con una URL de Drive, lee el contenido, propone (y tras aprobación aplica) un orden de la carpeta, descarga todo el material audiovisual a assets/, genera el perfil.md desde el brief y el manual, y deja lista la base de diseño: el kit de marca para Claude Design (por defecto) y/o las 3 plantillas maestras de Canva (las toma del Drive si existen; si faltan, ofrece todas las opciones: Claude Design, Canva, Claude Design importado a Canva u omitir). Sin URL, arma el perfil con lo que indique el usuario en el chat.
 tools: Read, Write, Glob, Bash, AskUserQuestion, mcp__gworkspace__*, mcp__canva__*, mcp__instagram__ver_cuenta, mcp__instagram__recopilar_estadisticas
 ---
 
@@ -51,7 +51,7 @@ Da de alta un cliente nuevo de la agencia.
 6. Resumir qué quedó hecho, qué quedó pendiente, y sugerir el siguiente paso:
    `/campania-mensual <cliente> <mes> <objetivo>`.
 
-   Orden de las secciones: A → B → C → D → E (diagnóstico de Instagram) → **F (subir los datos a Drive)**.
+   Orden de las secciones: A → B → C (diseño) → D → E (diagnóstico de Instagram) → **F (subir los datos a Drive)**.
 
 ## A. Leer y ordenar el Drive
 
@@ -88,30 +88,57 @@ Da de alta un cliente nuevo de la agencia.
 3. Informar cantidad por tipo y tamaño total. Si no hay material, decirlo: las piezas usarán
    plantilla sin foto.
 
-## C0. Kit de marca para Claude Design (por defecto)
+## C. Diseño: kit de marca y plantillas (todas las opciones)
 
-Si el cliente va a diseñarse con Claude Design (el motor por defecto), crear su kit de marca:
-`node herramientas/marca/marca.mjs init <cliente>`, completar `clientes/<cliente>/marca/marca.json`
-con la paleta (hex), las tipografías, el logo (copiar de `assets/identidad/` a `marca/logo/`) y
-las reglas de voz (las **restricciones** del perfil pasan a `reglas.prohibidas`), y regenerar con
-`marca.mjs build <cliente>`. Lo que el brief y el manual no digan se marca como supuesto y se
-avisa. Mostrar una pieza de prueba (`marca.mjs nueva … feed-cifra` + `render`) para que el humano
-valide la marca antes de seguir. Registrar en el perfil `Motor de diseño: claude-design`.
-Detalle: `docs/diseno-claude-design.md`.
+El cliente necesita una base de diseño para que las piezas salgan siempre con su identidad. Hay
+cuatro caminos y se pueden combinar.
 
-## C. Plantillas maestras de Canva (post, carrusel, historia) — alternativa
+1. **Ver qué ya existe**: links de Canva o archivos en `02 Identidad visual/plantillas-canva` del
+   Drive, un kit en `clientes/<cliente>/marca/`, y lo que diga el brief sobre cómo trabaja el
+   cliente su diseño. Lo que ya está hecho se registra tal cual; no se regenera.
 
-1. Buscar plantillas ya hechas: links de Canva o archivos en `Identidad Visual/plantillas-canva`.
-   Si están las 3, registrarlas en el perfil tal cual (no regenerar).
-2. Si el cliente va a usar Canva y faltan una o más, **preguntar con `AskUserQuestion`** cómo generarlas:
-   - **Canva** (recomendada): crear las faltantes con el conector, **sin `brand_kit_id`**,
-     describiendo paleta y tipografía del cliente en el prompt (nunca usar brand kits de otros
-     clientes de la cuenta).
-   - **Claude Design**: diseñarlas como Artifact de diseño y, si hace falta, importarlas a
-     Canva después con `import-design-from-url`.
-   - **Omitir por ahora**: dejar "pendiente" en el perfil; `/crear-post` caerá a modo plan.
-3. Mostrar cada plantilla (link de edición) al usuario para su revisión antes de registrarla.
-4. Guardar nombre/ID/link de las 3 en la sección "Plantillas maestras" del perfil.
+2. **Preguntar con `AskUserQuestion`** (selección múltiple) qué opciones usar para lo que falte:
+   - **Claude Design (código) — recomendada, es el motor por defecto**: kit de marca en HTML/CSS
+     con control de marca y render a PNG, que se itera en Faro (pestaña Diseños).
+   - **Canva — crear las 3 plantillas maestras** (post, carrusel, historia) con el conector.
+   - **Claude Design como Artifact visual e importarlo a Canva**: se diseña la plantilla como
+     Artifact de diseño y se importa a Canva con `import-design-from-url`, para que el cliente
+     o el equipo la sigan editando allí.
+   - **Omitir por ahora**: queda "pendiente" en el perfil; `/crear-post` cae a modo plan hasta
+     que se resuelva.
+   Marcar **Claude Design** y **Canva** a la vez es válido: Claude Design queda como motor por
+   defecto y Canva como alternativa lista para usar.
+
+3. **Si se elige Claude Design (código)** — crear el kit de marca:
+   - `node herramientas/marca/marca.mjs init <cliente>`.
+   - Completar `clientes/<cliente>/marca/marca.json` con la paleta (hex), las tipografías y el
+     logo (copiar de `assets/identidad/` a `marca/logo/` y `marca/fuentes/`), y las reglas de voz
+     (las **restricciones** del brief pasan a `reglas.prohibidas`). Lo que el brief y el manual no
+     digan se marca como supuesto y se avisa; no se inventa.
+   - `marca.mjs build <cliente>` y una pieza de prueba (`marca.mjs nueva <cliente> prueba feed-cifra`
+     + `render`): mostrar el PNG para que el humano valide la marca antes de seguir.
+   - Detalle: `docs/diseno-claude-design.md`.
+
+4. **Si se elige Canva — crear las plantillas maestras que falten** (post 1:1, carrusel 4:5 con
+   varias páginas, historia 9:16):
+   - Con el conector de Canva (`generate-design` y `create-design-from-candidate`), **sin
+     `brand_kit_id`**: describir en el prompt la paleta (hex), las tipografías, el tono y el estilo
+     del cliente sacados del brief y el manual. **Nunca** usar los brand kits de otros clientes de
+     la cuenta de Canva.
+   - Subir el logo del cliente (`create-upload-url`) y usarlo en la plantilla.
+   - Una plantilla por formato, con texto de ejemplo claramente marcado, zonas seguras para
+     historias y espacio para una foto real del cliente.
+   - Mostrar cada plantilla (link de edición) al usuario para su revisión **antes** de registrarla.
+   - Si Canva no está disponible: decirlo, dejar las plantillas como pendientes y ofrecer Claude
+     Design.
+
+5. **Si se elige Claude Design como Artifact → Canva**: diseñar cada plantilla como Artifact de
+   diseño con la identidad del cliente, mostrarla para revisión, importarla a Canva con
+   `import-design-from-url` y registrar el link de edición.
+
+6. **Registrar en el perfil** (`Identidad visual`): `Motor de diseño` (`claude-design` si se creó
+   el kit, `canva` si solo hay plantillas de Canva), la ruta del kit de marca, y el nombre, ID y
+   link de las 3 plantillas de Canva si se hicieron.
 
 ## D. Perfil
 
@@ -121,7 +148,7 @@ Detalle: `docs/diseno-claude-design.md`.
 3. Si el material contradice al usuario en el chat, priorizar al usuario y señalar la
    contradicción.
 4. El perfil sigue el formato de `clientes/plantilla/perfil.md`, incluyendo la sección
-   "Estado del alta" (Drive ordenado, assets descargados, plantillas Canva).
+   "Estado del alta" (Drive ordenado, assets descargados, kit de marca y/o plantillas de Canva).
 
 ## E. Diagnóstico inicial de Instagram (community-manager)
 

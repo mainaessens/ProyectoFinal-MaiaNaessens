@@ -14,6 +14,10 @@ El primero que aplique:
 
 El motor usado queda registrado en el `.plan.json` (`diseno.motor`).
 
+Al dar de alta un cliente, `/nuevo-cliente` (sección C) ofrece todas las opciones para lo que falte: el kit
+de Claude Design, las 3 plantillas maestras de Canva, Claude Design importado a Canva, o dejarlo para
+más tarde. Se pueden combinar (por ejemplo, kit de Claude Design y plantillas de Canva).
+
 ## Dónde vive cada cosa
 
 ```
