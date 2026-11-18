@@ -38,9 +38,8 @@ tocar código.
 │                                    #   convenciones de idioma/nomenclatura, ciclo de estados
 ├── settings.json                   # permisos y registro de hooks (PreToolUse/PostToolUse)
 ├── .mcp.json                       # conectores MCP declarados (Drive, Calendar, Jira, Canva,
-│                                    #   Instagram propio, Glif, Meta Ads) — solo referencias a env vars
+│                                    #   Instagram propio, Glif) — solo referencias a env vars
 ├── .env.example                    # variables de entorno necesarias, sin valores reales
-├── limites.json                    # tope mensual de gasto en anuncios por cliente
 ├── instagram-cuentas.json          # cliente → ig_user_id (no es un secreto)
 │
 ├── agents/                         # SUBAGENTES — especialistas invocados por los skills
@@ -48,8 +47,7 @@ tocar código.
 │   ├── disenador.md                #   piezas gráficas: prioridad foto real → Canva → Glif (Fase 6)
 │   ├── community-manager.md        #   analiza las estadísticas de IG cada mes; adapta captions, arma el PLAN
 │   ├── editor-video.md             #   edita el video en bruto con Moviola (director, editor, crítico)
-│   ├── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
-│   └── ads-manager.md              #   Meta Ads: lectura (Fase 7) y creación en pausa (Fase 8)
+│   └── horario-optimo.md           #   sugiere horario óptimo (Calendar + histórico de la cuenta)
 │
 ├── skills/                         # SKILLS — procedimientos invocables como /comando
 │   ├── nuevo-cliente/SKILL.md      #   alta: ordena el Drive (con OK), descarga assets, plantillas Canva, perfil
@@ -59,7 +57,6 @@ tocar código.
 │   ├── crear-historias/SKILL.md    #   secuencia de historias → plan → publicación por API (sin stickers)
 │   ├── editar-video/SKILL.md       #   edita el bruto del cliente → plan escena por escena → video terminado
 │   ├── crear-reel/SKILL.md         #   guion + video real del cliente + portada Canva → PLAN
-│   ├── lanzar-campania-ads/SKILL.md#   campaña de Meta Ads con doble confirmación, siempre en pausa
 │   ├── campania-mensual/SKILL.md   #   tendencias + historial → calendario editorial del mes
 │   ├── reporte-semanal/SKILL.md    #   informe semanal de actividad (sin inventar métricas)
 │   └── cierre-mensual/SKILL.md     #   consolida el mes → actualiza aprendizajes.md de la cuenta
@@ -74,7 +71,7 @@ tocar código.
 │                                    #   de auditoría del cliente correspondiente
 │
 └── scripts/                        # utilitarios de soporte (PowerShell)
-    ├── descargar-assets.ps1        #   sincroniza fotos/videos del cliente desde Drive
+    ├── descargar-assets.ps1        #   sincroniza fotos/videos/identidad desde Drive (ver docs/orden-del-drive.md)
     └── checklist-marca.ps1         #   valida un texto contra las restricciones del perfil
 ```
 
@@ -85,14 +82,14 @@ requiere modificar nada dentro de `.claude/`.
 ## Cómo empezar
 
 1. Abrir esta carpeta (`agencia/`) con Claude Code.
-2. Copiar variables de `. claude/.env.example` a variables de entorno del sistema (nunca a un
-   archivo versionado) a medida que se activen los conectores de cada fase.
+2. Copiar `.claude/.env.example` a `.claude/.env` y completar las variables a medida que se
+   activen los conectores de cada fase. `.claude/.env` está ignorado por git, el código lo
+   carga solo y es la única fuente de estas variables (no se usa el entorno del sistema).
 3. Dar de alta un cliente: `/nuevo-cliente <nombre> [url-drive]`.
 
 ## Roadmap
 
-El sistema se construye en 9 fases iterativas (Fase 0 a Fase 8), cada una añadiendo un solo
-conector o capacidad nueva, con la fase de gasto real (creación de campañas Meta Ads) al final.
+El sistema se construye en fases iterativas, cada una añadiendo un solo conector o capacidad nueva.
 El detalle de cada fase está en el PDF del plan y en las historias del proyecto Jira **PFMGN**.
 
 ## Documentación
@@ -103,7 +100,7 @@ El detalle de cada fase está en el PDF del plan y en las historias del proyecto
 - [`docs/obtencion-de-credenciales.md`](docs/obtencion-de-credenciales.md): paso a paso para conseguir cada
   API y token (Meta, Glif, Vercel Blob, conectores), con los errores encontrados y su solución.
 - [`docs/conectar-instagram.md`](docs/conectar-instagram.md): conector de publicación, tokens y pruebas.
-- [`docs/fases-6-a-8.md`](docs/fases-6-a-8.md): estado de Glif, Meta Ads y publicación.
+- [`docs/fases-1-y-6.md`](docs/fases-1-y-6.md): estado de Glif y publicación.
 - [`docs/fase5-canva.md`](docs/fase5-canva.md), [`docs/mvp-fase-0-4.md`](docs/mvp-fase-0-4.md),
   [`docs/guia-testeo-manual.md`](docs/guia-testeo-manual.md): fases anteriores y guía de pruebas.
 
@@ -113,8 +110,7 @@ El detalle de cada fase está en el PDF del plan y en las historias del proyecto
   con exportación y planes aprobados.
 - **Fase 1 (publicación)**: conector propio de Instagram con imagen, carrusel y reel; lectura verificada
   contra Meta real y **primera publicación real (carrusel) verificada el 2026-11-04**.
-- **Fases 6 a 8** (Glif, Meta Ads): programadas y testeadas con servicios simulados, sin probar contra
-  los servicios reales. Meta Ads queda para el final por decisión.
-- **Pruebas**: 195 tests Pester (incluyen el wrapper de los 24 tests de Node del conector).
+- **Fase 6** (Glif): verificada contra el servicio real (una imagen con `compose_project`).
+- **Pruebas**: suite Pester (hooks, scripts, estructura, esquema de planes) + tests de Node del conector.
 - Jira (proyecto **PFMGN**) se usa solo para trackear la tesis; el epic **PFMGN-71** es la interfaz
   web (fuera de este roadmap).

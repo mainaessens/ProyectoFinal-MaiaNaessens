@@ -16,8 +16,10 @@ Cada paso termina con una parada humana. Lo que sigue es el recorrido de un clie
 5. Genera `perfil.md` citando la fuente de cada dato; **parada** para aprobarlo.
 
 ## 2. Campaña del mes: `/campania-mensual <cliente> <mes> <objetivo>`
-Tendencias + historial → tabla numerada (`#`, slug, fecha, red, formato, tema, hook, CTA).
-**Parada:** aprobación de la tabla completa. Guarda `calendario-editorial.md`. Si el cliente la
+Tendencias + historial → tabla numerada (`#`, slug, fecha, red, formato, tema, hook, CTA) **más el
+desarrollo de cada pieza** (guion de cada reel, placas de cada carrusel, secuencia de cada historia).
+**Parada:** aprobación de la tabla y del desarrollo. Guarda `calendario-editorial.md` (tabla +
+sección "Desarrollo de piezas"). Si el cliente la
 aprueba, ofrece: un posteo por número o nombre, todos juntos, o más tarde.
 
 ## 3. Cada pieza: `/crear-post <cliente> <#|slug|todos>`
@@ -46,7 +48,3 @@ y alimentan la campaña del mes siguiente.
 
 ## Estados de una pieza
 `en calendario` → `diseño en curso` → `aprobada (plan.json)` → `exportada` → `publicada (.publicado.json)`.
-
-## Gasto en anuncios (opcional, al final del roadmap)
-`/lanzar-campania-ads`: propuesta → el usuario **escribe el monto** → `.ads.json` → campaña **en
-pausa** → activación con segunda confirmación. El hook verifica monto, tope mensual y estado.

@@ -72,13 +72,13 @@ Lo ejecuta el subagente **`community-manager`** (ver `.claude/agents/community-m
    matizar lo que la métrica no ve (una promoción, un evento, una campaña paga).
 
 7. **Solo tras la validación**: dejar el `.md` como definitivo (marcar `Estado: validado`),
-   registrar la línea en `registro-actividad.log` y sugerir el siguiente paso:
-   `/campania-mensual <cliente> <mes> <objetivo>`.
+   registrar la línea en `registro-actividad.log`, ejecutar `/sincronizar-drive <cliente>` y
+   sugerir el siguiente paso: `/campania-mensual <cliente> <mes> <objetivo>`.
 
 ## Método
 
 Seguir la sección *Métricas y mejora continua* de `.claude/referencias/criterios-editoriales.md`:
-comparar contra el historial **de la propia cuenta**, separar orgánico de pauta, distinguir
+comparar contra el historial **de la propia cuenta**, distinguir
 correlación de causalidad y cerrar con **un experimento medible** y una decisión concreta.
 
 ## Reglas

@@ -4,6 +4,7 @@ import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { createPublisher, ToolError } from "./publisher.mjs";
+import { cargarEnv } from "../../lib/cargar-env.mjs";
 
 export async function handleMessage(msg, publisher) {
   const { id, method, params } = msg;
@@ -33,6 +34,7 @@ export async function handleMessage(msg, publisher) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  cargarEnv(); // carga tokens desde .claude/.env (el .env pisa el entorno del sistema)
   const agenciaRoot = process.env.AGENCIA_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
   const publisher = createPublisher({ agenciaRoot });
   const rl = readline.createInterface({ input: process.stdin });

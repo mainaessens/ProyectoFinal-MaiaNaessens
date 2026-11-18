@@ -97,7 +97,7 @@ Meta respondió *"Cannot parse access token"*. Se reconoció el tipo por el pref
    `instagram_basic`, `instagram_content_publish` (y `pages_show_list`, `pages_read_engagement` si se
    ofrecen). Duración: 60 días mientras se prueba.
    Se **destildaron** `ads_management`, `ads_read`, `instagram_manage_messages` e
-   `instagram_manage_comments` (mínimo permiso: Meta Ads queda para después).
+   `instagram_manage_comments` (principio de mínimo permiso).
 5. Cargar `INSTAGRAM_ACCESS_TOKEN` y borrar `META_GRAPH_BASE`.
 6. Anotar el `ig_user_id` (empieza con `17841…`) en `.claude/instagram-cuentas.json`.
 
@@ -132,9 +132,7 @@ hay que crear otro con acceso público. Con el store público, la subida respond
 
 ## 5. Pendientes de credenciales
 
-- **Meta Ads** (`PIPEBOARD_API_TOKEN`, cuenta publicitaria y límite de gasto en Meta): decisión de
-  dejarlo para el final.
-- **Facebook y TikTok**: sin conector.
+- **Facebook**: sin conector.
 - **Revocar** el token de Glif que se compartió en un chat (generar otro y cargarlo) y el token anterior del otro usuario del sistema.
 - **Renovar** el token de Meta antes de los 60 días.
 

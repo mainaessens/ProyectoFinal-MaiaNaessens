@@ -25,7 +25,7 @@ general de este archivo.
    comprobado*.
 2. **Mirar el rendimiento con datos, no con intuición**: alcance de no seguidores, reproducciones
    y retención, guardados, compartidos, visitas al perfil, mensajes, clics y resultados de negocio
-   (pedidos, turnos, presupuestos) según el objetivo. **Separar orgánico de pauta.** Comparar
+   (pedidos, turnos, presupuestos) según el objetivo. Comparar
    contra el promedio histórico *de esa cuenta* y formatos equivalentes, nunca contra benchmarks
    inventados.
 3. **Formular una hipótesis por pieza o experimento**: «Si comunicamos [valor] desde [insight]
@@ -116,7 +116,7 @@ Confirmar y marcar lo que no se pueda:
 Seguimiento por pieza y por objetivo, anotando gancho, duración, tema, formato, día, fuente de
 tráfico y CTA. Ejemplos de lectura: retención y segundos 0–3 para reels, alcance a no seguidores
 y compartidos para descubrimiento, guardados y deslizamientos para educación, respuestas para
-historias, conversaciones calificadas y costo por resultado para pauta, turnos/pedidos/
+historias, conversaciones calificadas y turnos/pedidos/
 presupuestos para conversión. Identificar qué replicar, qué cambiar y qué dejar de hacer;
 **diferenciar correlación de causalidad**; proponer **un experimento medible por ciclo** y una
 decisión concreta (esto se materializa en las *Decisiones* de `/analisis-cuenta`).

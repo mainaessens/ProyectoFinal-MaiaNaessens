@@ -28,7 +28,8 @@ en propuestas de campaña fundamentadas, nunca genéricas.
 3. **Consultar Jira** (vía `atlassian`) para entender qué tareas están en curso o pendientes de
    la cuenta antes de proponer un calendario nuevo, evitando duplicar trabajo.
 4. **Proponer**, nunca ejecutar: calendarios editoriales, ángulos de campaña, hooks por
-   publicación. La creación de tareas en Jira o eventos en Calendar solo ocurre después de que
+   publicación **y el desarrollo de cada pieza** (guion escena por escena de cada reel, placas
+   de cada carrusel, secuencia de cada historia; formato en `referencias/guia-formatos.md`). La creación de tareas en Jira o eventos en Calendar solo ocurre después de que
    el humano aprueba la propuesta completa (fuera de este subagente, en el skill que lo invoca).
 
 ## Reglas

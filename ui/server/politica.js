@@ -2,7 +2,7 @@
 //
 // Criterio: se aprueba automáticamente SOLO lo que no tiene efecto fuera del proyecto ni gasta dinero (lecturas dentro
 // del proyecto, búsquedas, escritura dentro de clientes/**, y unos pocos comandos de solo lectura). Todo lo demás
-// (publicar, crear o modificar en Drive/Calendar/Jira/Canva, generar imágenes de pago, anuncios, comandos arbitrarios,
+// (publicar, crear o modificar en Drive/Calendar/Jira/Canva, generar imágenes de pago, comandos arbitrarios,
 // leer o escribir fuera del proyecto, tocar .claude/**) se le muestra al operador. Ante la duda, se pregunta.
 //
 // Lo concedido solo queda auditado en el historial (conteo por herramienta) y los hooks de .claude/hooks/ siguen
@@ -23,8 +23,8 @@ const ESCRITURA = { Write: 'file_path', Edit: 'file_path', MultiEdit: 'file_path
 const INSTAGRAM_LECTURA = new Set(['ver_cuenta', 'perfil_cuenta', 'listar_publicaciones', 'insights_publicacion',
   'insights_cuenta', 'audiencia', 'benchmark_competidor', 'recopilar_estadisticas']);
 
-// Conectores que nunca se aprueban solos (gastan dinero o publican), ni siquiera sus lecturas.
-const SERVIDORES_SIEMPRE_PREGUNTAR = new Set(['meta-ads', 'glif', 'postiz', 'late']);
+// Conectores que nunca se aprueban solos (publican o consumen créditos), ni siquiera sus lecturas.
+const SERVIDORES_SIEMPRE_PREGUNTAR = new Set(['glif']);
 
 // Nombre de herramienta de lectura: get_x, list_x, getJiraIssue, search-designs, read_file_content…
 const LECTURA_RE = /^(get|list|read|search|lookup|describe|find|query|view)([_-]|[A-Z]|$)/;

@@ -55,8 +55,8 @@ test('conectores: las lecturas pasan; crear, modificar, enviar y exportar se pre
   }
 });
 
-test('los conectores de gasto o publicación nunca se aprueban solos, ni sus lecturas', () => {
-  for (const t of ['mcp__meta-ads__get_campaigns', 'mcp__meta-ads__create_campaign', 'mcp__glif__list_workflows', 'mcp__glif__compose_project', 'mcp__postiz__list_posts', 'mcp__late__get_accounts']) {
+test('los conectores que publican o consumen créditos nunca se aprueban solos, ni sus lecturas', () => {
+  for (const t of ['mcp__glif__list_workflows', 'mcp__glif__compose_project']) {
     assert.equal(auto(t), null, t);
   }
 });

@@ -1,51 +1,65 @@
-<#
+﻿<#
 .SYNOPSIS
-    Sincroniza fotos/ y videos/ de la carpeta de Drive de un cliente hacia
-    clientes/<nombre>/assets/{fotos,videos}, sin duplicar archivos ya descargados.
+    Sincroniza el material de la carpeta de Drive de un cliente hacia clientes/<nombre>/assets/,
+    siguiendo la convención de orden de docs/orden-del-drive.md.
 
 .DESCRIPTION
-    Este script asume una instalación estándar de Claude Code con el conector
-    google_workspace_mcp registrado vía CLI (`claude mcp add gworkspace -- uvx workspace-mcp`)
-    y usa la API REST v3 de Google Drive directamente con un access token OAuth.
+    Lee las secciones de primer nivel del Drive (tolera prefijo numérico y mayúsculas/tildes):
 
-    NOTA — entorno de esta sesión: en esta sesión de trabajo, Google Drive está disponible
-    como conector de la plataforma (herramientas MCP invocadas por Claude directamente:
-    list_recent_files / search_files / download_file_content), no como una instalación CLI
-    local de Claude Code. En ese modo, la sincronización la ejecuta el propio agente llamando
-    a esas herramientas con la MISMA lógica que implementa este script (ver más abajo), sin
-    pasar por PowerShell. Este script queda documentado y listo para una instalación CLI
-    standalone, donde sí puede ejecutarse tal cual.
+        Drive                         ->  clientes/<c>/assets/
+        03-fotos/<cat>/<tema>/...     ->  fotos/<cat>/<tema>/...
+        04-videos/<cat>/...           ->  videos/<cat>/...
+        02-identidad-visual/...       ->  identidad/...
+        01-brief-y-manual, 05-otros   ->  no se descargan (se leen con el conector)
+
+    - Recursivo y con paginación (más de 100 archivos).
+    - Nombres locales normalizados (minúsculas, sin tildes ni espacios).
+    - Idempotente: assets/.drive-manifest.json recuerda id de Drive -> ruta + md5. No re-descarga
+      lo que no cambió, actualiza lo que cambió en Drive y nunca borra nada local.
+    - Solo lee Drive; no mueve, renombra ni borra nada allá.
+    - Avisa de desorden (archivos sueltos, tipos inesperados, carpetas muy profundas,
+      secciones no reconocidas) sin frenar la descarga.
+
+    Requiere la variable de entorno GOOGLE_ACCESS_TOKEN (token OAuth con acceso de lectura a Drive).
+    Con el conector de plataforma (sin CLI), el agente aplica estas mismas reglas con
+    download_file_content archivo por archivo.
 
 .PARAMETER Cliente
-    Nombre de la carpeta del cliente en clientes/<nombre>/ (debe existir).
+    Carpeta del cliente en clientes/<nombre>/ (debe existir).
 
 .PARAMETER DriveFolderId
-    ID de la carpeta de Drive del cliente (se toma de perfil.md si no se especifica).
+    ID de la carpeta raíz de Drive del cliente (si falta, se toma la URL de perfil.md).
+
+.PARAMETER DryRun
+    Solo muestra qué se descargaría.
 
 .EXAMPLE
-    ./descargar-assets.ps1 -Cliente cafe-lunar -DriveFolderId 1AbCdEfGhIjKlmNoPQRstuv
+    ./descargar-assets.ps1 -Cliente cafe-lunar -DriveFolderId 1AbCdEfGhIjKlmNoPQRstuv -DryRun
 #>
 
 param(
     [Parameter(Mandatory = $true)]
     [string]$Cliente,
 
-    [string]$DriveFolderId
+    [string]$DriveFolderId,
+
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+. (Join-Path $PSScriptRoot "lib\drive-orden.ps1")
 
 $agenciaRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $clienteDir = Join-Path $agenciaRoot "clientes\$Cliente"
 $perfilPath = Join-Path $clienteDir "perfil.md"
-$fotosDir = Join-Path $clienteDir "assets\fotos"
-$videosDir = Join-Path $clienteDir "assets\videos"
+$assetsDir = Join-Path $clienteDir "assets"
+$manifiestoPath = Join-Path $assetsDir ".drive-manifest.json"
 
 if (-not (Test-Path $clienteDir)) {
     throw "No existe clientes/$Cliente/. Ejecutá primero /nuevo-cliente $Cliente."
 }
-
-New-Item -ItemType Directory -Force -Path $fotosDir, $videosDir | Out-Null
 
 if (-not $DriveFolderId) {
     if (-not (Test-Path $perfilPath)) {
@@ -58,57 +72,57 @@ if (-not $DriveFolderId) {
     $DriveFolderId = $urlLine.Matches[0].Groups[1].Value
 }
 
-$accessToken = $env:GOOGLE_ACCESS_TOKEN
-if (-not $accessToken) {
-    throw "Falta la variable de entorno GOOGLE_ACCESS_TOKEN (token OAuth de la cuenta de Drive de la agencia)."
-}
-
-$headers = @{ Authorization = "Bearer $accessToken" }
-
-function Get-DriveSubfolderId {
-    param([string]$ParentId, [string]$Name)
-    $q = "'$ParentId' in parents and name = '$Name' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
-    $uri = "https://www.googleapis.com/drive/v3/files?q=$([uri]::EscapeDataString($q))&fields=files(id,name)"
-    $resp = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-    if ($resp.files.Count -eq 0) { return $null }
-    return $resp.files[0].id
-}
-
-function Sync-DriveFolder {
-    param([string]$FolderId, [string]$LocalDir)
-
-    if (-not $FolderId) { return }
-
-    $q = "'$FolderId' in parents and trashed = false"
-    $uri = "https://www.googleapis.com/drive/v3/files?q=$([uri]::EscapeDataString($q))&fields=files(id,name,modifiedTime,md5Checksum)"
-    $resp = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
-
-    foreach ($file in $resp.files) {
-        $localPath = Join-Path $LocalDir $file.name
-
-        # No duplicar: si ya existe un archivo con el mismo nombre, se omite.
-        # (Si se quiere detectar cambios de contenido, comparar $file.md5Checksum
-        # contra un hash local guardado — no implementado en esta versión mínima.)
-        if (Test-Path $localPath) {
-            Write-Host "  = $($file.name) (ya existe, se omite)"
-            continue
-        }
-
-        $downloadUri = "https://www.googleapis.com/drive/v3/files/$($file.id)?alt=media"
-        Invoke-WebRequest -Uri $downloadUri -Headers $headers -OutFile $localPath
-        Write-Host "  + $($file.name) (descargado)"
+# Token: variable de entorno, o .claude/.env (GOOGLE_ACCESS_TOKEN, o GOOGLE_CLIENT_ID +
+# GOOGLE_CLIENT_SECRET + GOOGLE_REFRESH_TOKEN para renovarlo solo). Ver docs/orden-del-drive.md.
+$envPath = Join-Path (Split-Path -Parent $PSScriptRoot) ".env"
+$cfg = @{}
+if (Test-Path $envPath) {
+    foreach ($l in Get-Content $envPath) {
+        if ($l -match '^\s*([A-Z_]+)\s*=\s*(.+?)\s*$') { $cfg[$Matches[1]] = $Matches[2] }
     }
 }
+$token = if ($env:GOOGLE_ACCESS_TOKEN) { $env:GOOGLE_ACCESS_TOKEN } else { $cfg['GOOGLE_ACCESS_TOKEN'] }
+if (-not $token -and $cfg['GOOGLE_REFRESH_TOKEN'] -and $cfg['GOOGLE_CLIENT_ID'] -and $cfg['GOOGLE_CLIENT_SECRET']) {
+    $r = Invoke-RestMethod -Method Post -Uri "https://oauth2.googleapis.com/token" -Body @{
+        client_id = $cfg['GOOGLE_CLIENT_ID']; client_secret = $cfg['GOOGLE_CLIENT_SECRET']
+        refresh_token = $cfg['GOOGLE_REFRESH_TOKEN']; grant_type = "refresh_token" }
+    $token = $r.access_token
+}
+if (-not $token) {
+    throw "Falta GOOGLE_ACCESS_TOKEN (variable de entorno o .claude/.env). Pasos en docs/orden-del-drive.md, sección 'Token de Drive'."
+}
+$script:DriveHeaders = @{ Authorization = "Bearer $token" }
 
-Write-Host "Sincronizando assets de '$Cliente' desde Drive (carpeta $DriveFolderId)..."
+New-Item -ItemType Directory -Force -Path $assetsDir | Out-Null
+$manifiesto = Read-Manifiesto -Path $manifiestoPath
+$resumen = New-Resumen
 
-$fotosId = Get-DriveSubfolderId -ParentId $DriveFolderId -Name "fotos"
-$videosId = Get-DriveSubfolderId -ParentId $DriveFolderId -Name "videos"
+Write-Host "Sincronizando '$Cliente' desde Drive (carpeta $DriveFolderId)$(if ($DryRun) { ' [DRY RUN]' })..."
 
-Write-Host "Fotos:"
-Sync-DriveFolder -FolderId $fotosId -LocalDir $fotosDir
+$vistas = @()
+foreach ($carpeta in @(Get-DriveHijos -FolderId $DriveFolderId | Where-Object { $_.mimeType -eq $script:MimeCarpeta })) {
+    $clave = Resolve-SeccionDrive $carpeta.name
+    if (-not $clave) {
+        $resumen.Avisos += "Carpeta de primer nivel no reconocida, no se descarga: $($carpeta.name)"
+        continue
+    }
+    $vistas += $clave
+    $sec = $script:Secciones[$clave]
+    if (-not $sec.Destino) { continue }
 
-Write-Host "Videos:"
-Sync-DriveFolder -FolderId $videosId -LocalDir $videosDir
+    Write-Host "$($carpeta.name) -> assets/$($sec.Destino)/"
+    Sync-CarpetaDrive -FolderId $carpeta.id -LocalDir (Join-Path $assetsDir $sec.Destino) -AssetsDir $assetsDir `
+        -MimeRegex $sec.Mime -Manifiesto $manifiesto -Resumen $resumen -RutaDrive $carpeta.name -DryRun:$DryRun
+}
+foreach ($esperada in 'fotos', 'videos') {
+    if ($vistas -notcontains $esperada) { $resumen.Avisos += "No hay sección '$esperada' en el Drive (ver docs/orden-del-drive.md)." }
+}
 
-Write-Host "Listo. Assets en $clienteDir\assets\"
+if (-not $DryRun) { Save-Manifiesto -Path $manifiestoPath -Manifiesto $manifiesto }
+
+$mb = [math]::Round($resumen.Bytes / 1MB, 1)
+Write-Host ""
+Write-Host "Resumen: $($resumen.Descargados) descargados, $($resumen.Actualizados) actualizados, $($resumen.Existentes) ya estaban, $($resumen.Omitidos) omitidos, $($resumen.Pendientes) pendientes (dry run), $mb MB."
+foreach ($a in $resumen.Avisos) { Write-Warning $a }
+foreach ($e in $resumen.Errores) { Write-Host "ERROR: $e" -ForegroundColor Red }
+if ($resumen.Errores.Count -gt 0) { exit 1 }

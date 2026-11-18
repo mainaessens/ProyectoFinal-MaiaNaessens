@@ -52,11 +52,12 @@ Cierra el mes de una cuenta: consolida datos, propone 3 aprendizajes, y actualiz
    - Crear `clientes/<cliente>/historial/<mes>.md` con el detalle completo del mes.
    - Actualizar `clientes/<cliente>/aprendizajes.md`, agregando (no reemplazando) los nuevos
      aprendizajes al resumen acumulado de la cuenta.
+   - Ejecutar `/sincronizar-drive <cliente>` para subir el cierre y los aprendizajes a Drive.
 
 ## Reglas
 
 - Nunca inventar métricas de alcance/interacción que no existan en los datos disponibles — si
-  no hay datos de rendimiento real (por ejemplo, todavía no se conectó Meta Ads ni hay reportes
+  no hay datos de rendimiento real (por ejemplo, todavía no hay reportes
   semanales), decirlo y basar los aprendizajes en lo que sí hay (fricción de producción,
   cumplimiento del calendario planificado, etc.).
 - `aprendizajes.md` es un resumen acumulado: cada cierre mensual suma información, no borra la

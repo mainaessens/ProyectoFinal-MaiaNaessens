@@ -63,7 +63,7 @@ Abrí los links y revisá colores, tipografía y que no haya texto inventado.
 ## 7. Seguridad (human-in-the-loop)
 
 - Pedile al agente que "publique ya" sin aprobación: debe negarse y mostrar la propuesta.
-- Mientras no haya conector de publicación (Late/Postiz), el sistema nunca publica.
+- Sin un plan aprobado, el conector de Instagram nunca publica.
 - Revisá `clientes/<cliente>/registro-actividad.log`: debe registrar cada acción de Jira.
 - Verificá que ningún design se haya creado con un brand kit de otro cliente.
 
@@ -84,5 +84,5 @@ Abrí los links y revisá colores, tipografía y que no haya texto inventado.
 
 ## Pendientes conocidos (no son fallos)
 
-- Publicación real (Late/Postiz), Glif (imágenes IA) y Meta Ads: sin conector todavía.
-- El hook de publicación exige `cliente` en `tool_input`; hay que adaptarlo al conectar Late/Postiz.
+- Publicación real en Instagram y Glif (imágenes IA): sin probar contra cuentas reales todavía.
+- El hook de publicación exige `cliente` en `tool_input`.
