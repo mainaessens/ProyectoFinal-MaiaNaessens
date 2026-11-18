@@ -23,7 +23,9 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
 
 ## Procedimiento (por cada posteo; en `todos`, secuencial)
 
-1. **Resolver el posteo**: leer `calendario-editorial.md` y tomar fecha, red, formato, tema,
+1. **Resolver el posteo**: leer `calendario-editorial.md` (la ficha de la sección `## Desarrollo
+   de piezas` es el punto de partida aprobado: no rehacerla salvo que el usuario pida cambios) y
+   tomar fecha, red, formato, tema,
    hook y CTA de la fila. Si el número/nombre no existe o es ambiguo, listar las filas y
    preguntar. Si el calendario no está aprobado, avisar y detenerse.
 
@@ -104,7 +106,7 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
     programada); el conector se niega a publicar antes de `fecha_programada` salvo
     `ignorar_fecha_programada:true`, que solo se usa si el usuario pide publicar ya.
     El conector registra `<plan>.publicado.json` y la línea en `registro-actividad.log`; el plan
-    aprobado no se modifica. Facebook y TikTok no tienen conector todavía.
+    aprobado no se modifica. Facebook no tiene conector todavía.
     - **Sin conector o sin cuenta configurada**: no intentar publicar. Dejar el plan en
       `listo_para_publicar_cuando_exista_conector`, con el archivo exportado listo, y decirlo
       explícitamente.

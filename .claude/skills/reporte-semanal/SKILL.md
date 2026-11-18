@@ -1,12 +1,12 @@
 ---
 name: reporte-semanal
-description: Genera un informe semanal de performance orgánica para un cliente (sin Meta Ads todavía — eso llega en la Fase 7), leyendo la auditoría de actividad y el Calendar del cliente. Resume qué se publicó, arma 3 conclusiones y 3 recomendaciones, y anota los datos en el historial mensual de la cuenta.
+description: Genera un informe semanal de performance orgánica para un cliente, leyendo la auditoría de actividad y el Calendar del cliente. Resume qué se publicó, arma 3 conclusiones y 3 recomendaciones, y anota los datos en el historial mensual de la cuenta.
 tools: Read, Write, mcp__gworkspace__*, AskUserQuestion
 ---
 
 # /reporte-semanal
 
-Arma el reporte semanal de una cuenta (métricas orgánicas — sin Ads todavía).
+Arma el reporte semanal de una cuenta (métricas orgánicas).
 
 ## Uso
 
@@ -27,9 +27,9 @@ Arma el reporte semanal de una cuenta (métricas orgánicas — sin Ads todavía
 2. **Leer eventos del Calendar** del cliente en ese rango, para cruzar lo planificado con lo
    efectivamente marcado como hecho.
 
-3. **Nota sobre métricas de alcance**: en esta fase (sin Meta Ads ni conector de publicación
-   real conectado todavía) **no hay alcance/interacción real disponible**. El reporte debe
-   decirlo explícitamente en vez de inventar números — se limita a reportar cumplimiento
+3. **Nota sobre métricas de alcance**: mientras no haya conector de publicación con métricas
+   reales, **no hay alcance/interacción real disponible**. El reporte debe decirlo
+   explícitamente en vez de inventar números — se limita a reportar cumplimiento
    (cuánto de lo planificado se ejecutó, con qué fricción) hasta que existan datos reales.
 
 4. **Armar el informe**:
@@ -46,8 +46,8 @@ Arma el reporte semanal de una cuenta (métricas orgánicas — sin Ads todavía
 
 ## Reglas
 
-- Nunca reportar una métrica de alcance/CPC/interacción como si fuera real cuando no hay
-  conector de Ads ni de publicación conectado — decir explícitamente "sin datos de alcance
+- Nunca reportar una métrica de alcance/interacción como si fuera real cuando no hay
+  conector de publicación con métricas conectado — decir explícitamente "sin datos de alcance
   todavía" en ese caso.
 - El historial que genera este skill es el que `/cierre-mensual` consolida a fin de mes, y el
   que `/campania-mensual` lee antes de planificar el mes siguiente.

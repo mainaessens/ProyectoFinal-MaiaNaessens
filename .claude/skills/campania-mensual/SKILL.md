@@ -47,7 +47,7 @@ Propone el calendario editorial completo de un mes para un cliente.
 3. **Definir la estrategia del mes** (método en `.claude/referencias/criterios-editoriales.md`):
    - **1 objetivo principal y 2–3 secundarios**, y los pilares del perfil que lo sirven.
    - **Matriz de oportunidades**: audiencia, problema/insight, diferenciador, formato, recurso
-     disponible, CTA y KPI. Aclarar qué piezas apoyan pauta y cuáles son solo orgánicas.
+     disponible, CTA y KPI.
    - **Mix por función, no por cuota**: reels para descubrimiento, carruseles para profundidad y
      guardados, historias para relación (solo si el perfil las incluye en el contrato), piezas
      comerciales para acción, testimonios/obras con consentimiento para confianza. Ajustar las
@@ -65,9 +65,8 @@ Propone el calendario editorial completo de un mes para un cliente.
 
    `Recurso` es el material real que existe (foto/video del cliente, plantilla) o **falta**.
    `Estado` arranca en *propuesta* y los POR CONFIRMAR quedan visibles. Al final, una **agenda de
-   producción**: qué hay que filmar/fotografiar, quién aprueba qué, y qué recursos faltan. El
-   desarrollo completo de cada pieza (ficha, guion, placas) lo hace `/crear-post` o
-   `/crear-reel`, una por vez y con aprobación individual.
+   producción**: qué hay que filmar/fotografiar, quién aprueba qué, y qué recursos faltan.
+   La tabla es el índice: el contenido de cada pieza se desarrolla en el paso 5.
 
    (Referencia de columnas mínimas, si el espacio no alcanza: `#`, Fecha, Red, Formato, Tema,
    Hook, CTA, Base.)
@@ -84,26 +83,56 @@ Propone el calendario editorial completo de un mes para un cliente.
    pilar del perfil, o aprendizaje previo) — nunca un hook genérico. Respetar los pilares de contenido y las
    restricciones del `perfil.md` del cliente en cada fila.
 
-5. **Parada obligatoria**: presentar la tabla completa al usuario (`AskUserQuestion` o
+5. **Desarrollar el contenido de cada pieza** (obligatorio, no se omite ni se difiere a
+   `/crear-post`). Para **cada fila** de la tabla, escribir su ficha con el método ya definido en
+   las referencias, sin inventar otro: `.claude/referencias/guia-formatos.md` (estructura de la
+   ficha por formato), `.claude/referencias/criterios-editoriales.md` (hook, tono, prioridades) y
+   el `perfil.md` del cliente. Sin esto, la tabla no está completa:
+   - **Reel**: ficha de entrega completa: título · objetivo · duración estimada · público ·
+     concepto · 2–3 opciones de hook con el elegido y su porqué · guion escena por escena
+     (tiempo, quién habla, texto exacto o pauta, plano/acción/B-roll/texto en pantalla) · audio ·
+     recursos · CTA · copy sugerido · portada · indicaciones de edición · datos a confirmar.
+   - **Carrusel**: placa por placa (portada, placa 2, desarrollo, cierre, CTA), cada una con
+     TÍTULO · TEXTO FINAL · FUNCIÓN · IDEA VISUAL · elemento real requerido · transición; más
+     caption sugerido y CTA único.
+   - **Historias**: por cada historia de la secuencia: función, texto exacto en pantalla, recurso,
+     sticker/encuesta/link si lleva (y por tanto si queda `manual`), objetivo y CTA.
+   - **Post simple / otros formatos**: idea, texto en la pieza, caption, recurso y CTA.
+   - En todas: recurso real que existe en `assets/` (nombrar el archivo) o **falta**; lo no
+     confirmado va como **SUPUESTO / POR CONFIRMAR**; cita la decisión (D#) que la respalda.
+     Respetar tono, pilares y restricciones del `perfil.md`.
+   - Cada ficha se encabeza con `### #<n> · <slug> · <fecha> · <formato>`.
+   - Es un desarrollo de planificación: no genera diseños en Canva, ni videos, ni planes
+     `.plan.json` (eso es `/crear-post`, `/crear-reel` y `/crear-historias`, que parten de esta
+     ficha sin rehacerla salvo que el usuario pida cambios).
+
+6. **Autoevaluar cada ficha** con `.claude/referencias/autoevaluacion.md` (0–2 en 10 criterios):
+   las que no lleguen a 16/20 o fallen en exactitud se reescriben antes de mostrarlas. Poner el
+   puntaje en el encabezado de cada ficha.
+
+7. **Parada obligatoria**: presentar la tabla completa **y el desarrollo de cada pieza** al usuario (`AskUserQuestion` o
    confirmación directa en el chat). El usuario puede aprobar tal cual, reordenar, pedir
    cambios en filas puntuales, o rechazar.
 
-6. **Si pide cambios**: ajustar solo las filas señaladas y volver a presentar la tabla completa
+8. **Si pide cambios**: ajustar solo las filas señaladas y volver a presentar la tabla completa
    actualizada — nunca asumir que el resto sigue aprobado sin volver a mostrarlo.
 
-7. **Solo tras aprobación completa**:
+9. **Solo tras aprobación completa**:
    - Crear una tarea en Jira por cada fila (usando el `jira_project_key` del perfil del
      cliente), con el hook y el formato en el resumen, y la fecha como `duedate`. Si una pieza depende de
      trabajo de otra persona (filmación, diseño, revisión experta, aprobación del cliente),
      crear la **subtarea relacionada** correspondiente en vez de dejarlo implícito.
    - Crear un evento en el Calendar del cliente (`google_calendar_id` del perfil) por cada fila,
      en la fecha y horario propuestos.
-   - Guardar la tabla aprobada en `clientes/<cliente>/calendario-editorial.md`, reemplazando el
-     contenido anterior de ese mes si existía.
+   - Guardar en `clientes/<cliente>/calendario-editorial.md`, reemplazando el contenido anterior
+     de ese mes si existía: primero la tabla aprobada y después la sección
+     `## Desarrollo de piezas` con las fichas del paso 5.
+   - En cada tarea de Jira, incluir en la descripción un resumen de la ficha de esa pieza.
 
-8. Confirmar al usuario cuántas tareas y eventos se crearon, con enlaces.
+10. Confirmar al usuario cuántas tareas y eventos se crearon, con enlaces. Ejecutar
+    `/sincronizar-drive <cliente>` para subir el calendario y el desarrollo de las piezas a Drive.
 
-9. **Siguiente paso (cuando la campaña está aprobada por el cliente)**: ofrecer con
+11. **Siguiente paso (cuando la campaña está aprobada por el cliente)**: ofrecer con
    `AskUserQuestion` cómo seguir con las piezas:
    - **Un posteo puntual**: indicar el número (`#`) o el nombre/slug → `/crear-post <cliente> <#|slug>`.
    - **Historias**: `/crear-historias <cliente> <#|slug>` (se publican por API; las que llevan stickers
@@ -117,7 +146,9 @@ Propone el calendario editorial completo de un mes para un cliente.
 
 - **Sin análisis validado del mes anterior no se arma el plan** (paso 0), salvo la excepción
   confirmada de cuenta sin datos.
-- Nunca crear tareas en Jira ni eventos en Calendar antes del paso 7 (aprobación completa de la
+- **Una tabla sin el desarrollo de cada reel, carrusel e historia está incompleta**: no se
+  presenta como lista para aprobar (paso 5).
+- Nunca crear tareas en Jira ni eventos en Calendar antes del paso 9 (aprobación completa de la
   tabla) — ni una fila suelta, ni "para adelantar trabajo".
 - Si `jira_project_key` o `google_calendar_id` no están completados en el perfil del cliente,
   avisar y no intentar crear nada ahí — se puede seguir generando y guardando la tabla igual.

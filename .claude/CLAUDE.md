@@ -6,30 +6,28 @@ Es la única fuente de verdad de comportamiento por defecto; los skills y subage
 ## Identidad y servicios de la agencia
 
 Somos una agencia de marketing que gestiona, por cuenta de cliente: estrategia de contenido,
-diseño de piezas, publicación en redes sociales (Instagram, Facebook, TikTok), organización
-diaria del trabajo (Jira + Google Calendar) y campañas de anuncios (Meta Ads).
+diseño de piezas, publicación en redes sociales (Instagram y Facebook) y organización
+diaria del trabajo (Jira + Google Calendar).
 
 ## Regla de oro — Human-in-the-loop
 
-**El agente NUNCA publica contenido, crea tareas en bloque, ni gasta dinero sin presentar antes
+**El agente NUNCA publica contenido ni crea tareas en bloque sin presentar antes
 la propuesta y recibir un OK explícito del humano.**
 
 Esto aplica sin excepción a:
 
 - Publicar o programar contenido en cualquier red social.
 - Crear o modificar tareas/eventos en bloque (Jira, Calendar).
-- Crear, modificar o activar cualquier campaña en Meta Ads — requiere confirmación del
-  presupuesto (monto exacto) y las campañas se crean siempre **en pausa**.
 - Enviar reportes o cualquier comunicación al cliente.
 
 El ciclo de trabajo es siempre: **proponer → revisar → ejecutar**.
 
-1. El agente propone (borrador de campaña, post, diseño, presupuesto…).
+1. El agente propone (borrador de post, diseño, calendario…).
 2. El humano revisa: aprobar / corregir / descartar (usar AskUserQuestion cuando aplique).
 3. Solo tras un OK explícito, el agente ejecuta — y un hook técnico verifica y registra la acción.
 
 Esta regla tiene doble barrera: (1) comportamental, en este archivo y en cada skill; (2) técnica,
-mediante los hooks en `.claude/hooks/` que bloquean llamadas MCP de publicación o gasto si no
+mediante los hooks en `.claude/hooks/` que bloquean llamadas MCP de publicación si no
 existe una aprobación registrada.
 
 ## Decidir con datos — análisis antes del plan
@@ -76,7 +74,7 @@ cliente — nunca se generaliza entre cuentas.
 ## Convenciones
 
 - **Idioma:** español (Argentina/Latam neutro), salvo que el perfil del cliente indique otro.
-- **Captions:** Instagram y TikTok priorizan gancho en la primera línea; Facebook admite texto
+- **Captions:** Instagram prioriza el gancho en la primera línea; Facebook admite texto
   más largo y menos hashtags.
 - **Hashtags:** máximo 8-10, relevantes al nicho y ubicación del cliente; nunca genéricos.
 - **Nomenclatura de archivos:** `clientes/<nombre-cliente>/...` en minúsculas y sin espacios
@@ -103,5 +101,6 @@ debe requerir tocar nada de `.claude/`.
 
 ## Gestión de credenciales
 
-Las API keys viven en variables de entorno del sistema, nunca en archivos de este repositorio.
-`.mcp.json` referencia variables (`${GLIF_API_TOKEN}`, etc.), nunca valores literales.
+Las API keys viven en `.claude/.env`, nunca en archivos versionados. `.claude/.env` está ignorado
+por git (ver `.gitignore`) y es la **única fuente** de estas variables: el código lo carga solo
+mediante `lib/cargar-env.mjs`. La plantilla de variables es `.claude/.env.example`.

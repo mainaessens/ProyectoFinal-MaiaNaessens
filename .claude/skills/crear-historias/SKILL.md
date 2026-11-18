@@ -27,7 +27,8 @@ Las historias duran 24 h. Todo el texto tiene que ir **dentro de la imagen o el 
 
 ## Procedimiento
 
-1. **Resolver la pieza**: leer `calendario-editorial.md` (fila con formato *Historias*) o tomar el
+1. **Resolver la pieza**: leer `calendario-editorial.md` (fila con formato *Historias* y su ficha en
+   `## Desarrollo de piezas`, que es la secuencia aprobada de partida) o tomar el
    tema libre. Leer `perfil.md` (tono, restricciones, *reglas de estilo y validación*, plantilla
    de historia de Canva) y `.claude/referencias/criterios-editoriales.md` +
    `.claude/referencias/guia-formatos.md` (sección *Historias*).

@@ -10,11 +10,6 @@
       "args": ["workspace-mcp"],
       "note": "Google Drive + Calendar + Docs. Auth: OAuth (cuenta proyectofinalmaianaessens@gmail.com, dedicada a este proyecto). Conectado vía Settings > Connectors en esta sesión; en una instalación estándar de Claude Code se registra con: claude mcp add gworkspace -- uvx workspace-mcp"
     },
-    "postiz": {
-      "transport": "sse",
-      "url": "${POSTIZ_SSE_URL}",
-      "note": "Fase 1 — pendiente. Publicación IG+FB+TikTok vía Late (free tier) o Postiz self-hosted. Auth: API key. ⚠ verificar URL antes de registrar."
-    },
     "instagram": {
       "command": "node",
       "args": ["mcp/instagram-publisher/server.mjs"],
@@ -30,12 +25,6 @@
       "url": "https://glif.app/api/mcp",
       "headers": { "Authorization": "Bearer ${GLIF_API_TOKEN}" },
       "note": "Fase 6 — servidor MCP alojado de Glif (el paquete npm @glifxyz/glif-mcp-server está obsoleto y su API ya no responde). Auth: la API key glif_v1_… como Bearer. Verificado el 2026-11-04: una imagen con compose_project (5,1 créditos). Ver docs/obtencion-de-credenciales.md."
-    },
-    "meta-ads": {
-      "command": "uvx",
-      "args": ["meta-ads-mcp"],
-      "env": { "PIPEBOARD_API_TOKEN": "${PIPEBOARD_API_TOKEN}" },
-      "note": "Fase 7 (solo lectura) y Fase 8 (creación) — pendiente."
     }
   }
 }

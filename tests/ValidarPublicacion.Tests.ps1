@@ -46,7 +46,7 @@ Describe "validar-publicacion.ps1" {
         if (Test-Path $ClienteDir) { Remove-Item -Recurse -Force $ClienteDir }
     }
 
-    Context "Tool no relacionada con publicacion/gasto" {
+    Context "Tool no relacionada con publicacion" {
         It "permite la llamada sin evaluar planes (exit 0)" {
             $r = Invoke-Hook '{"tool_name":"mcp__gworkspace__list_recent_files","tool_input":{}}'
             $r.ExitCode | Should -Be 0
@@ -55,11 +55,11 @@ Describe "validar-publicacion.ps1" {
 
     Context "Tool de publicacion sin plan aprobado" {
         It "bloquea la llamada (exit 2)" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $r.ExitCode | Should -Be 2
         }
         It "explica el motivo del bloqueo en stderr" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $r.StdErr | Should -Match "BLOQUEADO"
         }
     }
@@ -74,7 +74,7 @@ Describe "validar-publicacion.ps1" {
             Set-Content -Path (Join-Path $HistorialDir "2026-01-01-test.plan.json") -Value $plan -Encoding UTF8
         }
         It "permite la llamada (exit 0)" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $r.ExitCode | Should -Be 0
         }
     }
@@ -89,21 +89,14 @@ Describe "validar-publicacion.ps1" {
             Set-Content -Path (Join-Path $HistorialDir "2026-01-01-pendiente.plan.json") -Value $plan -Encoding UTF8
         }
         It "sigue bloqueando (exit 2) - un plan sin aprobar no habilita la publicacion" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
-            $r.ExitCode | Should -Be 2
-        }
-    }
-
-    Context "Tool de gasto (Meta Ads) sin plan aprobado" {
-        It "bloquea igual que publicacion (exit 2)" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__meta-ads__create_campaign"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $r.ExitCode | Should -Be 2
         }
     }
 
     Context "tool_input sin campo 'cliente'" {
         It "bloquea (no se puede verificar aprobacion sin saber de que cliente se trata)" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{} } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{} } | ConvertTo-Json)
             $r.ExitCode | Should -Be 2
         }
     }
@@ -122,7 +115,7 @@ Describe "validar-publicacion.ps1" {
             if (Test-Path $otroDir) { Remove-Item -Recurse -Force $otroDir }
         }
         It "un plan aprobado de OTRO cliente no habilita publicar para este cliente (sin plan propio)" {
-            $r = Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $r = Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $r.ExitCode | Should -Be 2
         }
     }

@@ -60,7 +60,7 @@ Describe "registrar-actividad.ps1" {
         }
     }
 
-    Context "Tool irrelevante (no publicacion/gasto/jira)" {
+    Context "Tool irrelevante (no publicacion/jira)" {
         It "no crea ni modifica ningun log" {
             Invoke-Hook (@{ tool_name = "Read"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             Test-Path $LogPath | Should -BeFalse
@@ -69,7 +69,7 @@ Describe "registrar-actividad.ps1" {
 
     Context "Tool relevante sin cliente identificable en tool_input" {
         It "cae al log general de la agencia en vez de fallar" {
-            Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{} } | ConvertTo-Json) | Out-Null
+            Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{} } | ConvertTo-Json) | Out-Null
             Test-Path $LogGeneral | Should -BeTrue
         }
     }
@@ -77,7 +77,7 @@ Describe "registrar-actividad.ps1" {
     Context "Multiples llamadas" {
         It "cada llamada agrega una linea nueva, sin sobrescribir el log" {
             Invoke-Hook (@{ tool_name = "mcp__atlassian__transitionJiraIssue"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
-            Invoke-Hook (@{ tool_name = "mcp__postiz__publish_post"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
+            Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             (Get-Content $LogPath).Count | Should -Be 2
         }
     }

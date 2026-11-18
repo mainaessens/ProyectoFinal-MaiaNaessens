@@ -10,6 +10,9 @@ import { buildPrompt, startRun } from './runner.js';
 import { manejarConexion } from './conexion.js';
 import { crearAlmacen, esIdValido } from './sesiones.js';
 import { listarModelos, modeloPorDefecto } from './modelos.js';
+import { cargarEnv } from '../../lib/cargar-env.mjs';
+
+cargarEnv(); // carga variables desde .claude/.env (el .env pisa el entorno del sistema)
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.FARO_PORT || 4310);

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "instagram": {
+      "command": "node",
+      "args": ["mcp/instagram-publisher/server.mjs"]
+    }
+  }
+}

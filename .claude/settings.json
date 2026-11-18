@@ -7,20 +7,16 @@
       "Write(./agencia/.claude/**)"
     ],
     "deny": [],
-    "ask": [
-      "mcp__meta-ads__create*",
-      "mcp__meta-ads__update*"
-    ]
+    "ask": []
   },
   "env": {
     "GLIF_API_TOKEN": "${GLIF_API_TOKEN}",
-    "PIPEBOARD_API_TOKEN": "${PIPEBOARD_API_TOKEN}",
     "LATE_API_KEY": "${LATE_API_KEY}"
   },
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__postiz__.*|mcp__late__.*|mcp__instagram__(publicar|subir).*|mcp__meta-ads__create.*|mcp__meta-ads__update.*",
+        "matcher": "mcp__instagram__(publicar|subir).*",
         "hooks": [
           {
             "type": "command",
@@ -31,7 +27,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__postiz__.*|mcp__late__.*|mcp__instagram__.*|mcp__meta-ads__.*|mcp__atlassian__.*",
+        "matcher": "mcp__instagram__.*|mcp__atlassian__.*",
         "hooks": [
           {
             "type": "command",

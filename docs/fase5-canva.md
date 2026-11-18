@@ -7,8 +7,8 @@ plan (`diseno_pendiente: true`) si no lo está — ver sección "Modo plan" más
 vigente como comportamiento de resiliencia del sistema aunque hoy Canva ya esté conectado.
 
 **Importante — separación de cuentas:** la cuenta de Canva conectada es la cuenta real de la
-agencia, con los brand kits de clientes reales (Marino Brimer, Creatief, GLOW, etc.). El
-sistema **nunca usa esos brand kits** — todas las plantillas de prueba se generan sin
+agencia, con los brand kits de clientes reales. El sistema **nunca usa esos brand kits** —
+todas las plantillas de prueba se generan sin
 `brand_kit_id`, describiendo la paleta del cliente de prueba directamente en el prompt. Ningún
 diseño ni brand kit real fue tocado durante el desarrollo/testing de esta fase.
 
@@ -40,7 +40,7 @@ diseño ni brand kit real fue tocado durante el desarrollo/testing de esta fase.
 
 ## Por qué "modo plan" para Canva
 
-Mismo patrón que la Fase 1 con Late/Postiz: el conector real requiere una cuenta y OAuth que
+Mismo patrón que la Fase 1: el conector real requiere una cuenta y OAuth que
 son responsabilidad del usuario, no algo que el agente pueda resolver por sí mismo. En vez de
 bloquear todo el pipeline de `/crear-post` hasta que eso exista, el sistema sigue generando y
 aprobando planes completos — dejando documentado exactamente qué plantilla y qué material se
@@ -67,4 +67,4 @@ registrado y la pieza se haya generado realmente.
 | Historia | Bloqueo |
 |---|---|
 | PFMGN-46 (parcial) | Validar con CEDITE (cliente institucional real) que la paleta/tono de los diseños generados es correcta — sigue pendiente de esa sesión real |
-| PFMGN-16 | Publicación real (Late/Postiz) — las piezas ya se generan, pero no se publican hasta que exista ese conector |
+| PFMGN-76 | Publicación real en Instagram (Graph API oficial) — las piezas ya se generan; la primera publicación real sigue pendiente |

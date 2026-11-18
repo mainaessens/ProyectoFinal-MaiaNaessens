@@ -48,7 +48,7 @@ log a mano — cada skill lo actualiza como parte de su propio procedimiento.
 | Fase | Estado | Nota |
 |---|---|---|
 | 0 — Base local | ✅ Completa | |
-| 1 — Publicación multi-red | ✅ Completa salvo PFMGN-16 | Conector Late/Postiz requiere coordinación externa (cuenta real) |
+| 1 — Publicación en Instagram | ✅ Completa salvo la primera publicación real | Conector propio sobre la Graph API oficial (PFMGN-76) |
 | 2 — Google Drive | ✅ Completa salvo la mitad de PFMGN-28 | Mecanismo validado; falta brief real de CEDITE |
 | 3 — Calendar + Jira | ✅ Completa salvo la integración con /crear-post en PFMGN-33 | Se construyó como pieza reutilizable (`horario-optimo.md`) a la espera de /crear-post con conector real |
 | 4 — Tendencias y campaña mensual | ✅ Completa salvo la mitad de PFMGN-40 | Mecanismo validado; falta sesión real con CEDITE |
@@ -56,7 +56,7 @@ log a mano — cada skill lo actualiza como parte de su propio procedimiento.
 ## Qué falta para una demo 100% con datos reales
 
 1. Brief y manual de marca reales de CEDITE en Drive (historia PFMGN-69, en curso).
-2. Coordinar la cuenta de Late/Postiz para publicar de verdad (Fase 1, PFMGN-16).
+2. Hacer la primera publicación real en Instagram con la Graph API oficial (Fase 1, PFMGN-76).
 3. Reemplazar el proyecto de prueba `SAM1` por un proyecto real de Jira para CEDITE.
 4. Una sesión de validación con referentes del CEDITE, como pide el Plan de Trabajo (tutor,
    cotutor, cliente institucional).

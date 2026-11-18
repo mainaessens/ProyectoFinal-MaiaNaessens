@@ -14,7 +14,8 @@ tools: Read, Write, Bash, AskUserQuestion, mcp__canva__*, mcp__gworkspace__*
 
 ## Procedimiento
 
-1. **Resolver el posteo** desde `calendario-editorial.md` (formato Reel) o tema libre; leer
+1. **Resolver el posteo** desde `calendario-editorial.md` (formato Reel; su ficha en `## Desarrollo
+   de piezas` es el guion aprobado de partida: ajustarlo al material real, no rehacerlo) o tema libre; leer
    `perfil.md` (tono, restricciones, plantillas Canva, redes).
 2. **Elegir material**: revisar `clientes/<cliente>/assets/videos/`. Prioridad: video real del
    cliente → ninguno adecuado = decirlo y proponer qué filmar (lista de tomas). Nunca inventar

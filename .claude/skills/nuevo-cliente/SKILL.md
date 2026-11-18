@@ -30,8 +30,9 @@ Da de alta un cliente nuevo de la agencia.
    ├── aprendizajes.md
    ├── historial/
    ├── assets/
-   │   ├── fotos/
-   │   ├── videos/
+   │   ├── fotos/          (<categoría>/<tema>/, espejo de 03 Fotos del Drive)
+   │   ├── videos/         (<categoría>/..., espejo de 04 Videos del Drive)
+   │   ├── identidad/      (logos y paleta, espejo de 02 Identidad visual)
    │   ├── ia/             (imágenes generadas con Glif, reutilizables)
    │   ├── exports/        (piezas exportadas de Canva)
    │   ├── referencias/    (reels de referencia, solo para estudiar estilo)
@@ -48,7 +49,7 @@ Da de alta un cliente nuevo de la agencia.
 6. Resumir qué quedó hecho, qué quedó pendiente, y sugerir el siguiente paso:
    `/campania-mensual <cliente> <mes> <objetivo>`.
 
-   Orden de las secciones: A → B → C → D → **E (diagnóstico de Instagram)**.
+   Orden de las secciones: A → B → C → D → E (diagnóstico de Instagram) → **F (subir los datos a Drive)**.
 
 ## A. Leer y ordenar el Drive
 
@@ -58,15 +59,13 @@ Da de alta un cliente nuevo de la agencia.
    - **Identidad visual**: logos, paletas, tipografías, plantillas Canva (links `canva.com`).
    - **Fotos** y **videos** (por tipo MIME).
    - **Otros documentos** (institucionales, contratos, etc.).
-3. **Proponer un orden** de la carpeta con esta estructura objetivo:
-   ```
-   <cliente>/
-   ├── Brief y manual/        ├── fotos/
-   ├── Identidad visual/      ├── videos/
-   │   └── plantillas-canva/  └── Otros/
-   ```
-   Mostrar una tabla `archivo actual → destino`. Marcar los archivos que no se pudieron
-   clasificar con seguridad.
+3. **Proponer un orden** de la carpeta según la convención de `docs/orden-del-drive.md`
+   (léela antes de proponer): `01 Brief y manual`, `02 Identidad visual` (con `logo/` y
+   `plantillas-canva/`), `03 Fotos/<categoría>/<tema>`, `04 Videos/<categoría>`, `05 Otros`. La carpeta `06 Agente` la
+   crea `/sincronizar-drive` (sección F); no se propone como destino de archivos del cliente.
+   Categorías de fotos: trabajos, producto, equipo, local, eventos, varios. De videos: crudos,
+   proceso, testimonios, varios. Mostrar una tabla `archivo actual → destino`. Marcar los archivos
+   que no se pudieron clasificar con seguridad.
 4. **Parada obligatoria**: pedir aprobación (`AskUserQuestion`: aplicar / ajustar / no tocar el
    Drive). Solo con OK explícito mover o renombrar archivos en Drive.
    - Nunca borrar ni enviar a la papelera nada del cliente.
@@ -76,11 +75,14 @@ Da de alta un cliente nuevo de la agencia.
 
 ## B. Descargar el material audiovisual
 
-1. Descargar todas las fotos y videos (de `fotos/`, `videos/` y de cualquier otra carpeta donde
-   se hayan clasificado) a `clientes/<cliente>/assets/fotos` y `assets/videos`.
-   - Con instalación CLI: `.claude/scripts/descargar-assets.ps1 -Cliente <cliente>`.
-   - Con el conector de la plataforma: usar `download_file_content` por archivo.
-2. No duplicar: omitir archivos que ya existan con el mismo nombre.
+1. Descargar fotos, videos e identidad visual a `clientes/<cliente>/assets/{fotos,videos,identidad}`
+   respetando el árbol del Drive (nombres normalizados), según `docs/orden-del-drive.md`.
+   - Con instalación CLI: `.claude/scripts/descargar-assets.ps1 -Cliente <cliente> -DryRun`
+     y luego sin `-DryRun`.
+   - Con el conector de la plataforma: `download_file_content` por archivo, con las mismas reglas
+     (mismas rutas locales, normalización de nombres, tipos por sección).
+2. No duplicar: el script usa `assets/.drive-manifest.json` (id de Drive → ruta + md5). Con el
+   conector, omitir los archivos que ya existan en la ruta destino con el mismo contenido.
 3. Informar cantidad por tipo y tamaño total. Si no hay material, decirlo: las piezas usarán
    plantilla sin foto.
 
@@ -102,7 +104,7 @@ Da de alta un cliente nuevo de la agencia.
 
 1. Leer el brief y el manual. Extraer y proponer: tono, paleta, tipografías, público, pilares,
    restricciones, competidores. **No inventar** más allá del material.
-2. Marcar qué se infirió y qué quedó pendiente (redes activas, Meta Ads, Jira, Calendar).
+2. Marcar qué se infirió y qué quedó pendiente (redes activas, Jira, Calendar).
 3. Si el material contradice al usuario en el chat, priorizar al usuario y señalar la
    contradicción.
 4. El perfil sigue el formato de `clientes/plantilla/perfil.md`, incluyendo la sección
@@ -124,6 +126,15 @@ Antes de planificar el primer mes hay que saber cómo rinde la cuenta hoy.
    publicaciones o con menos de 100 seguidores): decirlo, dejar el estado como **pendiente** en el
    perfil ("Diagnóstico de Instagram") y avanzar. Sin diagnóstico, el primer plan se marca como
    *hipótesis sin datos propios* y debe revisarse al cerrar el mes (`/analisis-cuenta` mensual).
+
+## F. Subir los datos del cliente a Drive (`06 Agente`)
+
+Cuando el perfil está aprobado y el diagnóstico hecho (o declarado pendiente), ejecutar
+**`/sincronizar-drive <cliente>`**: crea la carpeta `06 Agente` dentro de la carpeta de Drive de
+la que se descargó el material y sube allí `perfil.md`, `calendario-editorial.md`,
+`aprendizajes.md`, `analisis/`, `historial/` y lo demás que genere el alta. Marcar "Datos subidos
+a Drive" en la sección "Estado del alta" del perfil. Si el conector de Drive no tiene permiso de
+escritura, dejarlo como **pendiente** y seguir.
 
 ## Reglas
 

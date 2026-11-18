@@ -39,7 +39,7 @@ Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba auto
 | `WebSearch` y herramientas internas del agente (`Skill`, `Agent`, listas de tareas) | `WebFetch` y herramientas desconocidas |
 | Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar, Jira o Canva |
 | Comandos de solo lectura sin metacaracteres (`ls`, `cat`, `git status`, los comandos de Moviola), con rutas dentro del proyecto | Cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
-| — | Meta Ads, Glif, Postiz y Late (gastan o publican): **nunca** se aprueban solos, ni sus lecturas |
+| — | Glif (consume créditos): **nunca** se aprueba solo, ni sus lecturas |
 | — | Las **preguntas** del agente: siempre las contestás vos |
 
 Lo concedido solo queda auditado: al terminar, el historial agrega una línea como «Permisos concedidos automáticamente: WebSearch ×1». Los hooks de `.claude/hooks/` siguen actuando igual. Con `FARO_PERMISOS_AUTO=off` se pregunta todo.

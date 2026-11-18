@@ -49,7 +49,6 @@
 
 - [ ] Instagram (Business/Creator vinculada a página de Facebook)
 - [ ] Facebook
-- [ ] TikTok (Business)
 
 ## Reglas de estilo y validación
 
@@ -64,11 +63,6 @@
 - **Contrato de contenido mensual:** (reels, carruseles, historias, posteos; tope por mes)
 - **Consentimientos:** (testimonios, obras, imagen de personas)
 
-## Cuenta publicitaria Meta Ads (si aplica)
-
-- **ID cuenta:**
-- **Límite de gasto mensual acordado:**
-
 ## Organización (Fase 3)
 
 - **Proyecto/clave de Jira:** (ej: `SAM1`) — donde viven las tareas de contenido de este cliente
@@ -81,6 +75,7 @@
 - [ ] 3 plantillas maestras de Canva registradas (origen: Drive / Canva / Claude Design)
 - [ ] Diagnóstico inicial de Instagram (`analisis/baseline-*.md`, community-manager)
 - [ ] Perfil aprobado por el humano
+- [ ] Datos subidos a Drive (`06 Agente`, con `/sincronizar-drive`)
 
 ---
 
