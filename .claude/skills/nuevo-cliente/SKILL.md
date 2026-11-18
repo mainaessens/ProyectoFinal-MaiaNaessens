@@ -29,12 +29,14 @@ Da de alta un cliente nuevo de la agencia.
    ├── calendario-editorial.md
    ├── aprendizajes.md
    ├── historial/
+   ├── marca/              (kit de marca para Claude Design: marca.json, logo/, fuentes/)
+   ├── diseno/             (piezas HTML versionadas: <fecha>-<slug>/vN.html + vN.png)
    ├── assets/
    │   ├── fotos/          (<categoría>/<tema>/, espejo de 03 Fotos del Drive)
    │   ├── videos/         (<categoría>/..., espejo de 04 Videos del Drive)
    │   ├── identidad/      (logos y paleta, espejo de 02 Identidad visual)
    │   ├── ia/             (imágenes generadas con Glif, reutilizables)
-   │   ├── exports/        (piezas exportadas de Canva)
+   │   ├── exports/        (piezas aprobadas, de Claude Design o Canva)
    │   ├── referencias/    (reels de referencia, solo para estudiar estilo)
    │   ├── edicion/        (planes de edición, transcripciones y previews)
    │   └── terminados/     (videos finales editados con Moviola)
@@ -86,11 +88,22 @@ Da de alta un cliente nuevo de la agencia.
 3. Informar cantidad por tipo y tamaño total. Si no hay material, decirlo: las piezas usarán
    plantilla sin foto.
 
-## C. Plantillas maestras de Canva (post, carrusel, historia)
+## C0. Kit de marca para Claude Design (por defecto)
+
+Si el cliente va a diseñarse con Claude Design (el motor por defecto), crear su kit de marca:
+`node herramientas/marca/marca.mjs init <cliente>`, completar `clientes/<cliente>/marca/marca.json`
+con la paleta (hex), las tipografías, el logo (copiar de `assets/identidad/` a `marca/logo/`) y
+las reglas de voz (las **restricciones** del perfil pasan a `reglas.prohibidas`), y regenerar con
+`marca.mjs build <cliente>`. Lo que el brief y el manual no digan se marca como supuesto y se
+avisa. Mostrar una pieza de prueba (`marca.mjs nueva … feed-cifra` + `render`) para que el humano
+valide la marca antes de seguir. Registrar en el perfil `Motor de diseño: claude-design`.
+Detalle: `docs/diseno-claude-design.md`.
+
+## C. Plantillas maestras de Canva (post, carrusel, historia) — alternativa
 
 1. Buscar plantillas ya hechas: links de Canva o archivos en `Identidad Visual/plantillas-canva`.
    Si están las 3, registrarlas en el perfil tal cual (no regenerar).
-2. Si faltan una o más, **preguntar con `AskUserQuestion`** cómo generarlas:
+2. Si el cliente va a usar Canva y faltan una o más, **preguntar con `AskUserQuestion`** cómo generarlas:
    - **Canva** (recomendada): crear las faltantes con el conector, **sin `brand_kit_id`**,
      describiendo paleta y tipografía del cliente en el prompt (nunca usar brand kits de otros
      clientes de la cuenta).

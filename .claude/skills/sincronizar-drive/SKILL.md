@@ -25,6 +25,7 @@ y `/cierre-mensual`, y a mano cuando haga falta.
 |---|---|
 | `perfil.md`, `calendario-editorial.md`, `aprendizajes.md` | `assets/` (fotos, videos, exports: el material vive en Drive o es pesado) |
 | `analisis/`, `historial/` (incluye `*.plan.json`), `tendencias-*.md` | `registro-actividad.log` (auditoría interna) |
+| `marca/marca.json` y la última versión `vN.html` de cada pieza de `diseno/` | los PNG, fuentes y logos (pesados; los finales están en `assets/exports/`) |
 | cualquier otro `.md` o `.json` de datos del cliente | `.drive-agente.json`, archivos temporales y todo lo oculto |
 | | cualquier archivo que contenga un token o secreto (ver abajo) |
 

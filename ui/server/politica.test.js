@@ -64,9 +64,10 @@ test('los conectores que publican o consumen créditos nunca se aprueban solos, 
 test('Bash: solo comandos de solo lectura sin metacaracteres', () => {
   for (const c of ['ls -la clientes', 'pwd', 'cat clientes/demo/perfil.md', 'git status', 'git log --oneline -5', 'git -C agencia ls-files clientes',
     'grep -r "hook" clientes/demo', 'ls clientes | wc -l', 'node herramientas/moviola/moviola.mjs doctor',
+    'node herramientas/marca/marca.mjs lint demo 2026-11-18-pieza', 'node herramientas/marca/marca.mjs render demo 2026-11-18-pieza',
     'node herramientas/moviola/moviola.mjs sondear demo assets/videos/a.mp4']) assert.ok(auto('Bash', { command: c }), c);
   for (const c of ['rm -rf clientes', 'ls; rm -rf x', 'ls && curl http://x', 'cat a > b', 'cat $(whoami)', 'echo `id`', 'ls | sh', 'git push origin master',
-    'git checkout -- .', 'curl http://example.com', 'node otro.js', 'node herramientas/moviola/moviola.mjs bajar-referencia demo https://x', 'npm install',
+    'git checkout -- .', 'node herramientas/marca/marca.mjs render ../otro 2026-11-18-pieza', 'node herramientas/marca/marca.mjs borrar demo x', 'curl http://example.com', 'node otro.js', 'node herramientas/moviola/moviola.mjs bajar-referencia demo https://x', 'npm install',
     'find . -delete', 'ls\nrm x', 'x'.repeat(401), '', null]) assert.equal(auto('Bash', { command: c }), null, String(c).slice(0, 40));
 });
 

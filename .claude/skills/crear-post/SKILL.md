@@ -1,7 +1,7 @@
 ---
 name: crear-post
-description: Arma uno o varios posteos de la campaña mensual aprobada — hook + caption por red + pieza gráfica real en Canva (exportada a assets/exports/) + horario — revisando diseño por diseño con aprobación humana. Se invoca por número o nombre de posteo, o con "todos" para el lote completo. Genera un .plan.json por pieza; solo publica en redes si existe el conector de publicación y el usuario da un OK explícito por pieza. Si Canva no está disponible, cae a modo plan (diseno_pendiente) sin bloquear el pipeline.
-tools: Read, Write, Bash, AskUserQuestion, mcp__canva__*, mcp__gworkspace__*
+description: Arma uno o varios posteos de la campaña mensual aprobada — hook + caption por red + pieza gráfica real (Claude Design con código por defecto, o Canva; exportada a assets/exports/) + horario — revisando diseño por diseño con aprobación humana. Se invoca por número o nombre de posteo, o con "todos" para el lote completo. Genera un .plan.json por pieza; solo publica en redes si existe el conector de publicación y el usuario da un OK explícito por pieza. Si Canva no está disponible, cae a modo plan (diseno_pendiente) sin bloquear el pipeline.
+tools: Read, Write, Edit, Bash, Glob, AskUserQuestion, mcp__canva__*, mcp__gworkspace__*
 ---
 
 # /crear-post
@@ -46,9 +46,12 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
 
 4. **Adaptar el caption por red** (subagente `community-manager`).
 
-5. **Diseñar la pieza** (subagente `disenador`), con la prioridad foto real del cliente
-   (`assets/fotos`) → plantilla Canva sin foto → imagen IA. Usar las plantillas maestras del
-   cliente (nunca brand kits de otros clientes). Si Canva no está disponible: modo plan
+5. **Diseñar la pieza** (subagente `disenador`, skill `/disenar`), con la prioridad foto real
+   del cliente (`assets/fotos`) → pieza solo de texto/diseño → imagen IA. El motor se elige así:
+   lo que pida el usuario → `Motor de diseño` del perfil → **Claude Design (código)** por defecto;
+   **Canva** sigue disponible (plantillas maestras del cliente, nunca brand kits de otros). Con
+   Claude Design la pieza queda en `diseno/<pieza>/vN.html` + PNG y se puede iterar desde Faro.
+   Si el motor elegido no está disponible: cambiar de motor con el OK del usuario o modo plan
    (`diseno_pendiente: true`), sin bloquear el flujo.
 
 6. **Revisar el diseño**: analizar la pieza generada contra el perfil (paleta, tipografía,
@@ -65,9 +68,9 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
    - Si pide cambios: volver al paso 3, 4 o 5 y presentar una versión nueva, sin pisar la anterior.
 
 9. **Si aprueba**:
-   - **Exportar de Canva** el diseño final (`get-export-formats` + `export-design`, PNG para
-     post/historia; todas las páginas para carrusel) y descargarlo a
-     `clientes/<cliente>/assets/exports/<fecha>-<slug>.<ext>`.
+   - **Exportar el diseño final** a `clientes/<cliente>/assets/exports/<fecha>-<slug>.<ext>`:
+     con Claude Design, `marca.mjs exportar <cliente> <pieza> [vN]`; con Canva,
+     `get-export-formats` + `export-design` (PNG para post/historia; todas las páginas para carrusel).
    - Generar `clientes/<cliente>/historial/<fecha>-<slug>.plan.json`:
      ```json
      {
@@ -80,8 +83,11 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
        "caption": { "instagram": "...", "facebook": "..." },
        "diseno": {
          "fuente": "foto_cliente | plantilla_sin_foto | glif",
-         "plantilla_canva": "<id o nombre>",
-         "design_id": "<id del diseño final>",
+         "motor": "claude-design | canva",
+         "html_fuente": "diseno/<pieza>/vN.html (solo claude-design)",
+         "version": 1,
+         "plantilla_canva": "<id o nombre (solo canva)>",
+         "design_id": "<id del diseño final (solo canva)>",
          "archivo_exportado": "assets/exports/<fecha>-<slug>.png",
          "diseno_pendiente": false
        },
@@ -122,3 +128,4 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
 - Nunca llamar a un conector de publicación no registrado.
 - Un `.plan.json` aprobado es inmutable en contenido: un cambio genera un archivo nuevo.
 - Nunca usar brand kits de clientes de la cuenta de Canva.
+- Con Claude Design, el kit de marca es el de ese cliente (`clientes/<cliente>/marca/`): nunca el de otro.

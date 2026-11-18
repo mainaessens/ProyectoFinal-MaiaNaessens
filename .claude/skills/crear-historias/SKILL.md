@@ -53,7 +53,9 @@ Las historias duran 24 h. Todo el texto tiene que ir **dentro de la imagen o el 
      `"publicacion": "manual"`: se entregan con la pauta exacta (sticker, opciones, texto) para
      que el humano las publique desde la app. El conector se niega a publicarlas.
 
-5. **Diseñar** (subagente `disenador`): exportar cada historia en vertical 9:16 (1080×1920) a
+5. **Diseñar** (subagente `disenador`, skill `/disenar`: Claude Design con código por defecto, Canva
+   como alternativa; plantilla `historia`, una `.piece` por historia, zonas seguras incluidas):
+   exportar cada historia en vertical 9:16 (1080×1920) a
    `assets/exports/<fecha>-<slug>-<n>.png`; si el recurso es un video real, usar el archivo de
    `assets/videos/` (se puede pasar antes por `/editar-video`). Revisar cada pieza contra el perfil
    (paleta, tipografía, texto sin errores, zonas seguras) antes de mostrarla.

@@ -25,6 +25,12 @@ export async function api(token, path, opts = {}) {
   return data;
 }
 
+export async function apiBlob(token, path) {
+  const res = await fetch(`/api${path}`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  return res.blob();
+}
+
 export function openSocket(token, onMessage, onClose) {
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${proto}://${window.location.host}/ws?token=${encodeURIComponent(token)}`);

@@ -11,6 +11,7 @@ import { manejarConexion } from './conexion.js';
 import { crearAlmacen, esIdValido } from './sesiones.js';
 import { listarModelos, modeloPorDefecto } from './modelos.js';
 import { cargarEnv } from '../../lib/cargar-env.mjs';
+import { listarDisenos, archivoDePieza, aprobar, esPieza, MarcaError } from '../../herramientas/marca/lib/marca.mjs';
 
 cargarEnv(); // carga variables desde .claude/.env (el .env pisa el entorno del sistema)
 
@@ -60,6 +61,41 @@ app.post('/api/clientes/:slug/planes/:archivo/decision', wrap(async (req, res) =
     return res.status(400).json({ error: 'Solicitud inválida' });
   }
   res.json(await decidirPlan(slug, archivo, req.body.aprobado));
+}));
+
+// Diseños con Claude Design (clientes/<c>/diseno/<pieza>/vN.html + vN.png). Ver docs/diseno-claude-design.md.
+app.get('/api/clientes/:slug/disenos', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  if (!slug) return res.status(400).json({ error: 'Cliente inválido' });
+  res.json(listarDisenos(slug));
+}));
+
+// Solo sirve vN.png / vN-NN.png / vN.html de la pieza. El HTML va como texto plano (nunca se ejecuta en el panel).
+app.get('/api/clientes/:slug/disenos/:pieza/:archivo', (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  const file = slug && archivoDePieza(slug, req.params.pieza, req.params.archivo);
+  if (!file) return res.status(404).json({ error: 'Archivo no encontrado' });
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Cache-Control', 'no-store');
+  res.type(file.endsWith('.png') ? 'image/png' : 'text/plain; charset=utf-8');
+  res.sendFile(file);
+});
+
+// Aprobar una versión: exporta sus PNG a assets/exports/ y deja constancia (acción humana, como aprobar un plan).
+app.post('/api/clientes/:slug/disenos/:pieza/aprobar', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  const version = Number(req.body?.version);
+  if (!slug || !esPieza(req.params.pieza) || !Number.isInteger(version) || version < 1) return res.status(400).json({ error: 'Solicitud inválida' });
+  try {
+    const r = aprobar(slug, req.params.pieza, version, { por: 'faro-ui' });
+    const hoy = new Date().toISOString().slice(0, 10);
+    await fs.promises.appendFile(path.join(AGENCIA_ROOT, 'clientes', slug, 'registro-actividad.log'),
+      `[${hoy}] Faro UI: diseño ${req.params.pieza} v${version} APROBADO y exportado por el operador.\n`, 'utf8');
+    res.json(r);
+  } catch (e) {
+    if (e instanceof MarcaError) return res.status(400).json({ error: e.message });
+    throw e;
+  }
 }));
 
 app.get('/api/modelos', (_q, res) => res.json({ modelos: listarModelos(), porDefecto: modeloPorDefecto() }));

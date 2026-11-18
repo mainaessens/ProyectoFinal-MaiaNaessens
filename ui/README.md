@@ -17,6 +17,7 @@ Implementa el epic **PFMGN-71** (React + Express + WebSockets + auth).
 ## Sesión del agente
 
 - La consola del agente **sigue activa al navegar** por el panel: el historial, el skill elegido y la ejecución en curso no se pierden al ir a Clientes o a un cliente. En la barra lateral, «Agente» muestra **ejecutando** mientras corre un skill y **terminó** (punto verde) si terminó mientras mirabas otra vista; el título de la pestaña también lo indica.
+- **Diseños** (pestaña de cada cliente): las piezas hechas con Claude Design (código) se ven como imagen, con sus versiones y comparación; **Pedir cambios** lanza `/iterar-diseno` en la consola y **Aprobar** exporta la versión a `assets/exports/`. Ver `docs/diseno-claude-design.md`.
 - Una ejecución **solo se cancela** con el botón *Cancelar* o al cerrar o recargar la pestaña (el navegador avisa antes). Se sigue ejecutando un skill a la vez por conexión.
 
 ## Pedidos del agente: se resuelven desde la app
@@ -38,7 +39,7 @@ Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba auto
 | Escribir dentro de `clientes/**` | Escribir en cualquier otro lado, en especial `.claude/**` (hooks y skills) |
 | `WebSearch` y herramientas internas del agente (`Skill`, `Agent`, listas de tareas) | `WebFetch` y herramientas desconocidas |
 | Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar, Jira o Canva |
-| Comandos de solo lectura sin metacaracteres (`ls`, `cat`, `git status`, los comandos de Moviola), con rutas dentro del proyecto | Cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
+| Comandos de solo lectura sin metacaracteres (`ls`, `cat`, `git status`), los de Moviola y los del motor de diseño (`marca.mjs`), con rutas dentro del proyecto | Cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
 | — | Glif (consume créditos): **nunca** se aprueba solo, ni sus lecturas |
 | — | Las **preguntas** del agente: siempre las contestás vos |
 

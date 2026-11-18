@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Pieza</title>
+<link rel="stylesheet" href="{{MARCA}}/marca.css">
+<link rel="stylesheet" href="{{BASE}}/base.css">
+<!-- Plantilla base. Editá el texto y las clases; los colores y tipografías salen de la marca (var(--c-*), var(--f-*)). -->
+</head>
+<body>
+<!-- Foto real del cliente a sangre. Cambiá src por una foto de assets/fotos (ej.: {{ASSETS}}/fotos/trabajos/obra/foto.jpg) -->
+<section class="piece f-feed-4x5" data-tema="oscuro" data-name="foto">
+  <img class="foto" src="{{ASSETS}}/fotos/ejemplo.jpg" alt="Descripción de la foto">
+  <div class="velo"></div>
+  <div class="piece-head sobre-foto">
+    <span class="logo"><span class="wordmark">Marca</span></span>
+  </div>
+  <div class="stack sobre-foto" style="margin-top:auto">
+    <p class="eyebrow">Tema o sección</p>
+    <h1 class="h1 balance">Titular de una sola idea</h1>
+    <p class="lead">Bajada de una o dos oraciones.</p>
+    <span class="cta">Escribinos</span>
+  </div>
+</section>
+</body>
+</html>

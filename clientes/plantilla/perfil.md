@@ -25,7 +25,9 @@
 
 - **Paleta de colores:**
 - **Tipografías:**
-- **Plantillas maestras de Canva (nombre/ID):**
+- **Motor de diseño:** claude-design  <!-- claude-design (código, por defecto) | canva -->
+- **Kit de marca (Claude Design):** `marca/marca.json` (se crea con `marca.mjs init`)
+- **Plantillas maestras de Canva (nombre/ID), si se usa Canva:**
   - Post:
   - Carrusel:
   - Historia:
@@ -72,7 +74,7 @@
 
 - [ ] Drive ordenado (o plan de orden en `orden-drive.md`)
 - [ ] Fotos y videos descargados a `assets/`
-- [ ] 3 plantillas maestras de Canva registradas (origen: Drive / Canva / Claude Design)
+- [ ] Kit de marca creado (`marca/`) o 3 plantillas maestras de Canva registradas
 - [ ] Diagnóstico inicial de Instagram (`analisis/baseline-*.md`, community-manager)
 - [ ] Perfil aprobado por el humano
 - [ ] Datos subidos a Drive (`06 Agente`, con `/sincronizar-drive`)

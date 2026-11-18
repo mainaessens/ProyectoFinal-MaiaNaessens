@@ -3,6 +3,7 @@ import { api, initToken, saveToken } from './api.js';
 import Md from './Md.jsx';
 import Planes from './Planes.jsx';
 import Consola from './Consola.jsx';
+import Disenos from './Disenos.jsx';
 
 const Logo = () => (
   <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
@@ -44,9 +45,9 @@ function Analisis({ items }) {
   );
 }
 
-const TABS = [['planes', 'Planes'], ['analisis', 'Análisis'], ['calendario', 'Calendario'], ['perfil', 'Perfil'], ['aprendizajes', 'Aprendizajes'], ['actividad', 'Actividad']];
+const TABS = [['planes', 'Planes'], ['disenos', 'Diseños'], ['analisis', 'Análisis'], ['calendario', 'Calendario'], ['perfil', 'Perfil'], ['aprendizajes', 'Aprendizajes'], ['actividad', 'Actividad']];
 
-function Cliente({ token, slug, onRun }) {
+function Cliente({ token, slug, onRun, onPedido }) {
   const [data, setData] = useState(null);
   const [tab, setTab] = useState('planes');
   const [err, setErr] = useState('');
@@ -71,6 +72,7 @@ function Cliente({ token, slug, onRun }) {
         ))}
       </nav>
       {tab === 'planes' && <Planes token={token} slug={slug} planes={data.planes} onChange={cargar} />}
+      {tab === 'disenos' && <Disenos token={token} slug={slug} onPedido={onPedido} />}
       {tab === 'analisis' && <Analisis items={data.analisis || []} />}
       {tab === 'calendario' && <div className="card"><Md>{data.calendario}</Md></div>}
       {tab === 'perfil' && <div className="card"><Md>{data.perfil}</Md></div>}
@@ -116,6 +118,7 @@ export default function App() {
   const [corriendo, setCorriendo] = useState(false); // hay un skill en ejecución (aunque se esté en otra vista)
   const [esperando, setEsperando] = useState(0);      // pedidos del agente (preguntas, permisos) que esperan respuesta
   const [aviso, setAviso] = useState(false);          // un skill terminó mientras se miraba otra vista
+  const [pedido, setPedido] = useState(null);          // ejecución pedida desde otra vista (ej. «Pedir cambios» en Diseños)
 
   const cargar = useCallback(async () => {
     if (!token) return;
@@ -155,12 +158,13 @@ export default function App() {
       <main>
         {error && <div className="banner bad">{error}</div>}
         {view.name === 'inicio' && clientes && <Inicio clientes={clientes} onOpen={(slug) => setView({ name: 'cliente', slug })} />}
-        {view.name === 'cliente' && <Cliente token={token} slug={view.slug} onRun={(slug) => setView({ name: 'agente', slug })} />}
+        {view.name === 'cliente' && <Cliente token={token} slug={view.slug} onRun={(slug) => setView({ name: 'agente', slug })}
+          onPedido={(slug, skill, args) => { setPedido({ id: Date.now(), skill, cliente: slug, args }); setView({ name: 'agente', slug }); }} />}
         {/* La consola queda montada siempre: así no se pierden la sesión ni el WebSocket al cambiar de vista. */}
         <section hidden={view.name !== 'agente'}>
           <header className="page-head"><div><h2>Agente</h2><p className="muted small">Ejecutá un skill y seguí el trabajo en vivo</p></div></header>
           <Consola token={token} skills={skills} clientes={clientes || []} preCliente={view.name === 'agente' ? view.slug : undefined}
-            visible={view.name === 'agente'} onCorriendo={setCorriendo} onPendientes={setEsperando} onAviso={setAviso} />
+            visible={view.name === 'agente'} pedido={pedido} onCorriendo={setCorriendo} onPendientes={setEsperando} onAviso={setAviso} />
         </section>
       </main>
     </div>

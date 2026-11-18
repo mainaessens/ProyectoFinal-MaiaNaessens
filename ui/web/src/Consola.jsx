@@ -22,7 +22,7 @@ const AYUDA_COSTO = 'Estimación de Claude Code a precios de lista de la API, ac
  *
  * El historial lo arma y lo guarda el servidor: se puede abrir una sesión anterior y continuarla (--resume).
  */
-export default function Consola({ token, skills, clientes, preCliente, visible, onCorriendo, onPendientes, onAviso }) {
+export default function Consola({ token, skills, clientes, preCliente, visible, pedido, onCorriendo, onPendientes, onAviso }) {
   const [skill, setSkill] = useState('');
   const [cliente, setCliente] = useState(preCliente || '');
   const [args, setArgs] = useState('');
@@ -126,6 +126,18 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
     setReply('');
   };
   const responderPedido = (id, decision) => send({ type: 'responder', id, decision });
+
+  // Pedido hecho desde otra vista del panel (ej. «Pedir cambios» en Diseños): se ejecuta una sola vez, ya conectado y sin otra corrida.
+  const hecho = useRef(null);
+  useEffect(() => {
+    if (!pedido || hecho.current === pedido.id || conn !== 'conectado' || running) return;
+    if (!skills.some((s) => s.name === pedido.skill)) return;
+    hecho.current = pedido.id;
+    eligio.current = true;
+    setSkill(pedido.skill); setCliente(pedido.cliente); setArgs(pedido.args);
+    setLog([]); setSession(null); setCosto(0);
+    send({ type: 'run', skill: pedido.skill, cliente: pedido.cliente, args: pedido.args, modelo });
+  }, [pedido, conn, running, skills]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const abrir = async (id) => {
     try {

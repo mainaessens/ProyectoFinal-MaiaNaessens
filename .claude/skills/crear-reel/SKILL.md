@@ -1,6 +1,6 @@
 ---
 name: crear-reel
-description: Arma un reel de punta a punta — guion con gancho en el primer segundo, selección del video real del cliente (assets/videos), portada en Canva, caption por red y horario — y genera un PLAN de publicación tras aprobación humana. Nunca edita ni sube video por sí mismo ni publica; deja el plan listo y, si no hay video adecuado, lo declara en vez de inventarlo.
+description: Arma un reel de punta a punta — guion con gancho en el primer segundo, selección del video real del cliente (assets/videos), portada (Claude Design con código por defecto, o Canva), caption por red y horario — y genera un PLAN de publicación tras aprobación humana. Nunca edita ni sube video por sí mismo ni publica; deja el plan listo y, si no hay video adecuado, lo declara en vez de inventarlo.
 tools: Read, Write, Bash, AskUserQuestion, mcp__canva__*, mcp__gworkspace__*
 ---
 

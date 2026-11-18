@@ -33,6 +33,8 @@ const LECTURA_RE = /^(get|list|read|search|lookup|describe|find|query|view)([_-]
 const META_RE = /[;&><`$(){}\r\n]/;
 const BASH_LECTURA = /^(ls|pwd|cat|head|tail|wc|grep|sort|uniq|echo)(\s|$)/;
 const GIT_LECTURA = /^git(\s+-C\s+\S+)?\s+(status|log|diff|ls-files|show|branch|rev-parse)(\s|$)/;
+// Motor de diseño (herramientas/marca): solo escribe dentro de clientes/<c>/ y renderiza con Edge/Chrome local.
+const MARCA = /^node\s+herramientas\/marca\/marca\.mjs\s+(init|build|plantillas|nueva|iterar|listar|lint|render|exportar)(\s|$)/;
 const MOVIOLA = /^node\s+herramientas\/moviola\/moviola\.mjs\s+(doctor|preparar|sondear|silencios|transcribir|validar|fotograma|renderizar)(\s|$)/;
 const PS_LECTURA = /^(Get-ChildItem|Get-Content|Test-Path|Get-Item|Resolve-Path|Select-String|Get-Location|Select-Object|Where-Object|Sort-Object|Measure-Object|Format-Table|Out-String)(\s|$)/i;
 const ARGS_SEGUROS = /^[A-Za-z0-9_./:\\ @=,\-"'*]*$/; // argumentos sin nada que ejecute o redirija
@@ -69,6 +71,7 @@ function argumentosEnProyecto(cmd, raiz) {
 function bashSeguro(cmd, raiz) {
   if (typeof cmd !== 'string' || !cmd.trim() || cmd.length > 400 || META_RE.test(cmd)) return false;
   const c = cmd.trim();
+  if (MARCA.test(c)) return !c.includes('|') && ARGS_SEGUROS.test(c) && argumentosEnProyecto(c, raiz);
   if (MOVIOLA.test(c)) return !c.includes('|') && ARGS_SEGUROS.test(c) && argumentosEnProyecto(c, raiz);
   return partes(c).every((p) => (BASH_LECTURA.test(p) || GIT_LECTURA.test(p)) && ARGS_SEGUROS.test(p) && argumentosEnProyecto(p, raiz));
 }

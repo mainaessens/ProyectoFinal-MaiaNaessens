@@ -1,0 +1,62 @@
+/* Estilos base de las piezas. Todo sale de las variables de la marca (clientes/<c>/marca/marca.css):
+   no se escriben colores ni tipografías sueltos. Tema: data-tema="oscuro" en la .piece. */
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+
+.piece {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 32px;
+  padding: 72px; background: var(--c-fondo); color: var(--c-texto);
+  font-family: var(--f-texto); font-size: 34px; line-height: 1.35;
+}
+.piece[data-tema="oscuro"] { background: var(--c-fondo-oscuro); color: var(--c-texto-oscuro); }
+.piece[data-tema="primario"] { background: var(--c-primario); color: var(--c-texto-oscuro); }
+
+/* Formatos (ancho x alto en px). Historias: zonas seguras arriba y abajo. */
+.f-feed-1x1 { width: 1080px; height: 1080px; }
+.f-feed-4x5 { width: 1080px; height: 1350px; }
+.f-story { width: 1080px; height: 1920px; padding: 250px 72px 340px; }
+.f-wide { width: 1920px; height: 1080px; padding: 96px; }
+
+.piece-head, .piece-foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.piece-foot { margin-top: auto; }
+.stack { display: flex; flex-direction: column; gap: 24px; }
+.row { display: flex; align-items: center; gap: 24px; }
+.grow { flex: 1; }
+.center { justify-content: center; }
+
+/* Tipografía */
+.display, .h1, .h2, .h3, .number { font-family: var(--f-titulo); margin: 0; line-height: 1.08; letter-spacing: -0.01em; }
+.display { font-size: 112px; }
+.h1 { font-size: 84px; }
+.h2 { font-size: 62px; }
+.h3 { font-size: 44px; }
+.number { font-size: 260px; line-height: 0.95; color: var(--c-primario); }
+.piece[data-tema="oscuro"] .number, .piece[data-tema="primario"] .number { color: var(--c-acento); }
+.lead { font-size: 40px; margin: 0; }
+.body { font-size: 34px; margin: 0; }
+.small, .meta { font-size: 26px; margin: 0; opacity: 0.75; }
+.eyebrow { font-size: 26px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-primario); margin: 0; }
+.piece[data-tema="oscuro"] .eyebrow, .piece[data-tema="primario"] .eyebrow { color: var(--c-acento); }
+.hl { color: var(--c-primario); }
+.piece[data-tema="oscuro"] .hl, .piece[data-tema="primario"] .hl { color: var(--c-acento); }
+.balance { text-wrap: balance; }
+
+/* Componentes */
+.cta { display: inline-block; align-self: flex-start; padding: 22px 40px; border-radius: var(--radio); background: var(--c-primario); color: var(--c-texto-oscuro); font-weight: 700; font-size: 32px; }
+.piece[data-tema="primario"] .cta { background: var(--c-acento); color: var(--c-secundario); }
+.card { background: var(--c-superficie); color: var(--c-texto); border-radius: var(--radio); padding: 36px; }
+.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+.items li { display: flex; gap: 24px; align-items: flex-start; }
+.items .n { flex: none; width: 56px; height: 56px; border-radius: 50%; background: var(--c-primario); color: var(--c-texto-oscuro); display: grid; place-items: center; font-weight: 700; }
+
+/* Imagen: foto del cliente a sangre con velo para que el texto se lea */
+.foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.velo { position: absolute; inset: 0; background: linear-gradient(to top, var(--c-fondo-oscuro) 8%, transparent 70%); opacity: 0.85; z-index: 1; }
+.sobre-foto { position: relative; z-index: 2; color: var(--c-texto-oscuro); }
+.sobre-foto .eyebrow { color: var(--c-acento); }
+
+/* Logo: imagen de la marca o, si no hay, el nombre en texto */
+.logo { display: inline-flex; align-items: center; height: 56px; }
+.logo img { height: 100%; width: auto; display: block; }
+.wordmark { font-family: var(--f-titulo); font-weight: 700; font-size: 38px; letter-spacing: 0.02em; }
+.slide-counter { font-size: 24px; opacity: 0.7; }
