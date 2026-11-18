@@ -39,11 +39,11 @@ Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba auto
 | Escribir dentro de `clientes/**` | Escribir en cualquier otro lado, en especial `.claude/**` (hooks y skills) |
 | `WebSearch` y herramientas internas del agente (`Skill`, `Agent`, listas de tareas) | `WebFetch` y herramientas desconocidas |
 | Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar, Jira o Canva |
-| Comandos de solo lectura sin metacaracteres (`ls`, `cat`, `git status`), los de Moviola y los del motor de diseño (`marca.mjs`), con rutas dentro del proyecto | Cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
+| **Cualquier comando de Bash y PowerShell** (con `FARO_BASH=preguntar`: solo los de solo lectura, los de Moviola y los del motor de diseño, con rutas dentro del proyecto) | (con `FARO_BASH=preguntar`) cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
 | — | Glif (consume créditos): **nunca** se aprueba solo, ni sus lecturas |
 | — | Las **preguntas** del agente: siempre las contestás vos |
 
-Lo concedido solo queda auditado: al terminar, el historial agrega una línea como «Permisos concedidos automáticamente: WebSearch ×1». Los hooks de `.claude/hooks/` siguen actuando igual. Con `FARO_PERMISOS_AUTO=off` se pregunta todo.
+Lo concedido solo queda auditado: al terminar, el historial agrega una línea como «Permisos concedidos automáticamente: WebSearch ×1». Los hooks de `.claude/hooks/` siguen actuando igual. Con `FARO_PERMISOS_AUTO=off` se pregunta todo. **Bash y PowerShell se conceden sin preguntar** (`FARO_BASH=preguntar` vuelve a pedir todo lo que no sea de solo lectura); los conectores que gastan o publican y las preguntas del agente siguen igual.
 
 ## Modelo y costo
 
@@ -93,6 +93,7 @@ Tests: `npm test`.
 | `FARO_MODEL` | el de Claude Code | Modelo predeterminado de Faro (`opus`, `sonnet`, `haiku` o uno de `FARO_MODELS`). El selector del panel lo pisa. |
 | `FARO_MODELS` | — | Nombres de modelo extra para el selector, separados por coma (formato estricto). |
 | `FARO_PERMISOS_AUTO` | `seguros` | `off` desactiva los permisos automáticos: se pregunta todo. |
+| `FARO_BASH` | `todo` | `todo` concede cualquier comando de Bash y PowerShell sin preguntar; `preguntar` solo concede los de solo lectura. |
 | `FARO_DATA_DIR` | `ui/.faro-data/sesiones` | Carpeta donde se guardan las sesiones. |
 | `AGENCIA_ROOT` | carpeta `agencia/` | Raíz de datos del agente. |
 

@@ -18,6 +18,8 @@ const CLAUDE_BIN = process.env.FARO_CLAUDE_BIN || 'claude';
 const MAX_RESPUESTA = 500;
 // Permisos automáticos: lo claramente seguro se concede solo (ver politica.js). FARO_PERMISOS_AUTO=off pregunta todo.
 const AUTO_ACTIVA = (process.env.FARO_PERMISOS_AUTO || 'seguros').toLowerCase() !== 'off';
+// Shell (Bash y PowerShell): se permite todo salvo FARO_BASH=preguntar, que vuelve a pedir lo que no sea de solo lectura.
+const BASH_LIBRE = (process.env.FARO_BASH || 'todo').toLowerCase() !== 'preguntar';
 
 export async function buildPrompt({ skill, cliente, args, text }) {
   if (text) {
@@ -84,7 +86,7 @@ export function argsDeClaude({ sessionId, modelo, env = process.env } = {}) {
 }
 
 /** Lanza una ejecución. Devuelve { kill(), responder(id, decision) }. `emit(obj)` recibe cada evento. */
-export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal, raiz = AGENCIA_ROOT, autoPermisos = AUTO_ACTIVA }) {
+export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal, raiz = AGENCIA_ROOT, autoPermisos = AUTO_ACTIVA, bashLibre = BASH_LIBRE }) {
   const args = argsDeClaude({ sessionId, modelo });
 
   // shell:true es necesario en Windows (claude.cmd); los argumentos son todos fijos/validados.
@@ -100,7 +102,7 @@ export function startRun({ prompt, sessionId, modelo, emit, spawnFn = spawnReal,
     if (m.type === 'control_request' && m.request?.subtype === 'can_use_tool' && typeof m.request_id === 'string') {
       const r = m.request;
       // Lo claramente seguro se concede solo: no se le pide al operador algo que el agente puede resolver por su cuenta.
-      const auto = decidirAutomatico({ tool: String(r.tool_name || ''), input: r.input ?? {}, interactivo: r.requires_user_interaction === true }, { raiz, activa: autoPermisos });
+      const auto = decidirAutomatico({ tool: String(r.tool_name || ''), input: r.input ?? {}, interactivo: r.requires_user_interaction === true }, { raiz, activa: autoPermisos, bashLibre });
       if (auto) {
         escribir({ type: 'control_response', response: { subtype: 'success', request_id: m.request_id, response: { behavior: 'allow', updatedInput: r.input ?? {} } } });
         emit({ type: 'permiso_auto', tool: String(r.tool_name || ''), motivo: auto.motivo });

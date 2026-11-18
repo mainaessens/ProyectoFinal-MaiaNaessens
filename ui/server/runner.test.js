@@ -68,7 +68,7 @@ function lanzar(extra = {}) {
   const hijo = falso();
   const eventos = [];
   let args;
-  const run = startRun({ prompt: '/nuevo-cliente demo', emit: (e) => eventos.push(e), spawnFn: (bin, a) => { args = a; return hijo; }, ...extra });
+  const run = startRun({ prompt: '/nuevo-cliente demo', emit: (e) => eventos.push(e), spawnFn: (bin, a) => { args = a; return hijo; }, bashLibre: false, ...extra });
   return { hijo, eventos, run, args };
 }
 
@@ -185,4 +185,15 @@ test('con autoPermisos desactivado se pregunta todo, también las lecturas', asy
   pedirCtl(hijo, 'c1', 'Read', { file_path: 'clientes/demo/perfil.md' });
   await tick();
   assert.equal(eventos.filter((e) => e.type === 'solicitud').length, 1);
+});
+
+test('con bashLibre (predeterminado de Faro) el shell se concede solo; el resto sigue llegando al operador', async () => {
+  const { hijo, eventos, run } = lanzar({ raiz: RAIZ_T, autoPermisos: true, bashLibre: true });
+  pedirCtl(hijo, 's1', 'Bash', { command: 'rm -rf clientes' });
+  pedirCtl(hijo, 's2', 'PowerShell', { command: 'Remove-Item -Recurse tmp' });
+  pedirCtl(hijo, 's3', 'mcp__instagram__publicar_carrusel', { cliente: 'demo' });
+  await tick();
+  assert.deepEqual(eventos.filter((e) => e.type === 'solicitud').map((e) => e.id), ['s3']);
+  assert.deepEqual(run.pendientes(), ['s3']);
+  assert.equal(hijo.escritos.filter((x) => x.type === 'control_response').length, 2);
 });

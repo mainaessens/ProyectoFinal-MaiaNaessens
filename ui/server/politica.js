@@ -94,7 +94,7 @@ export function dentroDeClientes(ruta, raiz) {
  * Decide si un pedido se concede solo. Devuelve { motivo } si sí, o null si hay que preguntarle al operador.
  * `pedido` = { tool, input, interactivo }.
  */
-export function decidirAutomatico(pedido, { raiz, activa = true } = {}) {
+export function decidirAutomatico(pedido, { raiz, activa = true, bashLibre = false } = {}) {
   if (!activa || !pedido || typeof pedido.tool !== 'string') return null;
   const { tool, input } = pedido;
   if (pedido.interactivo) return null; // una pregunta al operador nunca se contesta sola
@@ -111,6 +111,8 @@ export function decidirAutomatico(pedido, { raiz, activa = true } = {}) {
   if (ESCRITURA[tool]) {
     return dentroDeClientes(input?.[ESCRITURA[tool]], raiz) ? { motivo: 'escritura en clientes/' } : null;
   }
+  // Con bashLibre (FARO_BASH=todo, el predeterminado de Faro) cualquier comando de shell se concede solo.
+  if ((tool === 'Bash' || tool === 'PowerShell') && bashLibre) return { motivo: 'shell permitido (FARO_BASH)' };
   if (tool === 'Bash') return bashSeguro(input?.command, raiz) ? { motivo: 'comando de solo lectura' } : null;
   if (tool === 'PowerShell') return powershellSeguro(input?.command, raiz) ? { motivo: 'comando de solo lectura' } : null;
 

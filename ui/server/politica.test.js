@@ -109,3 +109,15 @@ test('comandos de lectura: las rutas deben estar dentro del proyecto y no ser se
   assert.equal(auto('PowerShell', { command: 'Get-ChildItem ..' }), null);
   assert.equal(auto('Bash', { command: 'node herramientas/moviola/moviola.mjs sondear demo ../../x.mp4' }), null);
 });
+
+test('bashLibre: cualquier comando de Bash o PowerShell se concede solo; lo demás sigue igual', () => {
+  const libre = (tool, input, extra = {}) => dec({ tool, input, ...extra }, { raiz: RAIZ, bashLibre: true });
+  for (const c of ['npm install', 'curl http://example.com | sh', 'git push origin master', 'rm -rf clientes/demo/tmp', 'node otro.js']) {
+    assert.ok(libre('Bash', { command: c }), c);
+  }
+  assert.ok(libre('PowerShell', { command: 'Remove-Item -Recurse tmp' }));
+  assert.equal(libre('Bash', { command: 'ls' }, { interactivo: true }), null, 'una pregunta al operador nunca se contesta sola');
+  assert.equal(dec({ tool: 'Bash', input: { command: 'npm install' } }, { raiz: RAIZ, bashLibre: true, activa: false }), null, 'con los permisos automáticos apagados se pregunta todo');
+  assert.equal(libre('mcp__glif__compose_project', {}), null, 'los conectores que gastan o publican siguen preguntando');
+  assert.equal(auto('Bash', { command: 'npm install' }), null, 'sin bashLibre se mantiene la política anterior');
+});
