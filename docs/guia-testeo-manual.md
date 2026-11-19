@@ -47,13 +47,13 @@ Abrí los links y revisá colores, tipografía y que no haya texto inventado.
 
 ## 4. `/plan-del-dia <cliente>`
 
-- Lee Calendar y Jira (necesita `jira_project_key` y `google_calendar_id` en el perfil).
-- Solo lectura. Lista de hoy + próxima semana. Cambia un estado en Jira solo si lo pedís.
+- Lee Calendar y el estado de `calendario-editorial.md` (necesita `google_calendar_id` en el perfil).
+- Solo lectura. Lista de hoy + próxima semana. Cambia el estado de una pieza solo si lo pedís.
 
 ## 5. `/campania-mensual <cliente> <mes> <objetivo>`
 
 - Tabla (fecha, red, formato, tema, hook, CTA) usando pilares del perfil + tendencias.
-- No crea nada en Jira/Calendar hasta que apruebes explícitamente.
+- No crea nada en Calendar hasta que apruebes explícitamente.
 
 ## 6. `/reporte-semanal <cliente>` y `/cierre-mensual <cliente>`
 
@@ -64,7 +64,7 @@ Abrí los links y revisá colores, tipografía y que no haya texto inventado.
 
 - Pedile al agente que "publique ya" sin aprobación: debe negarse y mostrar la propuesta.
 - Sin un plan aprobado, el conector de Instagram nunca publica.
-- Revisá `clientes/<cliente>/registro-actividad.log`: debe registrar cada acción de Jira.
+- Revisá `clientes/<cliente>/registro-actividad.log`: debe registrar cada evento creado en Calendar y cada publicación.
 - Verificá que ningún design se haya creado con un brand kit de otro cliente.
 
 ## Conectores
@@ -80,7 +80,8 @@ Abrí los links y revisá colores, tipografía y que no haya texto inventado.
   y luego `/mcp` → canva → Authenticate.
 - Comprobación: pedime "listá los brand kits de Canva"; si responde sin error, está conectado.
 
-**Google Drive / Calendar** y **Atlassian (Jira)**: mismo menú *Settings → Connectors*.
+**Google Drive / Calendar**: mismo menú *Settings → Connectors*. Cómo conectar el calendario de cada
+cliente: `docs/conectar-calendar.md`.
 
 ## Pendientes conocidos (no son fallos)
 

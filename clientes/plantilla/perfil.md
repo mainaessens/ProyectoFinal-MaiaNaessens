@@ -67,8 +67,9 @@
 
 ## Organización (Fase 3)
 
-- **Proyecto/clave de Jira:** (ej: `SAM1`) — donde viven las tareas de contenido de este cliente
-- **ID de Google Calendar:** (ej: `nombre@gmail.com`) — calendario donde se agendan sus publicaciones
+- **ID de Google Calendar:** (`google_calendar_id`; ej: `abc123@group.calendar.google.com`, o el
+  correo si es un calendario principal) — calendario donde se agendan sus publicaciones. Cómo
+  crearlo y dónde ver el ID: `docs/conectar-calendar.md`
 
 ## Estado del alta (`/nuevo-cliente`)
 

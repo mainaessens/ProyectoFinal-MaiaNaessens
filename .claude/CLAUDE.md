@@ -7,7 +7,7 @@ Es la única fuente de verdad de comportamiento por defecto; los skills y subage
 
 Somos una agencia de marketing que gestiona, por cuenta de cliente: estrategia de contenido,
 diseño de piezas, publicación en redes sociales (Instagram y Facebook) y organización
-diaria del trabajo (Jira + Google Calendar).
+diaria del trabajo (Google Calendar).
 
 ## Regla de oro — Human-in-the-loop
 
@@ -17,7 +17,7 @@ la propuesta y recibir un OK explícito del humano.**
 Esto aplica sin excepción a:
 
 - Publicar o programar contenido en cualquier red social.
-- Crear o modificar tareas/eventos en bloque (Jira, Calendar).
+- Crear o modificar eventos en bloque en Calendar.
 - Enviar reportes o cualquier comunicación al cliente.
 
 El ciclo de trabajo es siempre: **proponer → revisar → ejecutar**.
@@ -80,9 +80,12 @@ cliente — nunca se generaliza entre cuentas.
 - **Nomenclatura de archivos:** `clientes/<nombre-cliente>/...` en minúsculas y sin espacios
   (usar guiones). Fechas en formato `AAAA-MM` o `AAAA-MM-DD`.
 
-## Ciclo de estados de una publicación (Jira)
+## Ciclo de estados de una publicación
 
 `Por hacer → En diseño → En aprobación → Programado → Publicado`
+
+El estado de cada pieza vive en `clientes/<cliente>/calendario-editorial.md`; la fecha y la hora, en
+el evento de Google Calendar del cliente (`docs/conectar-calendar.md`). No se usa Jira por cliente.
 
 ## Memoria por cliente
 

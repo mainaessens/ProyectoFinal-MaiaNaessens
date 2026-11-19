@@ -32,7 +32,7 @@ sin un OK explícito del humano, y esa regla se hace cumplir con barreras técni
 | `/campania-mensual` | Tendencias (WebSearch) + historial → tabla numerada del mes; con aprobación, crea tareas/eventos y ofrece seguir con `/crear-post`. |
 | `/crear-post` | Por número, slug o `todos`: hook, caption por red, diseño en Canva, revisión, exportación a `assets/exports/`, `.plan.json` aprobado y publicación opcional en Instagram. |
 | `/crear-reel` | Guion, selección del video real del cliente, portada en Canva, plan. Nunca inventa video. |
-| `/plan-del-dia` | Vista unificada de Calendar + Jira. Solo lectura. |
+| `/plan-del-dia` | Calendar + estado del calendario editorial. Solo lectura. |
 | `/reporte-semanal`, `/cierre-mensual` | Informe semanal y memoria mensual (`historial/`, `aprendizajes.md`). |
 
 ### Subagentes (`.claude/agents/`)
@@ -43,7 +43,7 @@ Canva sin foto → imagen IA con máximo 2 variantes), `community-manager` (adap
 ### Hooks (`.claude/hooks/`, registrados en `settings.json`)
 - `validar-publicacion.ps1` (PreToolUse): bloquea publicar sin aprobación. Detalle en la sección 5.
 - `registrar-actividad.ps1` (PostToolUse): registra en `clientes/<c>/registro-actividad.log` cada
-  llamada de publicación o Jira.
+  llamada de publicación o cambio en Calendar.
 
 Los comandos usan `powershell -NoProfile -ExecutionPolicy Bypass -File "$CLAUDE_PROJECT_DIR/.claude/hooks/<script>.ps1"`
 (Windows PowerShell 5.1; no se asume `pwsh`).
@@ -142,7 +142,8 @@ un plan aprobado es inmutable.
 - **Vercel Blob** para alojar imágenes: Meta descarga el medio desde una URL pública; el token de
   Blob queda acotado a un único store (la clave de Supabase da acceso a toda la base).
 - **Jira solo para la tesis**: no hay proyecto de Jira por cliente; el calendario vive en
-  `calendario-editorial.md`.
+  `calendario-editorial.md` y cada pieza se agenda en el Google Calendar del cliente
+  (`docs/conectar-calendar.md`).
 - **Hooks con Windows PowerShell 5.1**: un test verifica que el ejecutable de cada hook exista.
 - **Imagen generada con IA, solo si es necesaria**: deben cumplirse tres condiciones (no hay foto real del cliente que represente el tema, la plantilla sin foto no alcanza, y la imagen ilustra un concepto o ambiente genérico, nunca personas, resultados ni instalaciones reales del cliente). Siempre se declara como IA en la pieza y en el plan; una prueba exige esa declaración.
 - **Plantillas de Canva sin brand kit**: la cuenta de Canva contiene brand kits de clientes reales;

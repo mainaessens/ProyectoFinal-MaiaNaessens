@@ -1,10 +1,5 @@
 {
   "mcpServers": {
-    "atlassian": {
-      "transport": "sse",
-      "url": "https://mcp.atlassian.com/v1/sse",
-      "note": "MCP oficial de Atlassian (Jira). Auth: OAuth 2.1. Conectado vía Settings > Connectors. Verificar /v1/sse vs /v1/mcp antes de reinstalar (Atlassian migró a HTTP streamable)."
-    },
     "gworkspace": {
       "command": "uvx",
       "args": ["workspace-mcp"],

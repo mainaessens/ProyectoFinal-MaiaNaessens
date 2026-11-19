@@ -44,23 +44,23 @@ Describe "registrar-actividad.ps1" {
         if (Test-Path $LogGeneral) { Remove-Item -Force $LogGeneral }
     }
 
-    Context "Tool relevante (Jira) con cliente identificado" {
+    Context "Tool relevante (Calendar) con cliente identificado" {
         It "termina con exit 0" {
-            $exit = Invoke-Hook (@{ tool_name = "mcp__atlassian__transitionJiraIssue"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
+            $exit = Invoke-Hook (@{ tool_name = "mcp__gworkspace__create_event"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json)
             $exit | Should -Be 0
         }
         It "agrega una linea al log del cliente" {
-            Invoke-Hook (@{ tool_name = "mcp__atlassian__transitionJiraIssue"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
+            Invoke-Hook (@{ tool_name = "mcp__gworkspace__create_event"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             Test-Path $LogPath | Should -BeTrue
-            (Get-Content $LogPath) | Should -Match "mcp__atlassian__transitionJiraIssue"
+            (Get-Content $LogPath) | Should -Match "mcp__gworkspace__create_event"
         }
         It "la linea incluye el nombre del cliente" {
-            Invoke-Hook (@{ tool_name = "mcp__atlassian__transitionJiraIssue"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
+            Invoke-Hook (@{ tool_name = "mcp__gworkspace__create_event"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             (Get-Content $LogPath) | Should -Match "cliente=$TestCliente"
         }
     }
 
-    Context "Tool irrelevante (no publicacion/jira)" {
+    Context "Tool irrelevante (no publicacion/calendar)" {
         It "no crea ni modifica ningun log" {
             Invoke-Hook (@{ tool_name = "Read"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             Test-Path $LogPath | Should -BeFalse
@@ -76,7 +76,7 @@ Describe "registrar-actividad.ps1" {
 
     Context "Multiples llamadas" {
         It "cada llamada agrega una linea nueva, sin sobrescribir el log" {
-            Invoke-Hook (@{ tool_name = "mcp__atlassian__transitionJiraIssue"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
+            Invoke-Hook (@{ tool_name = "mcp__gworkspace__create_event"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             Invoke-Hook (@{ tool_name = "mcp__instagram__publicar_imagen"; tool_input = @{ cliente = $TestCliente } } | ConvertTo-Json) | Out-Null
             (Get-Content $LogPath).Count | Should -Be 2
         }

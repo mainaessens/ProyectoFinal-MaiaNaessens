@@ -38,7 +38,7 @@ Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba auto
 | Lecturas **dentro del proyecto** (`Read`, `Glob`, `Grep`), sin archivos sensibles (`.env`, tokens, claves) | Leer **fuera** del proyecto o archivos sensibles |
 | Escribir dentro de `clientes/**` | Escribir en cualquier otro lado, en especial `.claude/**` (hooks y skills) |
 | `WebSearch` y herramientas internas del agente (`Skill`, `Agent`, listas de tareas) | `WebFetch` y herramientas desconocidas |
-| Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar, Jira o Canva |
+| Estadísticas de Instagram (solo lectura) y lecturas de conectores (`get…`, `list…`, `read…`, `search…`) | **Publicar**, subir archivos, y crear, modificar, enviar o borrar en Drive, Calendar o Canva |
 | **Cualquier comando de Bash y PowerShell** (con `FARO_BASH=preguntar`: solo los de solo lectura, los de Moviola y los del motor de diseño, con rutas dentro del proyecto) | (con `FARO_BASH=preguntar`) cualquier otro comando, `;`, `&&`, redirecciones, rutas fuera del proyecto |
 | — | Glif (consume créditos): **nunca** se aprueba solo, ni sus lecturas |
 | — | Las **preguntas** del agente: siempre las contestás vos |
@@ -62,7 +62,7 @@ Lo concedido solo queda auditado: al terminar, el historial agrega una línea co
 
 - **Node.js 20 o superior** (probado con 24).
 - **Claude Code CLI** (`claude`) instalado, en el PATH y con sesión iniciada — solo para la sección *Agente*.
-- Los conectores que use cada skill (Drive, Calendar, Jira, Canva, Instagram…) configurados como indica
+- Los conectores que use cada skill (Drive, Calendar, Canva, Instagram…) configurados como indica
   [`../docs/obtencion-de-credenciales.md`](../docs/obtencion-de-credenciales.md). Las API keys siguen en
   variables de entorno del sistema, nunca en este panel.
 - Windows, macOS o Linux. Navegador moderno.

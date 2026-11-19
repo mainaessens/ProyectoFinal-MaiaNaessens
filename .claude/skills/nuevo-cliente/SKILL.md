@@ -144,11 +144,15 @@ cuatro caminos y se pueden combinar.
 
 1. Leer el brief y el manual. Extraer y proponer: tono, paleta, tipografías, público, pilares,
    restricciones, competidores. **No inventar** más allá del material.
-2. Marcar qué se infirió y qué quedó pendiente (redes activas, Jira, Calendar).
+2. Marcar qué se infirió y qué quedó pendiente (redes activas, Calendar).
 3. Si el material contradice al usuario en el chat, priorizar al usuario y señalar la
    contradicción.
 4. El perfil sigue el formato de `clientes/plantilla/perfil.md`, incluyendo la sección
    "Estado del alta" (Drive ordenado, assets descargados, kit de marca y/o plantillas de Canva).
+5. **Conectar el Calendar del cliente** (`google_calendar_id`, sección "Organización"): preguntar si
+   ya tiene un calendario para sus publicaciones. Si sí, listar los calendarios disponibles
+   (`gworkspace`, `list_calendars`) y registrar el ID elegido. Si no, indicar cómo crearlo y
+   dónde ver el ID (`docs/conectar-calendar.md`) y dejarlo **pendiente**. Nunca crear eventos acá.
 
 ## E. Diagnóstico inicial de Instagram (community-manager)
 
@@ -178,7 +182,7 @@ escritura, dejarlo como **pendiente** y seguir.
 
 ## Reglas
 
-- Nunca crear tareas en Jira ni eventos en Calendar desde este skill.
+- Nunca crear eventos en Calendar desde este skill (los crea `/campania-mensual` tras la aprobación).
 - Nunca sobrescribir un cliente existente sin confirmación explícita.
 - Nunca modificar el Drive del cliente sin aprobación del plan de orden, ni borrar nada.
 - Nunca usar brand kits de Canva; las plantillas se generan describiendo la marca en el prompt.

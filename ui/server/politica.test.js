@@ -46,10 +46,8 @@ test('estadísticas de Instagram: solo las de lectura; publicar y subir siempre 
 
 test('conectores: las lecturas pasan; crear, modificar, enviar y exportar se preguntan', () => {
   for (const t of ['mcp__gworkspace__list_events', 'mcp__gworkspace__read_file_content', 'mcp__gworkspace__search_files',
-    'mcp__08d03f21-d8c7-4b81-8c80-838024937ab3__getJiraIssue', 'mcp__08d03f21-d8c7-4b81-8c80-838024937ab3__searchJiraIssuesUsingJql',
     'mcp__canva__search-designs', 'mcp__canva__get-design']) assert.ok(auto(t), t);
   for (const t of ['mcp__gworkspace__create_event', 'mcp__gworkspace__delete_event', 'mcp__gworkspace__update_event', 'mcp__gworkspace__move_file',
-    'mcp__08d03f21-d8c7-4b81-8c80-838024937ab3__createJiraIssue', 'mcp__08d03f21-d8c7-4b81-8c80-838024937ab3__transitionJiraIssue',
     'mcp__canva__generate-design', 'mcp__canva__export-design', 'mcp__a02e003c__send_message', 'mcp__x__target', 'mcp__x__gettysburg_edit']) {
     assert.equal(auto(t), null, t);
   }

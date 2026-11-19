@@ -2,7 +2,7 @@
 //
 // Criterio: se aprueba automáticamente SOLO lo que no tiene efecto fuera del proyecto ni gasta dinero (lecturas dentro
 // del proyecto, búsquedas, escritura dentro de clientes/**, y unos pocos comandos de solo lectura). Todo lo demás
-// (publicar, crear o modificar en Drive/Calendar/Jira/Canva, generar imágenes de pago, comandos arbitrarios,
+// (publicar, crear o modificar en Drive/Calendar/Canva, generar imágenes de pago, comandos arbitrarios,
 // leer o escribir fuera del proyecto, tocar .claude/**) se le muestra al operador. Ante la duda, se pregunta.
 //
 // Lo concedido solo queda auditado en el historial (conteo por herramienta) y los hooks de .claude/hooks/ siguen

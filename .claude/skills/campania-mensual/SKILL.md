@@ -1,7 +1,7 @@
 ---
 name: campania-mensual
-description: Genera el calendario editorial de un mes para un cliente, combinando su historial de rendimiento (qué funcionó antes), tendencias del nicho (WebSearch) y los pilares de contenido de su perfil. Propone una tabla completa (fecha, red, formato, tema, hook, CTA) y, solo tras aprobación humana explícita, crea las tareas correspondientes en Jira y los eventos en Calendar.
-tools: Read, Write, Glob, WebSearch, mcp__gworkspace__*, mcp__atlassian__*, AskUserQuestion
+description: Genera el calendario editorial de un mes para un cliente, combinando su historial de rendimiento (qué funcionó antes), tendencias del nicho (WebSearch) y los pilares de contenido de su perfil. Propone una tabla completa (fecha, red, formato, tema, hook, CTA) y, solo tras aprobación humana explícita, crea los eventos correspondientes en Calendar.
+tools: Read, Write, Glob, WebSearch, mcp__gworkspace__*, AskUserQuestion
 ---
 
 # /campania-mensual
@@ -118,18 +118,17 @@ Propone el calendario editorial completo de un mes para un cliente.
    actualizada — nunca asumir que el resto sigue aprobado sin volver a mostrarlo.
 
 9. **Solo tras aprobación completa**:
-   - Crear una tarea en Jira por cada fila (usando el `jira_project_key` del perfil del
-     cliente), con el hook y el formato en el resumen, y la fecha como `duedate`. Si una pieza depende de
-     trabajo de otra persona (filmación, diseño, revisión experta, aprobación del cliente),
-     crear la **subtarea relacionada** correspondiente en vez de dejarlo implícito.
    - Crear un evento en el Calendar del cliente (`google_calendar_id` del perfil) por cada fila,
-     en la fecha y horario propuestos.
+     en la fecha y horario propuestos. Título `[Formato] Tema` (por ejemplo `[Reel] Cómo cuidar el
+     parquet`) y en la descripción un resumen de la ficha de esa pieza (hook, CTA, materiales y
+     qué falta). Si una pieza depende de trabajo de otra persona (filmación, diseño, revisión
+     experta, aprobación del cliente), crear un **evento aparte** con esa fecha límite en vez de
+     dejarlo implícito. Convención completa en `docs/conectar-calendar.md`.
    - Guardar en `clientes/<cliente>/calendario-editorial.md`, reemplazando el contenido anterior
      de ese mes si existía: primero la tabla aprobada y después la sección
      `## Desarrollo de piezas` con las fichas del paso 5.
-   - En cada tarea de Jira, incluir en la descripción un resumen de la ficha de esa pieza.
 
-10. Confirmar al usuario cuántas tareas y eventos se crearon, con enlaces. Ejecutar
+10. Confirmar al usuario cuántos eventos se crearon, con enlaces. Ejecutar
     `/sincronizar-drive <cliente>` para subir el calendario y el desarrollo de las piezas a Drive.
 
 11. **Siguiente paso (cuando la campaña está aprobada por el cliente)**: ofrecer con
@@ -148,9 +147,10 @@ Propone el calendario editorial completo de un mes para un cliente.
   confirmada de cuenta sin datos.
 - **Una tabla sin el desarrollo de cada reel, carrusel e historia está incompleta**: no se
   presenta como lista para aprobar (paso 5).
-- Nunca crear tareas en Jira ni eventos en Calendar antes del paso 9 (aprobación completa de la
+- Nunca crear eventos en Calendar antes del paso 9 (aprobación completa de la
   tabla) — ni una fila suelta, ni "para adelantar trabajo".
-- Si `jira_project_key` o `google_calendar_id` no están completados en el perfil del cliente,
-  avisar y no intentar crear nada ahí — se puede seguir generando y guardando la tabla igual.
+- Si `google_calendar_id` no está completado en el perfil del cliente, avisar, indicar cómo
+  obtenerlo (`docs/conectar-calendar.md`) y no intentar crear nada ahí — se puede seguir
+  generando y guardando la tabla igual.
 - El calendario editorial de un mes reemplaza al anterior del mismo mes solo si el usuario lo
   confirma explícitamente (para evitar pisar un mes ya aprobado por error).

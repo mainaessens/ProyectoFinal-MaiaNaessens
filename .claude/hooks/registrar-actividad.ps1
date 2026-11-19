@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
     Hook PostToolUse: registra en clientes/<cliente>/registro-actividad.log toda llamada de
-    publicacion o cambio de estado en Jira ya ejecutada.
+    publicacion o cambio en el Calendar de un cliente ya ejecutado.
 
 .DESCRIPTION
     Claude Code invoca los hooks PostToolUse pasando por stdin un JSON con tool_name,
     tool_input y tool_response. Este script:
       1. Lee ese JSON de stdin.
-      2. Si la tool no es relevante para auditoria (publicacion/Jira), no hace nada.
+      2. Si la tool no es relevante para auditoria (publicacion/Calendar), no hace nada.
       3. Si lo es, intenta identificar a que cliente corresponde (por convencion, el tool_input
          suele incluir una referencia al cliente o al plan; si no se puede determinar, se anota
          en un log general).
@@ -24,7 +24,7 @@ if ([string]::IsNullOrWhiteSpace($inputJson)) { exit 0 }
 $data = $inputJson | ConvertFrom-Json
 $toolName = $data.tool_name
 
-$patronRelevante = "mcp__instagram__(publicar|subir)|mcp__atlassian__"
+$patronRelevante = "mcp__instagram__(publicar|subir)|mcp__gworkspace__(create|update|delete)_event"
 if ($toolName -notmatch $patronRelevante) { exit 0 }
 
 $agenciaRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)

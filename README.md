@@ -38,7 +38,7 @@ tocar código.
 ├── CLAUDE.md                       # reglas globales: regla de oro human-in-the-loop,
 │                                    #   convenciones de idioma/nomenclatura, ciclo de estados
 ├── settings.json                   # permisos y registro de hooks (PreToolUse/PostToolUse)
-├── .mcp.json                       # conectores MCP declarados (Drive, Calendar, Jira, Canva,
+├── .mcp.json                       # conectores MCP declarados (Drive, Calendar, Canva,
 │                                    #   Instagram propio, Glif) — solo referencias a env vars
 ├── .env.example                    # variables de entorno necesarias, sin valores reales
 ├── instagram-cuentas.json          # cliente → ig_user_id (no es un secreto)
@@ -53,7 +53,7 @@ tocar código.
 ├── skills/                         # SKILLS — procedimientos invocables como /comando
 │   ├── nuevo-cliente/SKILL.md      #   alta: ordena el Drive (con OK), descarga assets, plantillas Canva, perfil
 │   ├── analisis-cuenta/SKILL.md    #   estadísticas reales de Instagram (community-manager) → decisiones para el plan
-│   ├── plan-del-dia/SKILL.md       #   vista unificada Calendar + Jira, prioridades del día
+│   ├── plan-del-dia/SKILL.md       #   Calendar + estado del calendario editorial, prioridades del día
 │   ├── crear-post/SKILL.md         #   por número/slug/todos: caption + diseño + export → PLAN aprobado → Instagram
 │   ├── crear-historias/SKILL.md    #   secuencia de historias → plan → publicación por API (sin stickers)
 │   ├── editar-video/SKILL.md       #   edita el bruto del cliente → plan escena por escena → video terminado

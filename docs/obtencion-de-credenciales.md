@@ -22,7 +22,7 @@ aparecieron y cómo se resolvieron. Sirve para que otra persona repita la instal
 
 ## 1. Conectores de la plataforma (sin token propio)
 
-Google Drive/Calendar, Atlassian (Jira), Canva, Vercel y Supabase se conectan desde la plataforma con
+Google Drive/Calendar, Atlassian (Jira, solo tesis), Canva, Vercel y Supabase se conectan desde la plataforma con
 OAuth: *Settings → Connectors → (servicio) → Connect*, iniciar sesión y aceptar permisos. Después hay
 que abrir una **sesión nueva** para que aparezcan sus herramientas.
 
