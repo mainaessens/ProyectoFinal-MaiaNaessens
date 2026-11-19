@@ -73,6 +73,8 @@ export async function getCliente(slug) {
     calendario: await readText(path.join(base, 'calendario-editorial.md')),
     aprendizajes: await readText(path.join(base, 'aprendizajes.md')),
     tendencias: extra[0] ? await readText(path.join(base, extra[0])) : null,
+    // Todos los informes de tendencias (tendencias-AAAA-MM.md), el más reciente primero.
+    tendenciasLista: await Promise.all(extra.map(async (f) => ({ archivo: f, texto: (await readText(path.join(base, f))) || '' }))),
     planes: await listPlanes(slug),
     actividad: await readLog(slug),
     analisis: await listAnalisis(slug),

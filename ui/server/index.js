@@ -9,6 +9,7 @@ import { listClientes, getCliente, decidirPlan, listSkills, safeSlug, safePlanFi
 import { buildPrompt, startRun } from './runner.js';
 import { manejarConexion } from './conexion.js';
 import { crearAlmacen, esIdValido } from './sesiones.js';
+import { listarVideos, archivoDeVideo, listarImagenes } from './videos.js';
 import { listarModelos, modeloPorDefecto } from './modelos.js';
 import { cargarEnv } from '../../lib/cargar-env.mjs';
 import { listarDisenos, archivoDePieza, aprobar, esPieza, MarcaError } from '../../herramientas/marca/lib/marca.mjs';
@@ -97,6 +98,27 @@ app.post('/api/clientes/:slug/disenos/:pieza/aprobar', wrap(async (req, res) => 
     throw e;
   }
 }));
+
+// Videos editados con Moviola: planes por escena y mp4 terminados (solo lectura).
+app.get('/api/clientes/:slug/videos', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  if (!slug) return res.status(400).json({ error: 'Cliente inválido' });
+  res.json(await listarVideos(slug));
+}));
+app.get('/api/clientes/:slug/imagenes', wrap(async (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  if (!slug) return res.status(400).json({ error: 'Cliente inválido' });
+  res.json(await listarImagenes(slug));
+}));
+app.get('/api/clientes/:slug/videos/:archivo', (req, res) => {
+  const slug = safeSlug(req.params.slug);
+  const file = slug && archivoDeVideo(slug, req.params.archivo);
+  if (!file) return res.status(404).json({ error: 'Archivo no encontrado' });
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Cache-Control', 'no-store');
+  res.type('video/mp4');
+  res.sendFile(file, (e) => { if (e && !res.headersSent) res.status(404).json({ error: 'Archivo no encontrado' }); });
+});
 
 app.get('/api/modelos', (_q, res) => res.json({ modelos: listarModelos(), porDefecto: modeloPorDefecto() }));
 

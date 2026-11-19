@@ -10,6 +10,11 @@ const usd = (n) => (n >= 0.01 ? `US$ ${n.toFixed(2)}` : `US$ ${n.toFixed(4)}`);
 const CLAVE_MODELO = 'faro.modelo';
 const leerModelo = () => { try { return localStorage.getItem(CLAVE_MODELO) || ''; } catch { return ''; } };
 const guardarModelo = (m) => { try { localStorage.setItem(CLAVE_MODELO, m); } catch { /* sin almacenamiento */ } };
+// Orden de trabajo de la agencia: alta → análisis → plan del mes → piezas → rutina de seguimiento.
+// Los skills de «iterar» no se listan acá: se lanzan desde su pestaña (ej. «Pedir cambios» en Diseños).
+const ORDEN = ['nuevo-cliente', 'analisis-cuenta', 'campania-mensual', 'disenar', 'crear-post', 'crear-historias', 'crear-reel', 'editar-video', 'crear-video', 'sincronizar-drive', 'plan-del-dia', 'reporte-semanal', 'cierre-mensual'];
+const posicion = (n) => { const i = ORDEN.indexOf(n); return i < 0 ? ORDEN.length : i; };
+const ordenar = (skills) => skills.filter((s) => !s.name.startsWith('iterar')).sort((p, q) => posicion(p.name) - posicion(q.name) || p.name.localeCompare(q.name));
 const AYUDA_COSTO = 'Estimación de Claude Code a precios de lista de la API, acumulada en la sesión. Con un plan de suscripción consume tu cupo de uso; no es una factura.';
 
 /**
@@ -49,7 +54,8 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
   }, [token]);
 
   useEffect(() => { if (preCliente && !running) { eligio.current = true; setCliente(preCliente); } }, [preCliente]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (!skill && skills.length) setSkill(skills[0].name); }, [skills, skill]);
+  const ejecutables = ordenar([...skills]);
+  useEffect(() => { if (!skill && ejecutables.length) setSkill(ejecutables[0].name); }, [skills, skill]); // eslint-disable-line react-hooks/exhaustive-deps
   // Al abrir el panel, se preselecciona el cliente de la última sesión (si el operador todavía no eligió uno).
   useEffect(() => {
     if (!eligio.current && sesiones.length && sesiones[0].cliente && clientes.some((c) => c.slug === sesiones[0].cliente)) {
@@ -198,7 +204,8 @@ export default function Consola({ token, skills, clientes, preCliente, visible, 
         <div className="grid4">
           <label>Skill
             <select value={skill} onChange={(e) => setSkill(e.target.value)} disabled={running}>
-              {skills.map((s) => <option key={s.name} value={s.name}>/{s.name}</option>)}
+              {skill && !ejecutables.some((s) => s.name === skill) && <option value={skill}>/{skill}</option>}
+              {ejecutables.map((s, i) => <option key={s.name} value={s.name}>{i + 1}. /{s.name}</option>)}
             </select>
           </label>
           <label>Cliente

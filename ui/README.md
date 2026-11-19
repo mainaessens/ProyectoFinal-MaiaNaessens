@@ -65,6 +65,9 @@ Lo concedido solo queda auditado: al terminar, el historial agrega una línea co
 - Los conectores que use cada skill (Drive, Calendar, Canva, Instagram…) configurados como indica
   [`../docs/obtencion-de-credenciales.md`](../docs/obtencion-de-credenciales.md). Las API keys siguen en
   variables de entorno del sistema, nunca en este panel.
+- **Para crear videos sin material de base** (pestaña *Videos* → «Video sin material de base», skill `/crear-video`): el plugin
+  **HyperFrames** (`claude plugin install hyperframes@claude-plugins-official`), **Node.js 22 o superior**, FFmpeg y Chrome o Edge.
+  Verificación: `npx hyperframes doctor`. Detalle en [`../docs/editor-de-video.md`](../docs/editor-de-video.md).
 - Windows, macOS o Linux. Navegador moderno.
 
 ## Uso

@@ -18,7 +18,10 @@ de esa autora: el método de edición de este proyecto es propio (`.claude/refer
 | Python 3.9 a 3.12 | Whisper | `winget install Python.Python.3.12` |
 | faster-whisper y `av` < 19 | transcripción local con tiempos por palabra | `python -m pip install -r herramientas/moviola/requirements.txt` |
 | yt-dlp *(opcional)* | bajar reels de referencia para estudiar su estilo | `winget install yt-dlp.yt-dlp` |
-| Plugin HyperFrames *(opcional)* | motion graphics avanzados | `claude plugin install hyperframes@claude-plugins-official` |
+| Plugin HyperFrames **(obligatorio para `/crear-video`)** | videos sin material de base (HTML/CSS → MP4) y motion graphics | `claude plugin install hyperframes@claude-plugins-official` |
+| Node.js 22 o más y Chrome o Edge | los exige HyperFrames para renderizar (con Node 20, `/editar-video` anda pero `/crear-video` no) | `winget install OpenJS.NodeJS.LTS` · `winget install Google.Chrome` |
+
+**Primer uso de HyperFrames:** la herramienta se baja sola con `npx` la primera vez (unos minutos, necesita internet). Para comprobar que quedó lista: `npx hyperframes doctor`; deben salir en verde Node, FFmpeg y Chrome. Whisper, TTS, música local y Docker que marca como faltantes son opcionales y no se necesitan para `/crear-video`. Renderizar consume memoria: conviene cerrar otras aplicaciones (el diagnóstico avisa si hay menos de ~2 GB libres).
 | Claude Code con sesión iniciada | el agente que usa el skill `/editar-video` | ver docs de Claude Code |
 
 En macOS el equivalente es `brew install node ffmpeg python yt-dlp`. Las instalaciones con `winget`
@@ -91,3 +94,11 @@ mismo plan y la misma aprobación. Está instalado pero no se probó todavía co
   aprobación y export final de 8,2 s en 1080×1920 con audio, con la línea de auditoría correspondiente.
 - **Sin verificar:** videos reales de un cliente, tipografías de pago de las marcas, HyperFrames y la mezcla
   de sonido.
+
+## Videos sin material de base (`/crear-video`)
+
+Cuando no hay video filmado, la idea se describe en palabras (desde Faro: pestaña Videos del cliente, bloque «Video sin material de base») y el agente arma el video como una composición HTML/CSS con el kit de marca del cliente y, si se quiere, sus fotos reales (`assets/fotos/`, `assets/identidad/`). Se renderiza con HyperFrames (plugin) a `assets/terminados/<slug>-vN.mp4`.
+
+- Usa el mismo ciclo que `/editar-video`: plan escena por escena en `assets/edicion/<slug>.vN.plan.json` (con `"tipo": "html"`), versiones que no se pisan y exportación solo con aprobación total.
+- La composición de cada versión vive en `assets/edicion/<slug>.vN/`. Las imágenes originales se copian, nunca se modifican.
+- Si HyperFrames no está instalado, el agente lo indica y pide permiso antes de instalar nada.

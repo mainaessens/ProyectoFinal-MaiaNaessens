@@ -4,18 +4,42 @@ import Md from './Md.jsx';
 import Planes from './Planes.jsx';
 import Consola from './Consola.jsx';
 import Disenos from './Disenos.jsx';
+import Videos from './Videos.jsx';
 
-const Logo = () => (
-  <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
-    <rect width="32" height="32" rx="8" fill="var(--brand)" />
-    <path d="M16 6l5 18H11z" fill="var(--accent)" />
-    <path d="M6 10l6 2M26 10l-6 2" stroke="var(--accent)" strokeWidth="1.6" strokeLinecap="round" />
-  </svg>
+const Logo = () => <span className="mono" aria-hidden="true">F</span>;
+
+const leerTema = () => { try { return localStorage.getItem('faro-tema') || 'light'; } catch { return 'light'; } };
+const Encabezado = () => {
+  const [tema, setTema] = useState(leerTema);
+  useEffect(() => {
+    document.documentElement.dataset.theme = tema;
+    try { localStorage.setItem('faro-tema', tema); } catch { /* sin almacenamiento */ }
+  }, [tema]);
+  return (
+    <header className="inst">
+      <img src="/logo-unt.webp" alt="Universidad Nacional de Tucumán" className="inst-logo unt" />
+      <div className="inst-titulo">
+        <span className="inst-kicker">Proyecto final</span>
+        <strong>Maia G. Naessens</strong>
+        <span className="inst-sub">Universidad Nacional de Tucumán · CEDITE</span>
+      </div>
+      <div className="inst-der">
+        <button className="tema" onClick={() => setTema(tema === 'dark' ? 'light' : 'dark')} title={tema === 'dark' ? 'Modo claro' : 'Modo oscuro'} aria-label="Cambiar entre modo claro y oscuro">{tema === 'dark' ? '☀' : '☾'}</button>
+        <img src="/logo-cedite.png" alt="CEDITE" className="inst-logo cedite" />
+      </div>
+    </header>
+  );
+};
+
+const Pie = () => (
+  <footer className="pie"><span>Proyecto final · Maia G. Naessens · 2026</span><span>Universidad Nacional de Tucumán · CEDITE</span></footer>
 );
 
 function Login({ onToken, error }) {
   const [t, setT] = useState('');
   return (
+    <>
+    <Encabezado />
     <main className="login">
       <Logo />
       <h1>Faro</h1>
@@ -26,6 +50,25 @@ function Login({ onToken, error }) {
       </form>
       {error && <div className="banner bad">{error}</div>}
     </main>
+    </>
+  );
+}
+
+function Tendencias({ items }) {
+  const [sel, setSel] = useState(0);
+  if (!items.length) {
+    return <div className="card"><p className="muted">Todavía no hay informes de tendencias. Se generan al ejecutar <code>/campania-mensual</code> (investiga formatos, fechas y temas en alza del nicho y guarda el resumen con sus fuentes).</p></div>;
+  }
+  const actual = items[Math.min(sel, items.length - 1)];
+  return (
+    <div className="stack">
+      {items.length > 1 && (
+        <select value={sel} onChange={(e) => setSel(Number(e.target.value))}>
+          {items.map((t, i) => <option key={t.archivo} value={i}>{t.archivo.replace(/^tendencias-|.md$/g, '')}</option>)}
+        </select>
+      )}
+      <div className="card"><Md>{actual.texto}</Md></div>
+    </div>
   );
 }
 
@@ -45,7 +88,7 @@ function Analisis({ items }) {
   );
 }
 
-const TABS = [['planes', 'Planes'], ['disenos', 'Diseños'], ['analisis', 'Análisis'], ['calendario', 'Calendario'], ['perfil', 'Perfil'], ['aprendizajes', 'Aprendizajes'], ['actividad', 'Actividad']];
+const TABS = [['planes', 'Planes'], ['disenos', 'Diseños'], ['videos', 'Videos'], ['analisis', 'Análisis'], ['tendencias', 'Tendencias'], ['calendario', 'Calendario'], ['perfil', 'Perfil'], ['aprendizajes', 'Aprendizajes'], ['actividad', 'Actividad']];
 
 function Cliente({ token, slug, onRun, onPedido }) {
   const [data, setData] = useState(null);
@@ -73,6 +116,8 @@ function Cliente({ token, slug, onRun, onPedido }) {
       </nav>
       {tab === 'planes' && <Planes token={token} slug={slug} planes={data.planes} onChange={cargar} />}
       {tab === 'disenos' && <Disenos token={token} slug={slug} onPedido={onPedido} />}
+      {tab === 'videos' && <Videos token={token} slug={slug} onPedido={onPedido} />}
+      {tab === 'tendencias' && <Tendencias items={data.tendenciasLista || []} />}
       {tab === 'analisis' && <Analisis items={data.analisis || []} />}
       {tab === 'calendario' && <div className="card"><Md>{data.calendario}</Md></div>}
       {tab === 'perfil' && <div className="card"><Md>{data.perfil}</Md></div>}
@@ -138,6 +183,8 @@ export default function App() {
   if (!token) return <Login error={error} onToken={(t) => { saveToken(t); setToken(t); }} />;
 
   return (
+    <>
+    <Encabezado />
     <div className="shell">
       <aside>
         <div className="brand"><Logo /><div><strong>Faro</strong><span className="muted small">panel de la agencia</span></div></div>
@@ -166,7 +213,9 @@ export default function App() {
           <Consola token={token} skills={skills} clientes={clientes || []} preCliente={view.name === 'agente' ? view.slug : undefined}
             visible={view.name === 'agente'} pedido={pedido} onCorriendo={setCorriendo} onPendientes={setEsperando} onAviso={setAviso} />
         </section>
+        <Pie />
       </main>
     </div>
+    </>
   );
 }

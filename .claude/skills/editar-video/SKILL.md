@@ -96,6 +96,9 @@ devuelve siempre JSON.
 | Títulos con animación de entrada y salida | Calcar el ritmo de un video de referencia automáticamente |
 | Normaliza el audio a −14 LUFS | Variantes automáticas con otros ganchos |
 
+Si no hay video filmado y la idea se describe en palabras, se usa **`/crear-video`** (composición
+HTML/CSS con HyperFrames, mismo plan escena por escena y misma aprobación).
+
 Para motion graphics avanzados (transiciones, animación de tipografía, 3D, bloques del registro)
 está instalado el plugin **HyperFrames** (`/hyperframes`): usarlo **solo si el humano lo pide**
 para esa pieza, y el resultado pasa por el mismo plan y la misma aprobación.
