@@ -6,7 +6,7 @@ import Consola from './Consola.jsx';
 import Disenos from './Disenos.jsx';
 import Videos from './Videos.jsx';
 
-const Logo = () => <span className="mono" aria-hidden="true">F</span>;
+const Logo = () => <span className="mono" aria-hidden="true">P</span>;
 
 const leerTema = () => { try { return localStorage.getItem('faro-tema') || 'light'; } catch { return 'light'; } };
 const Encabezado = () => {
@@ -42,7 +42,7 @@ function Login({ onToken, error }) {
     <Encabezado />
     <main className="login">
       <Logo />
-      <h1>Faro</h1>
+      <h1>Postagent</h1>
       <p className="muted">Pegá el token que imprime el servidor al iniciar (<code>npm start</code>).</p>
       <form onSubmit={(e) => { e.preventDefault(); onToken(t.trim()); }} className="row grow">
         <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Token" autoFocus />
@@ -177,7 +177,7 @@ export default function App() {
   useEffect(() => { cargar(); }, [cargar, view.name === 'inicio']);
   useEffect(() => { if (view.name === 'agente') setAviso(false); }, [view]);
   useEffect(() => {
-    document.title = esperando ? '? Faro (el agente espera tu respuesta)' : corriendo ? '● Faro (ejecutando)' : aviso ? '• Faro (el agente terminó)' : 'Faro — panel de la agencia';
+    document.title = esperando ? '? Postagent (el agente espera tu respuesta)' : corriendo ? '● Postagent (ejecutando)' : aviso ? '• Postagent (el agente terminó)' : 'Postagent — panel de la agencia';
   }, [corriendo, aviso, esperando]);
 
   if (!token) return <Login error={error} onToken={(t) => { saveToken(t); setToken(t); }} />;
@@ -187,7 +187,7 @@ export default function App() {
     <Encabezado />
     <div className="shell">
       <aside>
-        <div className="brand"><Logo /><div><strong>Faro</strong><span className="muted small">panel de la agencia</span></div></div>
+        <div className="brand"><Logo /><div><strong>Postagent</strong><span className="muted small">panel de la agencia</span></div></div>
         <button className={`nav ${view.name === 'inicio' ? 'on' : ''}`} onClick={() => setView({ name: 'inicio' })}>Clientes</button>
         <button className={`nav ${view.name === 'agente' ? 'on' : ''}`} onClick={() => setView({ name: 'agente' })}>
           Agente

@@ -50,7 +50,7 @@ planificadas (o publicadas, si hay conector y el humano lo aprueba).
    del cliente (`assets/fotos`) → pieza solo de texto/diseño → imagen IA. El motor se elige así:
    lo que pida el usuario → `Motor de diseño` del perfil → **Claude Design (código)** por defecto;
    **Canva** sigue disponible (plantillas maestras del cliente, nunca brand kits de otros). Con
-   Claude Design la pieza queda en `diseno/<pieza>/vN.html` + PNG y se puede iterar desde Faro.
+   Claude Design la pieza queda en `diseno/<pieza>/vN.html` + PNG y se puede iterar desde Postagent.
    Si el motor elegido no está disponible: cambiar de motor con el OK del usuario o modo plan
    (`diseno_pendiente: true`), sin bloquear el flujo.
 

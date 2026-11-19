@@ -2,7 +2,7 @@
 
 El diseñador produce las piezas gráficas con **Claude Design como primera opción**: cada pieza es un
 HTML que usa el kit de marca del cliente, se controla automáticamente, se renderiza a PNG y se
-itera desde Faro hasta llegar al resultado esperado. **Canva sigue disponible** como alternativa.
+itera desde Postagent hasta llegar al resultado esperado. **Canva sigue disponible** como alternativa.
 
 ## Elegir el motor
 
@@ -23,7 +23,7 @@ más tarde. Se pueden combinar (por ejemplo, kit de Claude Design y plantillas d
 ```
 herramientas/marca/                 el motor (igual para todos los clientes)
 ├── marca.mjs                       CLI: init, build, nueva, iterar, listar, lint, render, exportar
-├── lib/marca.mjs                   la lógica (la usa también Faro)
+├── lib/marca.mjs                   la lógica (la usa también Postagent)
 └── base/                           base.css + plantillas (feed-cifra, feed-foto, feed-lista, historia, carrusel)
 
 clientes/<cliente>/
@@ -34,7 +34,7 @@ clientes/<cliente>/
 └── diseno/<AAAA-MM-DD>-<slug>/     una carpeta por pieza
     ├── v1.html  v1.png  v2.html …  versiones; nunca se pisan
     ├── notas.md                    historial de cambios pedidos
-    └── aprobada.json               versión aprobada (la deja Faro o el CLI)
+    └── aprobada.json               versión aprobada (la deja Postagent o el CLI)
 ```
 
 Las piezas aprobadas se copian a `assets/exports/`, que es lo que toman `/crear-post` y el
@@ -91,11 +91,11 @@ negro puro, tipografías fuera de la marca y falta de logo.
 1. `/disenar <cliente> <#|slug|"tema"> [canva]` (o `/crear-post`, que lo invoca): resuelve la ficha
    del calendario, asegura el kit de marca, crea `v1.html` desde una plantilla, lo controla, lo
    renderiza, **mira el PNG** y presenta la pieza.
-2. En **Faro → cliente → Diseños** se ve la pieza (PNG), se compara con la versión anterior y se
+2. En **Postagent → cliente → Diseños** se ve la pieza (PNG), se compara con la versión anterior y se
    escribe qué cambiar. **Pedir cambios** abre el Agente y ejecuta `/iterar-diseno`, que crea la
    versión siguiente sin pisar la anterior, la controla y la renderiza. Se repite hasta que quede
    como se espera.
-3. **Aprobar vN** (en Faro, o el agente con `exportar`) copia los PNG a `assets/exports/` y deja
+3. **Aprobar vN** (en Postagent, o el agente con `exportar`) copia los PNG a `assets/exports/` y deja
    `aprobada.json` y una línea en `registro-actividad.log`.
 4. `/crear-post` genera el `.plan.json` con `diseno.motor`, `html_fuente` y `version`. La
    publicación sigue requiriendo su propio OK por pieza.

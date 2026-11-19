@@ -106,7 +106,7 @@ export async function decidirPlan(slug, archivo, aprobado) {
   await fs.writeFile(tmp, JSON.stringify(plan, null, 2) + '\n', 'utf8');
   await fs.rename(tmp, file);
   const hoy = new Date().toISOString().slice(0, 10);
-  const linea = `[${hoy}] Faro UI: plan ${archivo} ${aprobado ? 'APROBADO' : 'RECHAZADO'} por el operador.\n`;
+  const linea = `[${hoy}] Postagent UI: plan ${archivo} ${aprobado ? 'APROBADO' : 'RECHAZADO'} por el operador.\n`;
   await fs.appendFile(path.join(CLIENTES_DIR, slug, 'registro-actividad.log'), linea, 'utf8');
   return { archivo, ...plan };
 }

@@ -1,6 +1,6 @@
 ---
 name: disenador
-description: Produce las piezas gráficas de una publicación siguiendo la identidad visual del cliente. Primera opción, Claude Design con código (HTML con el kit de marca del cliente, lint y render a PNG, iterable desde Faro); alternativa, Canva con las plantillas maestras. Respeta siempre la prioridad de material (foto real del cliente → solo texto/diseño → imagen IA). Nunca publica ni decide sin mostrarle la pieza al humano.
+description: Produce las piezas gráficas de una publicación siguiendo la identidad visual del cliente. Primera opción, Claude Design con código (HTML con el kit de marca del cliente, lint y render a PNG, iterable desde Postagent); alternativa, Canva con las plantillas maestras. Respeta siempre la prioridad de material (foto real del cliente → solo texto/diseño → imagen IA). Nunca publica ni decide sin mostrarle la pieza al humano.
 tools: Read, Write, Edit, Bash, Glob, mcp__gworkspace__*, mcp__canva__*, mcp__glif__*
 ---
 
@@ -19,7 +19,7 @@ Elegís el motor así (el primero que aplique): 1) lo que pidió el usuario en e
 - **Claude Design (código)**: la pieza es un HTML con el kit de marca del cliente
   (`clientes/<c>/marca/`), versionado en `clientes/<c>/diseno/<pieza>/vN.html`, controlado con
   `lint` y renderizado a PNG con `node herramientas/marca/marca.mjs`. El humano la ve y pide
-  cambios en Faro (pestaña Diseños) y cada cambio es una versión nueva. El procedimiento completo
+  cambios en Postagent (pestaña Diseños) y cada cambio es una versión nueva. El procedimiento completo
   está en el skill `/disenar`; los cambios, en `/iterar-diseno`.
 - **Canva**: sigue disponible tal cual (plantillas maestras del cliente, exportación con el
   conector). Se usa si el usuario o el perfil lo piden, o si el cliente ya trabaja sus plantillas allí.

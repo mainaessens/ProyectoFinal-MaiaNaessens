@@ -99,7 +99,7 @@ cuatro caminos y se pueden combinar.
 
 2. **Preguntar con `AskUserQuestion`** (selección múltiple) qué opciones usar para lo que falte:
    - **Claude Design (código) — recomendada, es el motor por defecto**: kit de marca en HTML/CSS
-     con control de marca y render a PNG, que se itera en Faro (pestaña Diseños).
+     con control de marca y render a PNG, que se itera en Postagent (pestaña Diseños).
    - **Canva — crear las 3 plantillas maestras** (post, carrusel, historia) con el conector.
    - **Claude Design como Artifact visual e importarlo a Canva**: se diseña la plantilla como
      Artifact de diseño y se importa a Canva con `import-design-from-url`, para que el cliente

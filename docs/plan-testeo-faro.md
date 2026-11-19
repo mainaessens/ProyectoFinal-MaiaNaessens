@@ -1,4 +1,4 @@
-# Plan de testeo — Faro (panel web del agente), desde cero
+# Plan de testeo — Postagent (panel web del agente), desde cero
 
 **Alcance:** `agencia/ui` (React + Express + WebSocket), de punta a punta con un cliente nuevo
 (`el-norteno-parquet`), desde el alta hasta la publicación en Instagram.
@@ -129,7 +129,7 @@ Lanzar desde **Agente**: skill `/nuevo-cliente`, cliente `el-norteno-parquet`, a
 
 - **Aprobado** si pasan todos los casos de A, B, D, E, F y G, y ningún caso de H deja el sistema en un
   estado inconsistente.
-- Los casos ❌ se registran como tickets en Jira (proyecto PFMGN) bajo el epic de Faro (PFMGN-71)
+- Los casos ❌ se registran como tickets en Jira (proyecto PFMGN) bajo el epic de Postagent (PFMGN-71)
   o el de extras (PFMGN-83), con el mensaje exacto y los pasos para reproducir.
 - Al terminar: revisar `git status` y **no** subir `clientes/el-norteno-parquet/`,
   `.claude/instagram-cuentas.json` con IDs reales, `ui/.faro-token`, `ui/.faro-data/` ni `tests/resultados.xml`.

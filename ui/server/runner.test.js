@@ -187,7 +187,7 @@ test('con autoPermisos desactivado se pregunta todo, también las lecturas', asy
   assert.equal(eventos.filter((e) => e.type === 'solicitud').length, 1);
 });
 
-test('con bashLibre (predeterminado de Faro) el shell se concede solo; el resto sigue llegando al operador', async () => {
+test('con bashLibre (predeterminado de Postagent) el shell se concede solo; el resto sigue llegando al operador', async () => {
   const { hijo, eventos, run } = lanzar({ raiz: RAIZ_T, autoPermisos: true, bashLibre: true });
   pedirCtl(hijo, 's1', 'Bash', { command: 'rm -rf clientes' });
   pedirCtl(hijo, 's2', 'PowerShell', { command: 'Remove-Item -Recurse tmp' });

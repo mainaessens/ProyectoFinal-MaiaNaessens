@@ -5,6 +5,7 @@ import path from 'node:path';
 import { AGENCIA_ROOT } from './data.js';
 
 const PLAN_RE = /^([A-Za-z0-9][A-Za-z0-9_-]{0,80})\.v(\d{1,3})\.plan\.json$/;
+const PREVIEW_RE = /^([A-Za-z0-9][A-Za-z0-9_-]{0,80})\.v(\d{1,3})\.preview\.mp4$/;
 const MP4_RE = /^([A-Za-z0-9][A-Za-z0-9_-]{0,80})-v(\d{1,3})\.mp4$/;
 const dirs = (slug) => ({
   edicion: path.join(AGENCIA_ROOT, 'clientes', slug, 'assets', 'edicion'),
@@ -37,14 +38,21 @@ export async function listarVideos(slug) {
         sonido: e.sonido || '', estado: e.estado || 'pendiente', notas: e.notas || '',
       })),
       mp4: null,
+      preview: null,
     });
+  }
+  // Vistas previas (borradores de baja calidad) que deja el agente en assets/edicion/<video>.vN.preview.mp4.
+  for (const f of await ls(edicion)) {
+    const m = PREVIEW_RE.exec(f);
+    const ver = m && porVideo.get(m[1])?.versiones.get(Number(m[2]));
+    if (ver) ver.preview = f;
   }
   for (const f of await ls(terminados)) {
     const m = MP4_RE.exec(f);
     if (!m) continue;
     const v = nuevo(m[1]);
     const n = Number(m[2]);
-    const ver = v.versiones.get(n) || { n, tipo: 'bruto', formato: '', bruto: '', brief: '', duracion: null, aprobadoTotal: true, subtitulos: false, escenas: [], mp4: null };
+    const ver = v.versiones.get(n) || { n, tipo: 'bruto', formato: '', bruto: '', brief: '', duracion: null, aprobadoTotal: true, subtitulos: false, escenas: [], mp4: null, preview: null };
     ver.mp4 = f;
     v.versiones.set(n, ver);
   }
@@ -53,9 +61,11 @@ export async function listarVideos(slug) {
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
-// Ruta del mp4 terminado, o null si el nombre no es exactamente <video>-vN.mp4.
+// Ruta del mp4 terminado (<video>-vN.mp4) o de la vista previa (<video>.vN.preview.mp4); null si el nombre no coincide exacto.
 export function archivoDeVideo(slug, archivo) {
-  if (typeof archivo !== 'string' || !MP4_RE.test(archivo)) return null;
+  if (typeof archivo !== 'string') return null;
+  if (PREVIEW_RE.test(archivo)) return path.join(dirs(slug).edicion, archivo);
+  if (!MP4_RE.test(archivo)) return null;
   return path.join(dirs(slug).terminados, archivo);
 }
 

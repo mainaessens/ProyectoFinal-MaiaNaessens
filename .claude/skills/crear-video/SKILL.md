@@ -10,7 +10,7 @@ tools: Read, Write, Edit, Glob, Bash, Skill, AskUserQuestion
 Produce un video **sin filmación previa**: la idea se describe en palabras y el video se construye como
 una página HTML/CSS animada (títulos, textos, formas, fondos, fotos del cliente) que se renderiza a MP4.
 Es la contracara de `/editar-video` (que parte de un video en bruto) y usa el mismo ciclo de planes,
-versiones y aprobación, así que **aparece en la pestaña Videos de Faro** junto a los demás.
+versiones y aprobación, así que **aparece en la pestaña Videos de Postagent** junto a los demás.
 
 ## Uso
 
@@ -71,11 +71,14 @@ derechos claros. Personas reconocibles o menores: respetar los consentimientos d
    dos tipografías. Respetar `reglas` del kit (`sinEmojis`, palabras prohibidas, logo obligatorio).
 
 5. **Revisarlo como crítico antes de mostrar**: validar la composición (`check`/`lint`), sacar
-   fotogramas de los momentos clave (`snapshot`) y mirarlos. Corregir texto cortado, contraste bajo,
+   fotogramas de los momentos clave (`snapshot`) y mirarlos. Después **renderizar una vista previa**
+   (borrador de baja calidad, `render --quality draft`) a
+   `clientes/<cliente>/assets/edicion/<slug>.v<N>.preview.mp4`: es lo que Postagent reproduce en la pestaña
+   Videos para que el humano vea el video mientras se arma. Cada versión nueva lleva su propia vista previa. Corregir texto cortado, contraste bajo,
    elementos fuera de la zona segura, escenas sin novedad y errores de ortografía.
 
 6. **Presentar el plan escena por escena** (duración, qué se ve, texto, animación, imagen usada)
-   con los fotogramas, y pedir decisión con `AskUserQuestion`: aprobar todo / dejar notas por escena /
+   con los fotogramas y la vista previa (avisar que ya se puede ver en Postagent → Videos), y pedir decisión con `AskUserQuestion`: aprobar todo / dejar notas por escena /
    descartar.
    - Con notas: aplicar solo lo pedido y guardar como **versión nueva** (`v2`, `v3`…: otra carpeta y otro
      `.plan.json`), sin pisar las anteriores. Si una nota es vaga, preguntar escena, qué cambiar y cómo.

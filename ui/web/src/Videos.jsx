@@ -126,6 +126,7 @@ export default function Videos({ token, slug, onPedido }) {
     onPedido(slug, skillEdicion, args);
     setNotas({});
   };
+  const generarPrevia = () => onPedido(slug, 'crear-video', video.id + ' v' + actual.n + ' — generá la vista previa (render draft) en assets/edicion');
   const exportar = () => {
     if (!window.confirm(`¿Aprobar todas las escenas de v${actual.n} de "${video.id}" y exportar el video?`)) return;
     onPedido(slug, skillEdicion, `${video.id} v${actual.n} — aprobado por el operador: marcar aprobado_total y exportar`);
@@ -157,6 +158,7 @@ export default function Videos({ token, slug, onPedido }) {
                 ))}
               </div>
               <div className="row">
+                {actual.tipo === 'html' && !actual.mp4 && <button className="ghost" onClick={generarPrevia}>{actual.preview ? 'Actualizar vista previa' : 'Generar vista previa'}</button>}
                 {actual.tipo === 'html' && <span className="pill">HTML/CSS</span>}
                 {actual.formato && <span className="pill">{actual.formato}</span>}
                 {actual.mp4 ? <span className="pill ok">Exportado</span>
@@ -164,9 +166,14 @@ export default function Videos({ token, slug, onPedido }) {
                   : <button className="primary" onClick={exportar} disabled={!actual.escenas.length}>Aprobar todo y exportar</button>}
               </div>
             </div>
-            {actual.mp4
-              ? <Reproductor token={token} slug={slug} archivo={actual.mp4} />
-              : <p className="muted small">Esta versión todavía no se exportó. Revisá el plan escena por escena y aprobalo o dejá notas.</p>}
+            {actual.mp4 || actual.preview ? (
+              <>
+                {!actual.mp4 && <p className="muted small">Vista previa: borrador de baja calidad para revisar ritmo, textos e imágenes. El video final se exporta al aprobar.</p>}
+                <Reproductor key={actual.mp4 || actual.preview} token={token} slug={slug} archivo={actual.mp4 || actual.preview} />
+              </>
+            ) : (
+              <p className="muted small">Todavía no hay vista previa de esta versión. Generala con el botón de abajo o revisá el plan escena por escena.</p>
+            )}
           </div>
 
           {actual.brief && <p className="card muted small">Idea: {actual.brief}</p>}

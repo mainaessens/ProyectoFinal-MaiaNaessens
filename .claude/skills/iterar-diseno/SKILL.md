@@ -1,6 +1,6 @@
 ---
 name: iterar-diseno
-description: Aplica cambios pedidos por el humano sobre una pieza hecha con Claude Design (HTML) y genera una versión nueva (vN+1) sin pisar las anteriores, con lint y render. Es lo que se lanza desde Faro (cliente → Diseños → Pedir cambios) para ir afinando la pieza hasta el resultado esperado.
+description: Aplica cambios pedidos por el humano sobre una pieza hecha con Claude Design (HTML) y genera una versión nueva (vN+1) sin pisar las anteriores, con lint y render. Es lo que se lanza desde Postagent (cliente → Diseños → Pedir cambios) para ir afinando la pieza hasta el resultado esperado.
 argument-hint: <cliente> <pieza> <cambios a aplicar>
 tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
 ---
@@ -31,7 +31,7 @@ tools: Read, Write, Edit, Bash, Glob, AskUserQuestion
    quedó mal (texto cortado, foto tapada), corregir en la misma versión nueva y volver a renderizar.
 5. **Anotar** en `diseno/<pieza>/notas.md` una línea: `vN: <pedido del humano> → <qué se cambió>`.
 6. **Informar** en pocas líneas: qué cambió, resultado del lint, y que la versión nueva ya está en
-   **Faro → Diseños** para compararla con la anterior. Preguntar si aprueba o quiere más cambios.
+   **Postagent → Diseños** para compararla con la anterior. Preguntar si aprueba o quiere más cambios.
    Si aprueba: `marca.mjs exportar <cliente> <pieza> [vN]` y actualizar el `diseno` del `.plan.json`
    (`version`, `html_fuente`, `archivo_exportado`) si ya existía el plan.
 

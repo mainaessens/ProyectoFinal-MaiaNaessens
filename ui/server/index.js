@@ -91,7 +91,7 @@ app.post('/api/clientes/:slug/disenos/:pieza/aprobar', wrap(async (req, res) => 
     const r = aprobar(slug, req.params.pieza, version, { por: 'faro-ui' });
     const hoy = new Date().toISOString().slice(0, 10);
     await fs.promises.appendFile(path.join(AGENCIA_ROOT, 'clientes', slug, 'registro-actividad.log'),
-      `[${hoy}] Faro UI: diseño ${req.params.pieza} v${version} APROBADO y exportado por el operador.\n`, 'utf8');
+      `[${hoy}] Postagent UI: diseño ${req.params.pieza} v${version} APROBADO y exportado por el operador.\n`, 'utf8');
     res.json(r);
   } catch (e) {
     if (e instanceof MarcaError) return res.status(400).json({ error: e.message });
@@ -173,7 +173,7 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`\n  Faro listo → http://localhost:${PORT}/?token=${TOKEN}`);
+  console.log(`\n  Postagent listo → http://localhost:${PORT}/?token=${TOKEN}`);
   console.log(`  Agencia: ${AGENCIA_ROOT}\n`);
 });
 

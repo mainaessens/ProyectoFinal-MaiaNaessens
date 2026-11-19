@@ -2,7 +2,7 @@
   "name": "faro",
   "version": "0.1.0",
   "private": true,
-  "description": "Faro — panel web para operar el agente de la agencia (PFMGN-71)",
+  "description": "Postagent — panel web para operar el agente de la agencia (PFMGN-71)",
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {

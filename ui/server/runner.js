@@ -2,7 +2,7 @@
 //
 // Protocolo (el mismo que usa el SDK): entrada y salida stream-json y `--permission-prompt-tool stdio`.
 // Con eso Claude Code NO decide solo los permisos ni las preguntas: manda un `control_request` (subtype
-// can_use_tool) y espera nuestro `control_response`. Faro los muestra en el panel y reenvía la decisión del
+// can_use_tool) y espera nuestro `control_response`. Postagent los muestra en el panel y reenvía la decisión del
 // operador. Cubre dos casos: AskUserQuestion (pregunta con opciones) y permiso para usar una herramienta.
 //
 // Seguridad: el prompt viaja por stdin (nunca por argumentos de shell); solo se aceptan respuestas a pedidos
@@ -49,7 +49,7 @@ export function construirRespuesta(pedido, decision) {
   if (!decision || typeof decision !== 'object') throw new Error('Respuesta inválida');
   if (pedido.tool === 'AskUserQuestion') {
     if (decision.cancelar === true) {
-      return { respuesta: { behavior: 'deny', message: 'El operador canceló la pregunta desde Faro.' }, resumen: 'Cancelaste la pregunta del agente.' };
+      return { respuesta: { behavior: 'deny', message: 'El operador canceló la pregunta desde Postagent.' }, resumen: 'Cancelaste la pregunta del agente.' };
     }
     const preguntas = Array.isArray(pedido.input?.questions) ? pedido.input.questions : [];
     const r = decision.respuestas;
@@ -66,7 +66,7 @@ export function construirRespuesta(pedido, decision) {
   }
   if (typeof decision.permitir !== 'boolean') throw new Error('Respuesta inválida (permitir)');
   if (!decision.permitir) {
-    return { respuesta: { behavior: 'deny', message: 'El operador denegó este pedido desde Faro.' }, resumen: `Denegaste el permiso para ${pedido.tool}.` };
+    return { respuesta: { behavior: 'deny', message: 'El operador denegó este pedido desde Postagent.' }, resumen: `Denegaste el permiso para ${pedido.tool}.` };
   }
   const respuesta = { behavior: 'allow', updatedInput: pedido.input };
   const siempre = decision.siempre === true && Array.isArray(pedido.sugerencias) && pedido.sugerencias.length > 0;

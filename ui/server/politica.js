@@ -1,4 +1,4 @@
-// Política de permisos de Faro: qué pedidos de herramientas se conceden solos y cuáles le llegan al operador.
+// Política de permisos de Postagent: qué pedidos de herramientas se conceden solos y cuáles le llegan al operador.
 //
 // Criterio: se aprueba automáticamente SOLO lo que no tiene efecto fuera del proyecto ni gasta dinero (lecturas dentro
 // del proyecto, búsquedas, escritura dentro de clientes/**, y unos pocos comandos de solo lectura). Todo lo demás
@@ -111,7 +111,7 @@ export function decidirAutomatico(pedido, { raiz, activa = true, bashLibre = fal
   if (ESCRITURA[tool]) {
     return dentroDeClientes(input?.[ESCRITURA[tool]], raiz) ? { motivo: 'escritura en clientes/' } : null;
   }
-  // Con bashLibre (FARO_BASH=todo, el predeterminado de Faro) cualquier comando de shell se concede solo.
+  // Con bashLibre (FARO_BASH=todo, el predeterminado de Postagent) cualquier comando de shell se concede solo.
   if ((tool === 'Bash' || tool === 'PowerShell') && bashLibre) return { motivo: 'shell permitido (FARO_BASH)' };
   if (tool === 'Bash') return bashSeguro(input?.command, raiz) ? { motivo: 'comando de solo lectura' } : null;
   if (tool === 'PowerShell') return powershellSeguro(input?.command, raiz) ? { motivo: 'comando de solo lectura' } : null;

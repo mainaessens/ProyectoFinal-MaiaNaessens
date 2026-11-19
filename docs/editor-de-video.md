@@ -13,7 +13,7 @@ de esa autora: el método de edición de este proyecto es propio (`.claude/refer
 
 | Requisito | Para qué | Cómo se instala (Windows) |
 |---|---|---|
-| Node.js 20 o más | Moviola y el panel Faro | `winget install OpenJS.NodeJS.LTS` |
+| Node.js 20 o más | Moviola y el panel Postagent | `winget install OpenJS.NodeJS.LTS` |
 | FFmpeg (con `ffprobe`) | cortar, unir, quemar subtítulos, normalizar audio | `winget install Gyan.FFmpeg` |
 | Python 3.9 a 3.12 | Whisper | `winget install Python.Python.3.12` |
 | faster-whisper y `av` < 19 | transcripción local con tiempos por palabra | `python -m pip install -r herramientas/moviola/requirements.txt` |
@@ -34,7 +34,7 @@ cuando no falta nada). La primera transcripción descarga el modelo de Whisper (
 ## Cómo se usa
 
 1. Dejá el video en bruto en `clientes/<cliente>/assets/videos/` (tal cual sale del celular).
-2. En Claude Code, o desde la sección **Agente** de Faro: `/editar-video <cliente> <archivo> [instrucciones]`.
+2. En Claude Code, o desde la sección **Agente** de Postagent: `/editar-video <cliente> <archivo> [instrucciones]`.
    Contale de qué va, qué palabra resaltar y qué no querés («sin emojis», «sin zoom»).
 3. El agente prepara la **hoja de marca** del cliente (`hoja-de-marca.json`: colores, tipografías,
    qué nunca hacer), transcribe, detecta silencios y escribe el **plan escena por escena**.
@@ -97,7 +97,7 @@ mismo plan y la misma aprobación. Está instalado pero no se probó todavía co
 
 ## Videos sin material de base (`/crear-video`)
 
-Cuando no hay video filmado, la idea se describe en palabras (desde Faro: pestaña Videos del cliente, bloque «Video sin material de base») y el agente arma el video como una composición HTML/CSS con el kit de marca del cliente y, si se quiere, sus fotos reales (`assets/fotos/`, `assets/identidad/`). Se renderiza con HyperFrames (plugin) a `assets/terminados/<slug>-vN.mp4`.
+Cuando no hay video filmado, la idea se describe en palabras (desde Postagent: pestaña Videos del cliente, bloque «Video sin material de base») y el agente arma el video como una composición HTML/CSS con el kit de marca del cliente y, si se quiere, sus fotos reales (`assets/fotos/`, `assets/identidad/`). Se renderiza con HyperFrames (plugin) a `assets/terminados/<slug>-vN.mp4`.
 
 - Usa el mismo ciclo que `/editar-video`: plan escena por escena en `assets/edicion/<slug>.vN.plan.json` (con `"tipo": "html"`), versiones que no se pisan y exportación solo con aprobación total.
 - La composición de cada versión vive en `assets/edicion/<slug>.vN/`. Las imágenes originales se copian, nunca se modifican.

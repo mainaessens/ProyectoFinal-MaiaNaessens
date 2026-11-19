@@ -24,7 +24,7 @@ aprueba, ofrece: un posteo por número o nombre, todos juntos, o más tarde.
 
 ## 3. Cada pieza: `/crear-post <cliente> <#|slug|todos>`
 El diseño lo hace el `disenador` con **Claude Design (código)** por defecto o **Canva**; se itera en
-Faro → Diseños. Ver `docs/diseno-claude-design.md`.
+Postagent → Diseños. Ver `docs/diseno-claude-design.md`.
 
 1. Toma la fila del calendario, escribe el hook y el caption por red, corre `checklist-marca.ps1`.
 2. Diseña con la plantilla maestra del cliente (foto real → plantilla sin foto → imagen IA).

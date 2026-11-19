@@ -1,6 +1,6 @@
-# Faro — panel web de la agencia
+# Postagent — panel web de la agencia
 
-> Un faro guía y vigila a la vez: Faro es la cara visual del agente, y mantiene la regla de oro
+> Un faro guía y vigila a la vez: Postagent es la cara visual del agente, y mantiene la regla de oro
 > **human-in-the-loop** a la vista (nada se publica sin que lo apruebes acá).
 
 Implementa el epic **PFMGN-71** (React + Express + WebSockets + auth).
@@ -27,11 +27,11 @@ Cuando el agente necesita algo del operador, el pedido aparece como una **tarjet
 - **Pregunta con opciones** (lo que en la terminal sería `AskUserQuestion`): elegís una opción, varias si la pregunta lo permite, o escribís la tuya en «Otro», y **Enviar respuesta**. También podés **Cancelar pregunta**.
 - **Permiso para usar una herramienta** (escribir un archivo, correr un comando, usar un conector que no esté permitido): ves qué quiere hacer y elegís **Permitir**, **Denegar** o **Permitir siempre en esta sesión** (esta última solo aparece si Claude Code la ofrece).
 
-Detrás se usa el protocolo del SDK de Claude Code (`--permission-prompt-tool stdio` con entrada y salida `stream-json`): Faro solo reenvía respuestas a pedidos que el propio Claude Code emitió, valida las opciones contra las preguntas hechas y nunca acepta permisos «siempre» armados por el navegador. Los hooks de `.claude/hooks/` siguen actuando igual.
+Detrás se usa el protocolo del SDK de Claude Code (`--permission-prompt-tool stdio` con entrada y salida `stream-json`): Postagent solo reenvía respuestas a pedidos que el propio Claude Code emitió, valida las opciones contra las preguntas hechas y nunca acepta permisos «siempre» armados por el navegador. Los hooks de `.claude/hooks/` siguen actuando igual.
 
 ### Qué se concede solo y qué te llega
 
-Para no pedirte lo que el agente puede resolver por su cuenta, Faro aprueba automáticamente **solo lo que no tiene efecto fuera del proyecto ni gasta dinero**. Todo lo demás te llega como tarjeta. Ante la duda, pregunta. La política está en `server/politica.js`.
+Para no pedirte lo que el agente puede resolver por su cuenta, Postagent aprueba automáticamente **solo lo que no tiene efecto fuera del proyecto ni gasta dinero**. Todo lo demás te llega como tarjeta. Ante la duda, pregunta. La política está en `server/politica.js`.
 
 | Se concede solo | Te llega a vos |
 |---|---|
@@ -48,9 +48,9 @@ Lo concedido solo queda auditado: al terminar, el historial agrega una línea co
 ## Modelo y costo
 
 - El selector **Modelo** de la consola elige con qué modelo corre el agente: **Opus** (el más capaz y el más caro), **Sonnet** (equilibrado), **Haiku** (rápido y barato) o el **predeterminado de Claude Code**. El último elegido se recuerda en el navegador y cada sesión guarda el suyo. El historial indica qué modelo se usó realmente (`Modelo: claude-…`).
-- La lista es cerrada y la valida el servidor; `FARO_MODELS` (separados por coma) permite sumar nombres completos y `FARO_MODEL` fija el predeterminado de Faro.
+- La lista es cerrada y la valida el servidor; `FARO_MODELS` (separados por coma) permite sumar nombres completos y `FARO_MODEL` fija el predeterminado de Postagent.
 - Junto al botón se muestra el **costo estimado acumulado de la sesión**. Es la estimación de Claude Code a precios de lista de la API, no una factura: con un plan de suscripción consume el cupo de uso del plan.
-- **Cambiar de modelo a mitad de una sesión reprocesa todo el contexto** (la caché es por modelo) y encarece ese mensaje: conviene elegirlo al empezar. Faro corre dentro de `agencia/`, así que cada ejecución arrastra el contexto del proyecto (`CLAUDE.md`, skills y conectores); con Opus una consulta mínima estimó unos US$ 0,50 y con Haiku menos de un centavo.
+- **Cambiar de modelo a mitad de una sesión reprocesa todo el contexto** (la caché es por modelo) y encarece ese mensaje: conviene elegirlo al empezar. Postagent corre dentro de `agencia/`, así que cada ejecución arrastra el contexto del proyecto (`CLAUDE.md`, skills y conectores); con Opus una consulta mínima estimó unos US$ 0,50 y con Haiku menos de un centavo.
 
 ## Sesiones guardadas
 
@@ -93,7 +93,7 @@ Tests: `npm test`.
 | `FARO_TOKEN` | generado | Token de acceso (si no, se genera y guarda). |
 | `FARO_PERMISSION_MODE` | `acceptEdits` | Modo de permisos con el que se lanza `claude -p`. |
 | `FARO_CLAUDE_BIN` | `claude` | Ruta al ejecutable de Claude Code. |
-| `FARO_MODEL` | el de Claude Code | Modelo predeterminado de Faro (`opus`, `sonnet`, `haiku` o uno de `FARO_MODELS`). El selector del panel lo pisa. |
+| `FARO_MODEL` | el de Claude Code | Modelo predeterminado de Postagent (`opus`, `sonnet`, `haiku` o uno de `FARO_MODELS`). El selector del panel lo pisa. |
 | `FARO_MODELS` | — | Nombres de modelo extra para el selector, separados por coma (formato estricto). |
 | `FARO_PERMISOS_AUTO` | `seguros` | `off` desactiva los permisos automáticos: se pregunta todo. |
 | `FARO_BASH` | `todo` | `todo` concede cualquier comando de Bash y PowerShell sin preguntar; `preguntar` solo concede los de solo lectura. |

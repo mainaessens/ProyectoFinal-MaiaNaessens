@@ -15,7 +15,7 @@ export function listarModelos(env = process.env) {
   return [...BASE, ...extra];
 }
 
-/** Modelo con el que arranca Faro si el operador no elige uno (FARO_MODEL); vacío = el de Claude Code. */
+/** Modelo con el que arranca Postagent si el operador no elige uno (FARO_MODEL); vacío = el de Claude Code. */
 export function modeloPorDefecto(env = process.env) {
   const m = env.FARO_MODEL || '';
   return ID_RE.test(m) ? m : '';

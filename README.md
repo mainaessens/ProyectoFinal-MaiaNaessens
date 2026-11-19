@@ -22,7 +22,7 @@ agencia/
 ├── mcp/instagram-publisher/        # conector propio de Instagram: publicación (imagen, carrusel, reel, historias) y estadísticas (Node, sin dependencias)
 ├── herramientas/marca/             # motor de diseño con código (Claude Design): kit de marca, piezas HTML, lint y render a PNG
 ├── herramientas/moviola/           # editor de video local (Node + FFmpeg + Whisper): cortes, subtítulos, títulos, plan aprobable
-├── ui/                             # Faro: panel web (React + Express + WebSocket) para operar el agente
+├── ui/                             # Postagent: panel web (React + Express + WebSocket) para operar el agente
 ├── tests/                          # suite de tests automatizados (Pester + Node) — ver tests/README.md
 └── docs/                           # documentación técnica — ver "Documentación"
 ```

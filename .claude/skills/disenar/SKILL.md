@@ -1,6 +1,6 @@
 ---
 name: disenar
-description: Diseña la pieza gráfica de un post, carrusel o historia de un cliente. Primera opción, Claude Design con código; HTML con el kit de marca del cliente, control de marca (lint), render a PNG y versiones que se iteran desde Faro (pestaña Diseños). Alternativa, Canva con las plantillas maestras del cliente. Nunca publica; deja la pieza lista para que el humano la revise, pida cambios o la apruebe.
+description: Diseña la pieza gráfica de un post, carrusel o historia de un cliente. Primera opción, Claude Design con código; HTML con el kit de marca del cliente, control de marca (lint), render a PNG y versiones que se iteran desde Postagent (pestaña Diseños). Alternativa, Canva con las plantillas maestras del cliente. Nunca publica; deja la pieza lista para que el humano la revise, pida cambios o la apruebe.
 argument-hint: <cliente> <#|slug|"tema"> [canva]
 tools: Read, Write, Edit, Bash, Glob, AskUserQuestion, mcp__canva__*, mcp__gworkspace__*
 ---
@@ -65,7 +65,7 @@ Herramienta: `node herramientas/marca/marca.mjs <comando> <cliente> ...` (ver
      renderizar hasta que quede limpio (cada cambio es una versión nueva: ver `/iterar-diseno`).
 
 6. **Presentar** la pieza: ruta del PNG, motor, plantilla, qué foto se usó y de dónde salió, y el
-   resultado del lint. Avisar que se puede ver y pedir cambios en **Faro → cliente → Diseños**.
+   resultado del lint. Avisar que se puede ver y pedir cambios en **Postagent → cliente → Diseños**.
    Pedir decisión con `AskUserQuestion`: aprobar / pedir cambios / rechazar. Si pide cambios:
    `/iterar-diseno` (versión nueva, sin pisar la anterior).
 
